@@ -3,9 +3,9 @@
 class ApiConst {
 
   // Base URL for the API
-  static String baseUrl = " ";
+  static String baseUrl = "https://ops.vaagaibus.com/api/";
 
-
+  static const String accessToken= "MTIxYzMyYzExNWMxMTNjOTljMTEyYzEwOGM5NWMxMDdjOTljMzJjNTZjMzJjOTVjMTEwYzEwM2M5NWMxMDFjOTljMTA4YzExNGMzMmM0MmMzMmMxMTBjOTVjMTEzYzExM2MxMTdjMTA5YzExMmM5OGMzMmM1NmMzMmM0N2M0OGM0OWMzMmMxMjNjNjQ";
 
   //login with otp
   static const String loginWithOtp = " ";
@@ -13,7 +13,7 @@ class ApiConst {
   //verify otp
   static const String verifyOtp = " ";
 
-  static const String getToken = "validator/getLoginToken";
+  static const String getStations = "GetStations/apiagent";
 
 
 

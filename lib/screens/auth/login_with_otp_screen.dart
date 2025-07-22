@@ -680,22 +680,22 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
 
   void _handleSendOtp(BuildContext context) {
     Navigator.pushNamed(context, Routes.dashboard);
-    if (_formKey.currentState?.validate() ?? false) {
-      FocusScope.of(context).unfocus();
-      HapticFeedback.lightImpact();
+    // if (_formKey.currentState?.validate() ?? false) {
+    //   FocusScope.of(context).unfocus();
+    //   HapticFeedback.lightImpact();
 
-      setState(() => _isLoading = true);
-      _buttonController.forward().then((_) {
-        _buttonController.reverse();
-      });
+    //   setState(() => _isLoading = true);
+    //   _buttonController.forward().then((_) {
+    //     _buttonController.reverse();
+    //   });
 
-      context.read<LoginWithOtpBloc>().add(
-        OnLoginButtonPressed(mobileNumber: _mobileController.text),
-      );
-    } else {
-      HapticFeedback.heavyImpact();
-      _showErrorSnackBar('Enter valid 10-digit number');
-    }
+    //   context.read<LoginWithOtpBloc>().add(
+    //     OnLoginButtonPressed(mobileNumber: _mobileController.text),
+    //   );
+    // } else {
+    //   HapticFeedback.heavyImpact();
+    //   _showErrorSnackBar('Enter valid 10-digit number');
+    // }
   }
 
   void _navigateToSignUp() {

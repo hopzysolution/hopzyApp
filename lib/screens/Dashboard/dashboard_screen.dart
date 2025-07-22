@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ridebooking/commonWidgets/custom_bottom_nav_bar.dart';
 import 'package:ridebooking/screens/Dashboard/account.dart';
-import 'package:ridebooking/screens/Dashboard/home.dart';
+import 'package:ridebooking/screens/Dashboard/home_screen.dart';
 import 'package:ridebooking/screens/Dashboard/master_list.dart';
 import 'package:ridebooking/screens/Dashboard/tickets.dart';
 import 'package:ridebooking/utils/app_colors.dart';
@@ -25,7 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
   late Animation<double> _fabRotationAnimation;
 
   final List<Widget> _pages = const [
-   Home(),
+   HomeScreen(),
    Tickets(),
    MasterList(),
    Account()
@@ -359,7 +359,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                         backgroundColor: Colors.white,
                         child: CircleAvatar(
                           radius: avatarRadius - 3,
-                          backgroundImage: const AssetImage("assets/images/AppLogo.png"),
+                          backgroundImage: const AssetImage("assets/images/HopzybluePin.png"),
                         ),
                       ),
                     ),

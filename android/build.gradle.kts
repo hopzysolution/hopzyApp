@@ -1,16 +1,14 @@
 // ✅ Add plugin declaration at the top
-pluginManagement {
+// pluginManagement {
+    repositories {
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+    }
     plugins {
         id("com.google.gms.google-services") version "4.4.3" apply false
     }
-}
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
 
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)

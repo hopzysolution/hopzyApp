@@ -3,9 +3,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ridebooking/bloc/homeScreenBloc/home_screen_bloc.dart';
 import 'package:ridebooking/screens/Dashboard/account.dart';
 import 'package:ridebooking/screens/Dashboard/dashboard_screen.dart' show DashboardScreen;
-import 'package:ridebooking/screens/Dashboard/home.dart';
+import 'package:ridebooking/screens/Dashboard/home_screen.dart';
 import 'package:ridebooking/screens/Dashboard/master_list.dart';
 import 'package:ridebooking/screens/Dashboard/tickets.dart';
 import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
@@ -26,7 +27,7 @@ class Routes {
   static const String loginWithOtpScreen = "/login_with_otp_screen";
   static const String demoScreen="/demoscreen";
   static const String masterList = "/master_list";
-  static const String home = "/home";
+  static const String homeScreen = "/home_screen";
   static const String tickets = "/tickets";
   static const String account = "/account";
   static const String dashboard = "/dashboard_screen";
@@ -56,10 +57,13 @@ class Routes {
           return DashboardScreen();
         });
 
-        case home:
-        return MaterialPageRoute(builder: (context) {
-          return Home();
-        });
+        case homeScreen:
+  return MaterialPageRoute(builder: (context) {
+    return BlocProvider(
+      create: (_) => HomeScreenBloc(),
+      child: const HomeScreen(),
+    );
+  });
         case tickets:
         return MaterialPageRoute(builder: (context) {
           return Tickets();

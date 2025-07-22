@@ -60,7 +60,7 @@ class FirebaseMethods {
                 fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
           )));
 
-      Navigator.pushReplacementNamed(context, Routes.home);
+      Navigator.pushReplacementNamed(context, Routes.homeScreen);
     }
   }
 

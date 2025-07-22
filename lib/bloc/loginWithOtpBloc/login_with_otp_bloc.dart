@@ -25,7 +25,7 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
           print("Exception in signInWithGoogle ----> ${e}");
         }
       } else {
-        Navigator.pushReplacementNamed(event.context, Routes.home);
+        Navigator.pushReplacementNamed(event.context, Routes.homeScreen);
       }
     });
 
