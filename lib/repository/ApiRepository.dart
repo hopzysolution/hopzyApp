@@ -16,10 +16,9 @@ class ApiRepository {
 
       String token = await Session().getToken();
 
-      client.options.headers["deviceid"]=await Session.getDeviceId();
         client.options.headers["devicetoken"]="";
         client.options.headers["deviceType"]=Platform.isAndroid? "ANDROID":Platform.isIOS? "IOS":"WEB";
-        client.options.headers["language"]= await Session.getLanguage();
+        
        token.isEmpty?"": client.options.headers["authorization"] = "Bearer " + token;
 
       // if (token.isNotEmpty) {
@@ -126,11 +125,9 @@ class ApiRepository {
       // } // todo:token get if present or required!
      
         
- 
-        client.options.headers["deviceid"]=await Session.getDeviceId();
         client.options.headers["devicetoken"]="";
         client.options.headers["deviceType"]=Platform.isAndroid? "ANDROID":Platform.isIOS? "IOS":"WEB";
-        client.options.headers["language"]= await Session.getLanguage();
+        
        token.isEmpty?"": client.options.headers["authorization"] = "Bearer " + token;
       
         print("url:----- ${callUrl}");

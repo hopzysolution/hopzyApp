@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "604780340704",
+    "project_id": "redbus-4d7c2",
+    "storage_bucket": "redbus-4d7c2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:604780340704:android:d5f513cb2a9dff7936f785",
+        "android_client_info": {
+          "package_name": "com.example.ridebooking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu22SEBAHJgM4JVaaptSAau4UOVsMSWlg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

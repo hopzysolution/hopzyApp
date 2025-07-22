@@ -1,13 +1,39 @@
 import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:ridebooking/bloc/loginWithOtpBloc/login_with_otp_event.dart';
 import 'package:ridebooking/bloc/loginWithOtpBloc/login_with_otp_state.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/repository/ApiRepository.dart';
+import 'package:ridebooking/services/firebase_methods.dart';
+import 'package:ridebooking/utils/route_generate.dart';
+import 'package:ridebooking/utils/session.dart';
 class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
   String? mobileNumber;
   LoginWithOtpBloc() : super(LoginWithOtpInitial()) {
+
+
+      on<OnSignWithGoogle>((event, State) async {
+      emit(LoginWithOtpInitial());
+      Session preferenceHelper = Session();
+      String? name = await preferenceHelper.getFullName();
+      if (name == null || name.isEmpty) {
+        try {
+          FirebaseMethods().signInWithGoogle(event.context);
+        } catch (e) {
+          print("Exception in signInWithGoogle ----> ${e}");
+        }
+      } else {
+        Navigator.pushReplacementNamed(event.context, Routes.home);
+      }
+    });
+
+
+
+
+
+
     on<OnLoginButtonPressed>((event, emit) async {
       mobileNumber = event.mobileNumber;
       // Here you can handle the login logic

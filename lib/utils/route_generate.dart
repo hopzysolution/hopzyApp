@@ -8,8 +8,8 @@ import 'package:ridebooking/screens/Dashboard/dashboard_screen.dart' show Dashbo
 import 'package:ridebooking/screens/Dashboard/home.dart';
 import 'package:ridebooking/screens/Dashboard/master_list.dart';
 import 'package:ridebooking/screens/Dashboard/tickets.dart';
-import 'package:ridebooking/screens/login_with_otp_screen.dart';
-import 'package:ridebooking/screens/otp_verification.dart';
+import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
+import 'package:ridebooking/screens/auth/otp_verification.dart';
 import 'package:ridebooking/screens/splash_screen.dart';
 
 

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ridebooking/commonWidgets/animated_logo.dart';
+import 'package:ridebooking/Animations/animated_logo.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/toast_messages.dart';

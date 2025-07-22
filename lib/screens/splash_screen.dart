@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:ridebooking/screens/demoscreen.dart';
-import 'package:ridebooking/screens/login_with_otp_screen.dart';
+import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -15,7 +15,6 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   late final AnimationController _zoomController;
-  late final AnimationController _jogTextController;
   late final Animation<double> _scaleAnimation;
   late final Animation<Color?> _backgroundColorAnimation;
 
@@ -30,10 +29,6 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1000),
     );
 
-    _jogTextController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    )..repeat();
 
     _scaleAnimation = Tween<double>(begin: 1.0, end: 25.0).animate(
       CurvedAnimation(parent: _zoomController, curve: Curves.easeInOut),
@@ -64,17 +59,10 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     _zoomController.dispose();
-    _jogTextController.dispose();
     super.dispose();
   }
 
-  Matrix4 _jogTransform(double value) {
-    return Matrix4.translationValues(
-      10 * sin(2 * pi * value),
-      5 * cos(2 * pi * value),
-      0,
-    )..rotateZ(0.05 * sin(2 * pi * value));
-  }
+ 
 
   @override
   Widget build(BuildContext context) {

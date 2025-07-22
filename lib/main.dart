@@ -1,13 +1,28 @@
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ridebooking/screens/login_with_otp_screen.dart';
+import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
 import 'package:ridebooking/screens/splash_screen.dart';
 import 'package:ridebooking/utils/app_theme.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'screens/seat_selection_screen.dart';
 
-void main() {
+void main() async{
+
+  // WidgetsFlutterBinding.ensureInitialized();
+  // await Firebase.initializeApp(
+  //     options: FirebaseOptions(
+  //         apiKey: "AIzaSyAu22SEBAHJgM4JVaaptSAau4UOVsMSWlg",
+  //         appId: "1:604780340704:android:d5f513cb2a9dff7936f785",
+  //         messagingSenderId: "604780340704",
+  //         projectId: "redbus-4d7c2"));
+
+  // await FirebaseAppCheck.instance.activate(
+  //   androidProvider: AndroidProvider.playIntegrity,
+  // );
+
+
   runApp(const BusBookingApp());
 }
 

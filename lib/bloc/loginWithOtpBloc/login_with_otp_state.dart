@@ -25,3 +25,4 @@ class OtpFailureState extends LoginWithOtpState {
 
   OtpFailureState({required this.error});
 }
+

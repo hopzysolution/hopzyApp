@@ -3,36 +3,13 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Session {
-
+  static String userIdKey = "USERKEY";
   static String fullName = "fullName";
   static String dateOfBirth = "dateOfBirth";
   static String dateOfTime = "dateOfTime";
   static String dateOfPlace = "dateOfPlace";
-  static String gender = "gender";
-
-
-
-  static Future<String> getLanguage() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? language = prefs.getString("language");
-    return (language ?? "");
-  }
-
-  Future<bool> setLanguage(String name) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.setString("language", name);
-  }
-
-  static Future<String> getDeviceId() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? language = prefs.getString("deviceId");
-    return (language ?? "");
-  }
-
-  Future<bool> setDeviceId(String name) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.setString("deviceId", name);
-  }
+  static String gender = "gender";  
+  static String userImageKey = "userImageKey";
 
  Future<String> getFullName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -45,61 +22,31 @@ class Session {
     return prefs.setString(fullName, setFullName);
   }
 
-   Future<String> getDateOfBirth() async {
+  
+   Future<bool> setUserImage(String getUserImage) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? getDateOfBirth = prefs.getString(dateOfBirth);
-    return getDateOfBirth ?? "";
-  }
-
-  Future<bool> setDateOfBirth(String setDateOfBirth) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.setString(dateOfBirth, setDateOfBirth);
-  }
-
-  Future<String> getDateOfTime() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? getDateOfTime = prefs.getString(dateOfTime);
-    return getDateOfTime ?? "";
-  }
-
-  Future<bool> setDateOfTime(String setDateOfTime) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.setString(dateOfTime, setDateOfTime);
+    return prefs.setString(userImageKey, getUserImage);
   }
 
   
-
-    Future<String> getDateOfPlace() async {
+  Future<String?> getUserImage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? getDateOfPlace = prefs.getString(dateOfPlace);
-    return getDateOfPlace ?? "";
+    return prefs.getString(userImageKey);
   }
 
-  Future<bool> setDateOfPlace(String setDateOfPlace) async {
+   Future<String?> getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.setString(dateOfPlace, setDateOfPlace);
+    return prefs.getString(userIdKey);
   }
 
-    Future<String> getGender() async {
+
+
+   Future<bool> setUserId(String getUserId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? genderValue = prefs.getString(gender);
-    return genderValue ?? "";
+    return prefs.setString(userIdKey, getUserId);
   }
 
-  Future<bool> setGender(String setGender) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.setString(gender, setGender);
-  }
-
-    Future<void> setMaritalStatus(String status) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('maritalStatus', status);
-  }
-
-  Future<String?> getMaritalStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('maritalStatus');
-  }
+ 
 
    Future<String> getToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

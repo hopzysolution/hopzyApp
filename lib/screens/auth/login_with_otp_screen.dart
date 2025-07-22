@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ridebooking/Animations/floating_circle_background_button.dart';
 import 'package:ridebooking/bloc/loginWithOtpBloc/login_with_otp_bloc.dart';
 import 'package:ridebooking/bloc/loginWithOtpBloc/login_with_otp_event.dart';
 import 'package:ridebooking/bloc/loginWithOtpBloc/login_with_otp_state.dart';
-import 'package:ridebooking/commonWidgets/animated_logo.dart';
+import 'package:ridebooking/Animations/animated_logo.dart';
 import 'package:ridebooking/commonWidgets/custom_action_button.dart';
+import 'package:ridebooking/commonWidgets/mobile_number_field.dart';
+import 'package:ridebooking/screens/auth/welcom_widget.dart';
 import 'package:ridebooking/screens/demoscreen.dart';
-import 'package:ridebooking/screens/otp_verification.dart';
+import 'package:ridebooking/screens/auth/otp_verification.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/app_custom_theme.dart';
 import 'package:ridebooking/utils/app_theme.dart';
@@ -24,7 +27,6 @@ class LoginWithOtpScreen extends StatefulWidget {
 class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
     with TickerProviderStateMixin {
   // Animation Controllers
-  late final AnimationController _mainController;
   late final AnimationController _logoController;
   late final AnimationController _contentController;
   late final AnimationController _buttonController;
@@ -58,10 +60,6 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
   }
 
   void _initializeAnimations() {
-    _mainController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
 
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 2000),
@@ -154,7 +152,6 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
 
   @override
   void dispose() {
-    _mainController.dispose();
     _logoController.dispose();
     _contentController.dispose();
     _buttonController.dispose();
@@ -203,7 +200,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
       child: Stack(
         children: [
           // Animated background elements
-          _buildBackgroundElements(),
+          FloatingCirclesBackground(floatingAnimation: _floatingAnimation,context: context,),
           
           // Main content
           BlocProvider(
@@ -452,7 +449,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                         height: isTablet ? 32 : (isSmallScreen ? 16 : 20),
                       ),
                       if (!isKeyboardVisible || !isSmallScreen)
-                        _buildWelcomeSection(isTablet, isSmallScreen, context),
+                        WelcomeSection( opacityAnimation:  _contentOpacity,slideAnimation: _contentSlide,isTablet:  isTablet,isSmallScreen:  isSmallScreen,context: context),
                     ],
                   ),
                 ),
@@ -556,58 +553,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
     );
   }
 
-  Widget _buildWelcomeSection(
-    bool isTablet,
-    bool isSmallScreen,
-    BuildContext context,
-  ) {
-    final titleFontSize = isTablet ? 36.0 : (isSmallScreen ? 24.0 : 28.0);
-    final subtitleFontSize = isTablet ? 18.0 : (isSmallScreen ? 14.0 : 16.0);
-
-    return AnimatedBuilder(
-      animation: _contentController,
-      builder: (context, child) {
-        return FadeTransition(
-          opacity: _contentOpacity,
-          child: SlideTransition(
-            position: _contentSlide,
-            child: Column(
-              children: [
-                Text(
-                  'Welcome Back!',
-                  style: TextStyle(
-                    fontSize: titleFontSize,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                    shadows: [
-                      Shadow(
-                        offset: const Offset(0, 3),
-                        blurRadius: 12,
-                        color: Colors.black.withOpacity(0.3),
-                      ),
-                    ],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: isTablet ? 16 : (isSmallScreen ? 8 : 12)),
-                Text(
-                  'Enter your mobile number to continue your journey',
-                  style: TextStyle(
-                    fontSize: subtitleFontSize,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.95),
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
+ 
 
   Widget _buildFormHeader(
     bool isTablet,
@@ -664,256 +610,14 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
     return Form(
       key: _formKey,
       child: Column(
-        children: [_buildEnhancedMobileNumberField(isTablet, isSmallScreen, context)],
+        children: [MobileNumberField(controller:_mobileController ,focusNode:_focusNode ,isFormValid:_isFormValid ,isTablet:isTablet,isSmallScreen: isSmallScreen,context:context)],
       ),
     );
   }
 
-  Widget _buildEnhancedMobileNumberField(
-    bool isTablet,
-    bool isSmallScreen,
-    BuildContext context,
-  ) {
-    final fontSize = isTablet ? 16.0 : (isSmallScreen ? 14.0 : 15.0);
-    final iconSize = isTablet ? 24.0 : (isSmallScreen ? 18.0 : 20.0);
-    final verticalPadding = isTablet ? 20.0 : (isSmallScreen ? 14.0 : 16.0);
+  
 
-    bool hasFocus = _focusNode.hasFocus;
-    bool hasValue = _mobileController.text.isNotEmpty;
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: hasFocus 
-              ? AppColors.primaryBlue.withOpacity(0.2)
-              : Colors.black.withOpacity(0.08),
-            blurRadius: hasFocus ? 20 : 15,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: TextFormField(
-        controller: _mobileController,
-        focusNode: _focusNode,
-        keyboardType: TextInputType.phone,
-        maxLength: 10,
-        textInputAction: TextInputAction.done,
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(10),
-        ],
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w600,
-          color: Colors.black87,
-          letterSpacing: 0.5,
-        ),
-        decoration: InputDecoration(
-          hintText: 'Mobile Number',
-          hintStyle: TextStyle(
-            color: Colors.grey.shade500,
-            fontWeight: FontWeight.w500,
-          ),
-          prefixIcon: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: isTablet ? 18 : (isSmallScreen ? 12 : 14),
-              vertical: verticalPadding,
-            ),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primaryBlue.withOpacity(0.1),
-                  AppColors.secondaryTeal.withOpacity(0.1),
-                ],
-              ),
-              border: Border(
-                right: BorderSide(
-                  color: hasFocus 
-                    ? AppColors.primaryBlue.withOpacity(0.3)
-                    : Colors.grey.shade300, 
-                  width: 1.5
-                ),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.phone_outlined,
-                  color: hasFocus
-                      ? AppColors.primaryBlue
-                      : Colors.grey.shade500,
-                  size: iconSize,
-                ),
-                SizedBox(width: isTablet ? 12 : (isSmallScreen ? 8 : 10)),
-                Text(
-                  "+91",
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          suffixIcon: hasValue
-              ? Container(
-                  padding: EdgeInsets.all(
-                    isTablet ? 16 : (isSmallScreen ? 10 : 12),
-                  ),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: Icon(
-                      _isFormValid ? Icons.check_circle : Icons.error_outline,
-                      color: _isFormValid 
-                        ? Colors.green.shade500 
-                        : Colors.orange.shade400,
-                      size: iconSize,
-                      key: ValueKey(_isFormValid),
-                    ),
-                  ),
-                )
-              : null,
-          counterText: "",
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: const BorderSide(
-              color: AppColors.primaryBlue,
-              width: 2.5,
-            ),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: Colors.orange.shade400, width: 2),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: Colors.orange.shade400, width: 2.5),
-          ),
-          contentPadding: EdgeInsets.symmetric(
-            vertical: verticalPadding,
-            horizontal: isTablet ? 24 : (isSmallScreen ? 14 : 18),
-          ),
-        ),
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return 'Mobile number required';
-          } else if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
-            return 'Enter valid 10-digit number';
-          }
-          return null;
-        },
-        onFieldSubmitted: (_) => _handleSendOtp(context),
-        onTap: () {
-          HapticFeedback.selectionClick();
-          Future.delayed(const Duration(milliseconds: 100), () {
-            if (mounted) {
-              setState(() {});
-            }
-          });
-        },
-      ),
-    );
-  }
-
-  Widget _buildActionButtons(
-    bool isTablet,
-    bool isSmallScreen,
-    BuildContext context,
-  ) {
-    final buttonHeight = isTablet ? 56.0 : (isSmallScreen ? 44.0 : 48.0);
-    final fontSize = isTablet ? 16.0 : (isSmallScreen ? 13.0 : 14.0);
-    final iconSize = isTablet ? 20.0 : (isSmallScreen ? 16.0 : 18.0);
-
-    return Column(
-      children: [
-        AnimatedBuilder(
-          animation: _buttonController,
-          builder: (context, child) {
-            return ScaleTransition(
-              scale: _buttonScale,
-              child: Container(
-                width: double.infinity,
-                height: buttonHeight,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: _isFormValid && !_isLoading
-                      ? [
-                          BoxShadow(
-                            color: AppColors.primaryBlue.withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isFormValid && !_isLoading
-                        ? AppColors.primaryBlue
-                        : Colors.grey.shade300,
-                    foregroundColor: _isFormValid && !_isLoading
-                        ? Colors.white
-                        : Colors.grey.shade500,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  onPressed: _isFormValid && !_isLoading
-                      ? () => _handleSendOtp(context)
-                      : null,
-                  child: _isLoading
-                      ? SizedBox(
-                          height: iconSize,
-                          width: iconSize,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.send_rounded, size: iconSize),
-                            SizedBox(
-                              width: isTablet ? 10 : (isSmallScreen ? 6 : 8),
-                            ),
-                            Text(
-                              "Send Verification Code",
-                              style: TextStyle(
-                                fontSize: fontSize,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                ),
-              ),
-            );
-          },
-        ),
-        SizedBox(height: isTablet ? 20 : (isSmallScreen ? 12 : 16)),
-        _buildSignUpLink(isTablet, isSmallScreen),
-      ],
-    );
-  }
+  
 
   Widget _buildSignUpLink(bool isTablet, bool isSmallScreen) {
     final fontSize = isTablet ? 15.0 : (isSmallScreen ? 12.0 : 13.0);
@@ -976,22 +680,22 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
 
   void _handleSendOtp(BuildContext context) {
     Navigator.pushNamed(context, Routes.dashboard);
-    // if (_formKey.currentState?.validate() ?? false) {
-    //   FocusScope.of(context).unfocus();
-    //   HapticFeedback.lightImpact();
+    if (_formKey.currentState?.validate() ?? false) {
+      FocusScope.of(context).unfocus();
+      HapticFeedback.lightImpact();
 
-    //   setState(() => _isLoading = true);
-    //   _buttonController.forward().then((_) {
-    //     _buttonController.reverse();
-    //   });
+      setState(() => _isLoading = true);
+      _buttonController.forward().then((_) {
+        _buttonController.reverse();
+      });
 
-    //   context.read<LoginWithOtpBloc>().add(
-    //     OnLoginButtonPressed(mobileNumber: _mobileController.text),
-    //   );
-    // } else {
-    //   HapticFeedback.heavyImpact();
-    //   _showErrorSnackBar('Enter valid 10-digit number');
-    // }
+      context.read<LoginWithOtpBloc>().add(
+        OnLoginButtonPressed(mobileNumber: _mobileController.text),
+      );
+    } else {
+      HapticFeedback.heavyImpact();
+      _showErrorSnackBar('Enter valid 10-digit number');
+    }
   }
 
   void _navigateToSignUp() {
