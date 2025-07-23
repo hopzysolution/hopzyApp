@@ -59,10 +59,11 @@ class Routes {
 
         case homeScreen:
   return MaterialPageRoute(builder: (context) {
-    return BlocProvider(
-      create: (_) => HomeScreenBloc(),
-      child: const HomeScreen(),
-    );
+    return HomeScreen();
+    // BlocProvider(
+    //   create: (_) => HomeScreenBloc(),
+    //   child: const HomeScreen(),
+    // );
   });
         case tickets:
         return MaterialPageRoute(builder: (context) {

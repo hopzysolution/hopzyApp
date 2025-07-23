@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ridebooking/commonWidgets/custom_action_button.dart';
-import 'package:ridebooking/commonWidgets/custom_search_view_widget.dart';
+import 'package:ridebooking/commonWidgets/station_search_view.dart';
+import 'package:ridebooking/models/station_model.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 
 class CustomSearchWidget extends StatelessWidget {
@@ -11,6 +12,7 @@ class CustomSearchWidget extends StatelessWidget {
   final VoidCallback onSearchTap;
   final DateTime selectedDate;
   final Function(DateTime) onDateSelected;
+  final List<StationDetails> stations; 
 
   const CustomSearchWidget({
     Key? key,
@@ -20,6 +22,7 @@ class CustomSearchWidget extends StatelessWidget {
     required this.onSearchTap,
     required this.selectedDate,
     required this.onDateSelected,
+    required this.stations,
   }) : super(key: key);
 
   @override
@@ -53,6 +56,7 @@ class CustomSearchWidget extends StatelessWidget {
                     controller: fromController,
                     icon: Icons.directions_bus,
                     hintText: 'From',
+                    
                   ),
                   const Divider(height: 1, thickness: 1, color: Colors.grey),
                   _buildTextField(
@@ -215,8 +219,8 @@ class CustomSearchWidget extends StatelessWidget {
                 final selectedLocation = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SearchView(
-
+                    builder: (context) => StationSearchView(
+                      stationList: stations, // Pass the list of stations
                     ),
                   ),
                 );

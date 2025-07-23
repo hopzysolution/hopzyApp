@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_bloc.dart';
+import 'package:ridebooking/bloc/homeScreenBloc/home_screen_event.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_state.dart';
 import 'package:ridebooking/commonWidgets/custom_search_widget.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
@@ -14,71 +14,63 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  TextEditingController fromController = TextEditingController();
-  TextEditingController toController = TextEditingController();
+  final TextEditingController fromController = TextEditingController();
+  final TextEditingController toController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    return BlocListener<HomeScreenBloc,HomeScreenState>(
-      listener: (context,state){
+    return BlocProvider(
+      create: (_) => HomeScreenBloc(), 
+      child: BlocListener<HomeScreenBloc, HomeScreenState>(
+        listener: (context, state) {
+          if (state is HomeScreenFailure) {
+            ToastMessage().showErrorToast(state.error);
+          }
+        },
+        child: BlocBuilder<HomeScreenBloc, HomeScreenState>(
+          builder: (context, state) {
+            if (state is HomeScreenLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is HomeScreenFailure) {
+              return Center(
+                child: Text(
+                  state.error,
+                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                ),
+              );
+            }
 
-      if(state is HomeScreenFailure){
-        // Handle state changes if needed
-        ToastMessage().showErrorToast(
-           state.error,
-        );
-      }
-
-    },
-    child: BlocBuilder<HomeScreenBloc,HomeScreenState>(
-      builder: (context, state) {
-        if (state is HomeScreenLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is HomeScreenLoaded) {
-          // Handle the loaded state if needed
-          return   Center(
-            child: Text(
-              'Stations Loaded: ${state.stations?.stationDetails!.length ?? 'No stations found'}',
-              style: const TextStyle(fontSize: 20),
-            ),
-          );
-
-        } else {
-          return    Container(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            CustomSearchWidget(
-            fromController: fromController,
-            toController: toController,
-            onSwapTap: () {
-              // Swap logic
-              final temp = fromController.text;
-              fromController.text = toController.text;
-              toController.text = temp;
-            },
-            onSearchTap: () {
-              // Search logic
-            },
-            onDateSelected: (DateTime date) {
-              setState(() { // Update selected date
-              });
-            },
-            
-            selectedDate: DateTime.now(), // Pass the state-managed date
-          ),
-            Spacer()
-          ],
+            // Whether loaded or fallback, show the same base UI
+            return Container(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  CustomSearchWidget(
+                    stations: context.read<HomeScreenBloc>().stations!,
+                    fromController: fromController,
+                    toController: toController,
+                    onSwapTap: () {
+                      final temp = fromController.text;
+                      fromController.text = toController.text;
+                      toController.text = temp;
+                    },
+                    onSearchTap: () {
+                      // Search logic (dispatch bloc event if needed)
+                    },
+                    onDateSelected: (DateTime date) {
+                      setState(() {});
+                    },
+                    selectedDate: DateTime.now(),
+                  ),
+                  const Spacer(),
+                  
+                ],
+              ),
+            );
+          },
         ),
-      );
-        }
-
-        // Return the main UI of the HomeScreen
-      
-  
-    }));
-    
-    
-    
-  
+      ),
+    );
   }
 }

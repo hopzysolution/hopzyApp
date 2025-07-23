@@ -5,7 +5,7 @@ abstract class HomeScreenState {}
 class HomeScreenInitial extends HomeScreenState {}
 class HomeScreenLoading extends HomeScreenState {}
 class HomeScreenLoaded extends HomeScreenState {
-  final StationModel? stations;
+  final List<StationDetails>? stations;
 
   HomeScreenLoaded({this.stations});
 }

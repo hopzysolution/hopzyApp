@@ -7,6 +7,7 @@ import 'package:ridebooking/repository/ApiRepository.dart';
 import 'package:ridebooking/repository/ApiResponse.dart';
 
 class HomeScreenBloc extends Bloc<HomeScreenEvent,HomeScreenState> {
+List<StationDetails>? stations;
   HomeScreenBloc() : super(HomeScreenInitial()) {
     on<HomeScreenEvent>((event, emit) {
       // Handle home screen events here
@@ -16,19 +17,26 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent,HomeScreenState> {
   }
 
 
-  void getAllStations() async{
-    // Logic to fetch all stations
-    // This could involve making an API call and then emitting a new state with the fetched data
-    emit(HomeScreenLoading());
-    // Simulate a network call
-    ApiResponse response = await ApiRepository.getAPI(ApiConst.getStations);
-    if (response.status.success) {
-      // Assuming the response contains a list of stations
-      StationModel stations = response.data['stationDetails'];
-      print("object of stations is --->>> : ${stations.toJson()}");
+  void getAllStations() async {
+  emit(HomeScreenLoading());
+
+  try {
+    var response = await ApiRepository.getAPI(ApiConst.getStations);
+
+    final data = response.data; // ✅ Extract actual response map
+
+    if (data["status"] != null && data["status"]["success"] == true) {
+      StationModel stationModel = StationModel.fromJson(data);
+      stations = stationModel.stationDetails;
       emit(HomeScreenLoaded(stations: stations));
     } else {
-      emit(HomeScreenFailure(error: response.status.message));
+      final message = data["status"]?["message"] ?? "Failed to load stations";
+      emit(HomeScreenFailure(error: message));
     }
+  } catch (e) {
+    print("Error in getAllStations: $e");
+    emit(HomeScreenFailure(error: "Something went wrong. Please try again."));
   }
+}
+
 }
