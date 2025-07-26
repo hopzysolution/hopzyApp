@@ -1,3 +1,4 @@
+import 'package:ridebooking/models/all_trip_data_model.dart';
 import 'package:ridebooking/models/station_model.dart';
 
 abstract class HomeScreenState {}
@@ -13,4 +14,11 @@ class HomeScreenFailure extends HomeScreenState {
   final String error;
 
   HomeScreenFailure({required this.error});
+}
+
+class AllTripSuccessState extends HomeScreenState {
+
+final List<Availabletrips>? allTrips;
+
+  AllTripSuccessState({this.allTrips});
 }

@@ -12,7 +12,9 @@ class CustomSearchWidget extends StatelessWidget {
   final VoidCallback onSearchTap;
   final DateTime selectedDate;
   final Function(DateTime) onDateSelected;
-  final List<StationDetails> stations; 
+  final List<StationDetails> stations;
+  final Function(StationDetails station) onFromSelected;
+final Function(StationDetails station) onToSelected;
 
   const CustomSearchWidget({
     Key? key,
@@ -23,6 +25,9 @@ class CustomSearchWidget extends StatelessWidget {
     required this.selectedDate,
     required this.onDateSelected,
     required this.stations,
+    required this.onToSelected,
+    required this.onFromSelected,
+
   }) : super(key: key);
 
   @override
@@ -56,7 +61,6 @@ class CustomSearchWidget extends StatelessWidget {
                     controller: fromController,
                     icon: Icons.directions_bus,
                     hintText: 'From',
-                    
                   ),
                   const Divider(height: 1, thickness: 1, color: Colors.grey),
                   _buildTextField(
@@ -97,32 +101,24 @@ class CustomSearchWidget extends StatelessWidget {
               Expanded(
                 child: GestureDetector(
                   onTap: () async {
+                    // Inside GestureDetector
                     final DateTime? picked = await showDatePicker(
                       context: context,
                       initialDate: selectedDate,
                       firstDate: DateTime.now(),
                       lastDate: DateTime.now().add(const Duration(days: 30)),
-                      builder: (context, child) {
-                        return Theme(
-                          data: ThemeData.light().copyWith(
-                            colorScheme: const ColorScheme.light(
-                              primary: AppColors.primaryBlue,
-                              onPrimary: Colors.white,
-                              surface: Colors.white,
-                              onSurface: Colors.black,
-                            ),
-                            dialogBackgroundColor: Colors.white,
-                          ),
-                          child: child!,
-                        );
-                      },
                     );
                     if (picked != null) {
-                      onDateSelected(picked);
+                      onDateSelected(
+                        picked,
+                      ); // <-- this notifies the parent to update
                     }
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey.shade300),
                       borderRadius: BorderRadius.circular(8),
@@ -130,7 +126,11 @@ class CustomSearchWidget extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.calendar_today, color: AppColors.primaryBlue, size: 20),
+                        const Icon(
+                          Icons.calendar_today,
+                          color: AppColors.primaryBlue,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           DateFormat('dd MMM yyyy').format(selectedDate),
@@ -153,9 +153,9 @@ class CustomSearchWidget extends StatelessWidget {
                   borderColor: AppColors.primaryBlue,
                   backgroundColor: AppColors.primaryBlueAccent.withOpacity(0.6),
                   textColor: AppColors.neutral900,
-                  onPressed: () => onDateSelected(DateTime.now()), 
+                  onPressed: () => onDateSelected(DateTime.now()),
                   text: "Todays",
-                  )
+                ),
               ),
               const SizedBox(width: 5),
               // Tomorrow Button
@@ -163,19 +163,20 @@ class CustomSearchWidget extends StatelessWidget {
                 flex: 1,
                 child: CustomActionButton(
                   backgroundColor: AppColors.primaryBlue,
-                  onPressed: () => onDateSelected(DateTime.now().add( Duration(days: 1))), 
+                  onPressed: () =>
+                      onDateSelected(DateTime.now().add(Duration(days: 1))),
                   text: "Tomorrow",
-                  )
+                ),
               ),
             ],
           ),
           const SizedBox(height: 20),
           // Search Button
-           CustomActionButton(
-  onPressed: onSearchTap,
-  text: 'Search',
-  icon: Icons.search,
-),
+          CustomActionButton(
+            onPressed: onSearchTap,
+            text: 'Search',
+            icon: Icons.search,
+          ),
         ],
       ),
     );
@@ -203,31 +204,43 @@ class CustomSearchWidget extends StatelessWidget {
                 border: InputBorder.none,
                 filled: true,
                 fillColor: Colors.grey.shade100,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.primaryBlue, width: 2),
-                ),
-                
-              ),
-               onTap: () async {
-                // Navigate to LocationSearchView and wait for result
-                final selectedLocation = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StationSearchView(
-                      stationList: stations, // Pass the list of stations
-                    ),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryBlue,
+                    width: 2,
                   ),
-                );
-                // Update controller if a location is selected
-                if (selectedLocation != null) {
-                  controller.text = selectedLocation as String;
-                }
+                ),
+              ),
+              onTap: () async {
+              final selectedStation = await Navigator.push<StationDetails>(
+  context,
+  MaterialPageRoute(
+    builder: (context) => StationSearchView(
+      stationList: stations,
+    ),
+  ),
+);
+
+if (selectedStation != null) {
+  controller.text = selectedStation.station ?? '';
+  // You can also store selectedStation.stationId wherever needed
+  if (hintText.toLowerCase() == 'from') {
+    onFromSelected(selectedStation);
+  } else if (hintText.toLowerCase() == 'to') {
+    onToSelected(selectedStation);
+  }
+
+}
+
               },
             ),
           ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:ridebooking/models/all_trip_data_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Session {
@@ -69,4 +70,24 @@ Future<void> setEmail(String email) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('email', email);
 }
+
+Future<void> saveTripsToSession(List<Availabletrips> trips) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String> tripList = trips.map((trip) => jsonEncode(trip.toJson())).toList();
+  await prefs.setStringList('available_trips', tripList);
+}
+
+Future<List<Availabletrips>> getTripsFromSession() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String>? tripList = prefs.getStringList('available_trips');
+
+  if (tripList != null) {
+    return tripList
+        .map((tripString) => Availabletrips.fromJson(jsonDecode(tripString)))
+        .toList();
+  } else {
+    return [];
+  }
+}
+
 }

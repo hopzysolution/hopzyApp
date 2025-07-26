@@ -48,6 +48,7 @@ dependencies:
   random_string: 
   firebase_auth:
   google_sign_in: ^6.3.0
+  dotted_line: ^3.2.3
 
 dev_dependencies:
   flutter_test:

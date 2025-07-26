@@ -127,12 +127,14 @@ class ApiRepository {
       // } // todo:token get if present or required!
      
         
-        client.options.headers["devicetoken"]="";
-        client.options.headers["deviceType"]=Platform.isAndroid? "ANDROID":Platform.isIOS? "IOS":"WEB";
+        // client.options.headers["devicetoken"]="";
+        // client.options.headers["deviceType"]=Platform.isAndroid? "ANDROID":Platform.isIOS? "IOS":"WEB";
         
-       token.isEmpty?"": client.options.headers["authorization"] = "Bearer " + token;
+       client.options.headers["User-Agent"]="insomnia/11.2.0";
+        client.options.headers["token"]=ApiConst.accessToken;
+        // client.options.headers["Cookie"]="";
+        // client.options.headers["PHPSESSID"]="qjmtid5a30e8sdgpcdu7h9a399";
       
-        print("url:----- ${callUrl}");
       print("-------------------------");
       print("-------------------------");
       print("url:----- ${callUrl}");

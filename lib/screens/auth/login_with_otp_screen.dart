@@ -188,7 +188,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
         gradient: LinearGradient(
           colors: [
             const Color(0xFF667eea),
-            const Color(0xFF764ba2),
+            AppColors.primaryBlueDark,
             AppColors.primaryBlue,
             AppColors.secondaryTeal,
           ],
