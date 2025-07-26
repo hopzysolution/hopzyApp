@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ridebooking/commonWidgets/custom_trip_list_tile.dart';
-import 'package:ridebooking/models/all_trip_data_model.dart';
+import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/trip_model.dart';
 import 'package:ridebooking/screens/trip_details_screen.dart';
 
@@ -33,13 +33,14 @@ class _AvailableTripsScreenState extends State<AvailableTripsScreen> {
               routeId: widget.allTrips![index].routeid ?? 'Unknown Route ID',
               operatorId: widget.allTrips![index].operatorid ?? 'Unknown Operator ID',
               operatorName: widget.allTrips![index].operatorname ?? 'Unknown Operator',
-              srcName: widget.allTrips![index].srcname ?? 'Unknown Source',
-              dstName: widget.allTrips![index].dstname ?? 'Unknown Destination',
-              departureTime: DateTime.parse(widget.allTrips![index].depaturetime ?? DateTime.now().toString()),
-              arrivalTime: DateTime.parse(widget.allTrips![index].arrivaltime ?? DateTime.now().toString()),
+              srcName: widget.allTrips![index].src ?? 'Unknown Source',
+              dstName: widget.allTrips![index].dst ?? 'Unknown Destination',
+              departureTime: DateTime.parse(widget.allTrips![index].deptime ?? DateTime.now().toString()),
+              arrivalTime: DateTime.parse(widget.allTrips![index].arrtime ?? DateTime.now().toString()),
               busType: widget.allTrips![index].bustype ?? 'Unknown Bus Type',
               availableSeats: widget.allTrips![index].availseats ?? "0",
               totalSeats: widget.allTrips![index].totalseats ?? "",
+              price: widget.allTrips![index].fare ?? "0",
             ),
           );
           

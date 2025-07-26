@@ -56,7 +56,7 @@ class TripListTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (trip.availableSeats != null)//price
+                  if (trip.price != null)//price
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -67,8 +67,8 @@ class TripListTile extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        "₹ 600",
-                        // '₹//${trip.price}',
+                        // "₹ 600",
+                        '₹ ${trip.price}',
                         style: theme.textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colorScheme.onPrimaryContainer,

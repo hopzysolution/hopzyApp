@@ -11,6 +11,7 @@ class TripModel {
   final String totalSeats;
   final String busType;
   final String tripIdV2;
+  final String? price;
 
   TripModel({
     required this.operatorId,
@@ -25,6 +26,7 @@ class TripModel {
     required this.totalSeats,
     required this.busType,
     required this.tripIdV2,
+    required this.price,
   });
 
   factory TripModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,25 @@ class TripModel {
       totalSeats: json['totalseats'].toString(),
       busType: json['bustype'],
       tripIdV2: json['tripid_v2'],
+      price: json['price']?.toString() ?? '0',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'operatorid': operatorId,
+      'operatorname': operatorName,
+      'routeid': routeId,
+      'tripid': tripId,
+      'srcname': srcName,
+      'dstname': dstName,
+      'depaturetime': departureTime.toIso8601String(),
+      'arrivaltime': arrivalTime.toIso8601String(),
+      'availseats': availableSeats,
+      'totalseats': totalSeats,
+      'bustype': busType,
+      'tripid_v2': tripIdV2,
+      'price': price,
+    };
   }
 }

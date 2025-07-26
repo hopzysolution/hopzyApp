@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_bloc.dart';
-import 'package:ridebooking/models/all_trip_data_model.dart';
+import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/screens/Dashboard/account.dart';
 import 'package:ridebooking/screens/Dashboard/dashboard_screen.dart'
     show DashboardScreen;
