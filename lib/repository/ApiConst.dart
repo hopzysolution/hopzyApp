@@ -19,6 +19,8 @@ class ApiConst {
 
   static const String getAvailableTrips = "GetAvailableTrips/apiagent";
 
+  static const String getSeatLayout= "GetSeatLayout/apiagent";
+
 
 
 }
