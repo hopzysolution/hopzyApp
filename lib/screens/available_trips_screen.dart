@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:ridebooking/commonWidgets/custom_trip_list_tile.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/trip_model.dart';
+import 'package:ridebooking/screens/seat_selection_screen/seat_selection_screen.dart';
 import 'package:ridebooking/screens/trip_details_screen.dart';
 
 class AvailableTripsScreen extends StatefulWidget {
@@ -25,7 +26,7 @@ class _AvailableTripsScreenState extends State<AvailableTripsScreen> {
         itemBuilder: (context,index){
           return TripListTile(
             onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => TripDetailsScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => SeatSelectionScreen()));
           },
             trip: TripModel(
               tripIdV2: widget.allTrips![index].tripidV2 ?? 'Unknown Trip ID'  ,
