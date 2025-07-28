@@ -49,6 +49,7 @@ dependencies:
   firebase_auth:
   google_sign_in: ^6.3.0
   dotted_line: ^3.2.3
+  flaticon: ^0.0.1
 
 dev_dependencies:
   flutter_test:

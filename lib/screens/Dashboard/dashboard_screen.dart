@@ -397,30 +397,36 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
             SizedBox(height: isTablet ? 12 : 8),
 
             // Menu Items with Categories
-            _buildSectionHeader('Services', isTablet),
+            _buildSectionHeader('My details', isTablet),
             _buildModernListTile(
               icon: Icons.shopping_bag_outlined,
-              title: 'Heading 1',
+              title: 'Bookings',
               onTap: () => _onDrawerItemTap("MyOrders"),
               isTablet: isTablet,
             ),
             _buildModernListTile(
               icon: Icons.account_balance_wallet_outlined,
-              title: 'My Wallet',
+              title: 'Personal information',
               onTap: () => _onDrawerItemTap("MyWallet"),
               isTablet: isTablet,
             ),
             _buildModernListTile(
               icon: Icons.loyalty_outlined,
-              title: 'Heading 2',
+              title: 'Passengers',
+              onTap: () => _onDrawerItemTap("LoyaltyHistory"),
+              isTablet: isTablet,
+            ),
+            _buildModernListTile(
+              icon: Icons.loyalty_outlined,
+              title: 'IRCTC details',
               onTap: () => _onDrawerItemTap("LoyaltyHistory"),
               isTablet: isTablet,
             ),
 
-            _buildSectionHeader('Consultations', isTablet),
+            _buildSectionHeader('Payments', isTablet),
             _buildModernListTile(
-              icon: Icons.help_outline,
-              title: 'Heading 3',
+              icon: Icons.wallet,
+              title: 'redBus Wallet',
               onTap: () => _onDrawerItemTap("MyQuestions"),
               isTablet: isTablet,
             ),
