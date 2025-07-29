@@ -7,6 +7,7 @@ import 'package:ridebooking/screens/Dashboard/master_list.dart';
 import 'package:ridebooking/screens/Dashboard/tickets.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/session.dart';
+import 'package:ridebooking/screens/webview_pages/webview_pages_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -24,9 +25,14 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
   late Animation<double> _fabScaleAnimation;
   late Animation<double> _fabRotationAnimation;
 
-  final List<Widget> _pages = const [
+  final List<Widget> _pages = [
    HomeScreen(),
-   Tickets(),
+    //  Tickets(),
+    WebViewPagesScreenBody(
+      titleMain: "AI",
+      urlToLoad: "https://www.google.com",
+      bodyTags: "",
+    ),
    MasterList(),
    Account()
   ];
