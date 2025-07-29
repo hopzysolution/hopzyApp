@@ -50,6 +50,7 @@ dependencies:
   google_sign_in: ^6.3.0
   dotted_line: ^3.2.3
   flaticon: ^0.0.1
+  webview_flutter: ^4.13.0
 
 dev_dependencies:
   flutter_test:
