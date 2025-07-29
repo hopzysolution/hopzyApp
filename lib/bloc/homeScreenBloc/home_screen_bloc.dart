@@ -63,6 +63,7 @@ List<Availabletrips> allTrips = [];
       if (data["status"] != null && data["status"]["success"] == true) {
         GetAvailableTrips getAvailableTrips = GetAvailableTrips.fromJson(data);
         availableaatripsList = getAvailableTrips.availabletrips!;
+        Session().saveTripsToSession(availableaatripsList);
         emit(AllTripSuccessState(allTrips: availableaatripsList));
       } else {
         final message = data["status"]?["message"] ?? "Failed to load trips";

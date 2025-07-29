@@ -26,7 +26,7 @@ class _AvailableTripsScreenState extends State<AvailableTripsScreen> {
         itemBuilder: (context,index){
           return TripListTile(
             onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => SeatSelectionScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => SeatSelectionScreen(trip: widget.allTrips![index],)));
           },
             trip: TripModel(
               tripIdV2: widget.allTrips![index].tripidV2 ?? 'Unknown Trip ID'  ,

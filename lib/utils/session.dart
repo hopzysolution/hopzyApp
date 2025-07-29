@@ -1,6 +1,5 @@
 import 'dart:convert';
-
-import 'package:ridebooking/models/all_trip_data_model.dart';
+import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Session {

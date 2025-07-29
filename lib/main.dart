@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
 import 'package:ridebooking/screens/splash_screen.dart';
+import 'package:ridebooking/utils/Api_client.dart';
 import 'package:ridebooking/utils/app_theme.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'screens/seat_selection_screen.dart';
 
 void main() async{
-
+  final apiClient = ApiClient();
+  apiClient.init();
   // WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp(
   //     options: FirebaseOptions(

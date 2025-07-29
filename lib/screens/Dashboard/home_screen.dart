@@ -8,6 +8,7 @@ import 'package:ridebooking/commonWidgets/custom_search_widget.dart';
 import 'package:ridebooking/models/station_model.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
+import 'package:ridebooking/utils/webview_page_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,73 +45,78 @@ class _HomeScreenState extends State<HomeScreen> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (state is HomeScreenFailure) {
-              return Center(
-                child: Text(
-                  state.error,
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
-                ),
-              );
-            }
+            // if (state is HomeScreenFailure) {
+            //   return Center(
+            //     child: Text(
+            //       state.error,
+            //       style: const TextStyle(color: Colors.red, fontSize: 16),
+            //     ),
+            //   );
+            // }
 
            
 
-            return Container(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                children: [
-                  CustomSearchWidget(
-                    stations: context.read<HomeScreenBloc>().stations!,
-                    fromController: fromController,
-                    toController: toController,
-                    selectedDate: selectedDate,
-                    onDateSelected: (DateTime date) {
-                      setState(() {
-                        selectedDate = date;
-                      });
-                    },
-                    
-                    onSwapTap: () {
-                      final tempText = fromController.text;
-                      fromController.text = toController.text;
-                      toController.text = tempText;
+            return SingleChildScrollView(
+  child: Container(
+    padding: const EdgeInsets.all(10.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomSearchWidget(
+          stations: context.read<HomeScreenBloc>().stations!,
+          fromController: fromController,
+          toController: toController,
+          selectedDate: selectedDate,
+          onDateSelected: (DateTime date) {
+            setState(() {
+              selectedDate = date;
+            });
+          },
+          onSwapTap: () {
+            final tempText = fromController.text;
+            fromController.text = toController.text;
+            toController.text = tempText;
 
-                      final tempStation = selectedFromStation;
-                      selectedFromStation = selectedToStation;
-                      selectedToStation = tempStation;
-                      print("Swapped stations: ${selectedFromStation?.station} and ${selectedToStation?.station}");
-                    },
-                    onSearchTap: () {
-                      print("Searching for trips from ${fromController.text} to ${selectedToStation?.station} on $selectedDate");
-                      if (selectedFromStation == null ||
-                          selectedToStation == null) {
-                        ToastMessage().showErrorToast("Please select both stations.");
-                        return;
-                      }
-                      String dateSelected=DateFormat('yyyy-MM-dd').format(selectedDate);
-                      context.read<HomeScreenBloc>().add(
-                            SearchAvailableTripsEvent(
-                              from: selectedFromStation!.stationId!,
-                              to: selectedToStation!.stationId!,
-                              date: dateSelected,
-                            ),
-                          );
-                    },
-                    onFromSelected: (StationDetails station) {
+            final tempStation = selectedFromStation;
+            selectedFromStation = selectedToStation;
+            selectedToStation = tempStation;
 
-                      selectedFromStation = station;
-                      print( "Selected From Station: ${selectedFromStation?.station}");
-                   
-                    },
-                    onToSelected: (StationDetails station) {
-                      selectedToStation = station;
-                      print("Selected To Station: ${selectedToStation?.station}");
-                    },
-                  ),
-                  const Spacer(),
-                ],
+            print("Swapped stations: ${selectedFromStation?.station} and ${selectedToStation?.station}");
+          },
+          onSearchTap: () {
+            print("Searching for trips from ${fromController.text} to ${selectedToStation?.station} on $selectedDate");
+
+            if (selectedFromStation == null || selectedToStation == null) {
+              ToastMessage().showErrorToast("Please select both stations.");
+              return;
+            }
+
+            String dateSelected = DateFormat('yyyy-MM-dd').format(selectedDate);
+
+            context.read<HomeScreenBloc>().add(
+              SearchAvailableTripsEvent(
+                from: selectedFromStation!.stationId!,
+                to: selectedToStation!.stationId!,
+                date: dateSelected,
               ),
             );
+          },
+          onFromSelected: (StationDetails station) {
+            selectedFromStation = station;
+            print("Selected From Station: ${selectedFromStation?.station}");
+          },
+          onToSelected: (StationDetails station) {
+            selectedToStation = station;
+            print("Selected To Station: ${selectedToStation?.station}");
+          },
+        ),
+        const SizedBox(height: 20), // Use this instead of Spacer
+       
+      ],
+    ),
+  ),
+);
+
           },
         ),
       ),

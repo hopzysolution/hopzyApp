@@ -1,6 +1,9 @@
 // Enhanced Bottom Sheet Widget
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/utils/session.dart';
 
 // You'll need to import your BusInfo class or define it here
 class BusInfo {
@@ -11,7 +14,6 @@ class BusInfo {
   final String date;
   final double rating;
   final String busType;
-  final String coSaving;
 
   BusInfo({
     required this.name,
@@ -21,20 +23,20 @@ class BusInfo {
     required this.date,
     required this.rating,
     required this.busType,
-    required this.coSaving,
   });
 }
 
 class EnhancedBusInfoBottomSheet extends StatefulWidget {
+  Availabletrips? tripData;
   final BusInfo busInfo;
   final Set<String>? selectedSeats;
   final ScrollController? scrollController;
 
-  const EnhancedBusInfoBottomSheet(
+   EnhancedBusInfoBottomSheet(
       {Key? key,
       required this.busInfo,
       this.selectedSeats,
-      this.scrollController})
+      this.scrollController,this.tripData})
       : super(key: key);
 
   @override
@@ -52,6 +54,13 @@ class _EnhancedBusInfoBottomSheetState
     'Dropping',
     'Passengers'
   ];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+   
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,13 +122,13 @@ class _EnhancedBusInfoBottomSheetState
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              '${widget.busInfo.coSaving}% CO₂ saving',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
-                            ),
+                            // Text(
+                            //   '${widget.busInfo.coSaving}% CO₂ saving',
+                            //   style: TextStyle(
+                            //     color: Colors.grey[600],
+                            //     fontSize: 12,
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -379,36 +388,134 @@ class _EnhancedBusInfoBottomSheetState
   Widget _buildBusRouteTab() {
     return Column(
       children: [
-        _buildRouteItem('Dewas', '07:25', true),
+        _buildRouteItem(widget.tripData!.src.toString(), "${ DateFormat('hh:mm a').format(DateTime.parse(widget.tripData!.deptime.toString()))}", true),
         _buildRouteConnector(),
-        _buildRouteItem('Indore Junction', '08:15', false),
+        _buildRouteItem(widget.tripData!.dst.toString(), "${ DateFormat('hh:mm a').format(DateTime.parse(widget.tripData!.arrtime.toString()))}", false),
         _buildRouteConnector(),
-        _buildRouteItem('Ujjain', '09:00', false),
-        _buildRouteConnector(),
-        _buildRouteItem('Bhopal', '10:05', true),
+        // _buildRouteItem('Ujjain', '09:00', false),
+        // _buildRouteConnector(),
+        // _buildRouteItem('Bhopal', '10:05', true),
       ],
+    );
+  }
+  String? _selectedBoardingPoint;
+Widget _buildBoardingTab() {
+  final bpDetails = widget.tripData?.boardingpoint?.bpDetails;
+
+  if (bpDetails == null || bpDetails.isEmpty) {
+    return const Center(child: Text("No boarding points available"));
+  }
+
+  return Column(
+    children: List.generate(bpDetails.length, (int index) {
+      final detail = bpDetails[index];
+
+      final String venue = detail.venue ?? '';
+      final String boardTime = detail.boardtime != null
+          ? DateFormat('hh:mm a').format(DateTime.parse(detail.boardtime.toString()))
+          : '--:--';
+      final String stationName = detail.stnname ?? '';
+      final String selectedValue = '$venue-$boardTime';
+
+      return _buildBoardingPoint(
+          venue,
+          boardTime,
+          stationName,
+          groupValue: _selectedBoardingPoint,
+          selectedValue: selectedValue,
+          onTap: () {
+            setState(() {
+              _selectedBoardingPoint = selectedValue;
+            });
+            print('Selected boarding point: $venue at $boardTime');
+          },
+        );
+    }),
+  );
+}
+
+
+  Widget _buildBoardingPoint(
+    String location,
+    String time,
+    String description, {
+    VoidCallback? onTap,
+    required String? groupValue,
+    required String selectedValue,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(
+          location,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              time,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              description,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+        leading: Radio<String>(
+          value: selectedValue,
+          groupValue: groupValue,
+          onChanged: (value) {
+            if (onTap != null) {
+              onTap();
+            }
+          },
+        ),
+        onTap: onTap,
+      ),
     );
   }
 
-  Widget _buildBoardingTab() {
-    return Column(
-      children: [
-        _buildBoardingPoint('Dewas Bus Stand', '07:25', 'Main pickup point'),
-        _buildBoardingPoint(
-            'Dewas Railway Station', '07:30', 'Alternative pickup'),
-      ],
-    );
-  }
 
   Widget _buildDroppingTab() {
-    return Column(
-      children: [
-        _buildDroppingPoint(
-            'Bhopal Railway Station', '10:00', 'Main drop point'),
-        _buildDroppingPoint('Bhopal Bus Stand', '10:05', 'Final destination'),
-      ],
-    );
+  final dpDetails = widget.tripData?.droppingpoint?.dpDetails;
+
+  if (dpDetails == null || dpDetails.isEmpty) {
+    return const Center(child: Text("No dropping points available"));
   }
+
+  return Column(
+    children: List.generate(dpDetails.length, (int index) {
+      final detail = dpDetails[index];
+
+      final String venue = detail.venue ?? '';
+      final String dropTime = detail.droptime != null
+          ? DateFormat('hh:mm a').format(DateTime.parse(detail.droptime.toString()))
+          : '--:--';
+      final String stationName = detail.stationname ?? '';
+
+      return _buildDroppingPoint(venue, dropTime, stationName);
+    }),
+  );
+}
+
 
   Widget _buildPassengersTab() {
     return Column(
@@ -530,62 +637,68 @@ class _EnhancedBusInfoBottomSheetState
     );
   }
 
-  Widget _buildBoardingPoint(String location, String time, String description) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            location,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Text(
-            time,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            description,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+//   Widget _buildBoardingPoint(String location, String time, String description, {VoidCallback? onTap}) {
+//   return Container(
+//     margin: EdgeInsets.only(bottom: 16),
+//     padding: EdgeInsets.all(12),
+//     decoration: BoxDecoration(
+//       border: Border.all(color: Colors.grey[300]!),
+//       borderRadius: BorderRadius.circular(8),
+//     ),
+//     child: ListTile(
+//       contentPadding: EdgeInsets.zero,
+//       title: Text(
+//         location,
+//         style: TextStyle(
+//           fontSize: 14,
+//           fontWeight: FontWeight.w500,
+//         ),
+//       ),
+//       subtitle: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Text(
+//             time,
+//             style: TextStyle(
+//               fontSize: 12,
+//               color: Colors.red,
+//               fontWeight: FontWeight.bold,
+//             ),
+//           ),
+//           Text(
+//             description,
+//             style: TextStyle(
+//               fontSize: 12,
+//               color: Colors.grey[600],
+//             ),
+//           ),
+//         ],
+//       ),
+//       onTap: onTap,
+//     ),
+//   );
+// }
 
-  Widget _buildDroppingPoint(String location, String time, String description) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(8),
+  Widget _buildDroppingPoint(String location, String time, String description, {VoidCallback? onTap}) {
+  return Container(
+    margin: EdgeInsets.only(bottom: 16),
+    padding: EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.grey[300]!),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        location,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
       ),
-      child: Column(
+      subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            location,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
           Text(
             time,
             style: TextStyle(
@@ -603,8 +716,10 @@ class _EnhancedBusInfoBottomSheetState
           ),
         ],
       ),
-    );
-  }
+      onTap: onTap,
+    ),
+  );
+}
 
   Widget _buildPassengerInfo(String label, String value) {
     return Padding(

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTypography {
   AppTypography._();
 
+  static String get fontFamily => GoogleFonts.inter().fontFamily!;
   /// Font Weights
   static const FontWeight light = FontWeight.w300;
   static const FontWeight regular = FontWeight.w400;

@@ -4,7 +4,7 @@ abstract class SeatLayoutState {}
 class SeatLayoutInitial extends SeatLayoutState {}
 class SeatLayoutLoading extends SeatLayoutState {}
 class SeatLayoutLoaded extends SeatLayoutState {
-  final Layout? seatLayout;
+  final SeatLayoutDataModel? seatLayout;
 
   SeatLayoutLoaded({this.seatLayout});
 }

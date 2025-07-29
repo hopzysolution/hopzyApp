@@ -5,6 +5,7 @@ class SeatLayoutFetchEvent extends SeatLayoutEvent {
   final String? dstOrder;
   final String? routeId;
   final String? tripId;
+  final String? opid;
 
-  SeatLayoutFetchEvent({this.srcOrder, this.dstOrder, this.routeId, this.tripId});
+  SeatLayoutFetchEvent({this.srcOrder, this.dstOrder, this.routeId, this.tripId,this.opid});
 }
