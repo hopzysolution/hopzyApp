@@ -151,10 +151,10 @@ final Function(StationDetails station) onToSelected;
                 flex: 1,
                 child: CustomActionButton(
                   borderColor: AppColors.primaryBlue,
-                  backgroundColor: AppColors.primaryBlueAccent.withOpacity(0.6),
+                  backgroundColor: Colors.white,
                   textColor: AppColors.neutral900,
                   onPressed: () => onDateSelected(DateTime.now()),
-                  text: "Todays",
+                  text: "Today",
                 ),
               ),
               const SizedBox(width: 5),
@@ -174,7 +174,7 @@ final Function(StationDetails station) onToSelected;
           // Search Button
           CustomActionButton(
             onPressed: onSearchTap,
-            text: 'Search',
+            text: 'Hopein...',
             icon: Icons.search,
           ),
         ],

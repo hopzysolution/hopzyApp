@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ridebooking/models/trip_model.dart';
+import 'package:ridebooking/utils/app_colors.dart';
 
 class TripListTile extends StatelessWidget {
   final TripModel trip;
@@ -63,7 +64,7 @@ class TripListTile extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer,
+                        color: AppColors.appAssets,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -156,7 +157,7 @@ class TripListTile extends StatelessWidget {
                               width: 8,
                               height: 8,
                               decoration: BoxDecoration(
-                                color: colorScheme.secondary,
+                                color: AppColors.error,
                                 shape: BoxShape.circle,
                               ),
                             ),

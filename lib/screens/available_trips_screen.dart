@@ -19,7 +19,7 @@ class _AvailableTripsScreenState extends State<AvailableTripsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Available Trips'),
+        title: const Text('Available Buses'),
       ),
       body: ListView.builder(
         itemCount: widget.allTrips?.length ?? 0,

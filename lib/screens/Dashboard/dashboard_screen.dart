@@ -194,15 +194,20 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              Icons.location_on_rounded,
-              color: Colors.white,
-              size: isTablet ? 20 : 18,
-            ),
+            child: Image.asset(
+                'assets/images/ticket.png',
+                width: isTablet ? 20 : 18,
+                height: isTablet ? 20 : 18,
+              )
+            // Icon(
+            //   Icons.location_on_rounded,
+            //   color: Colors.white,
+            //   size: isTablet ? 20 : 18,
+            // ),
           ),
           SizedBox(width: isTablet ? 12 : 8),
           Text(
-            'Home',
+            'Bus Tickets',
             style: TextStyle(
               color: Colors.white,
               fontSize: titleFontSize,
@@ -213,41 +218,40 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
         ],
       ),
       actions: [
-        Container(
-          margin: EdgeInsets.only(right: isTablet ? 16 : 12),
-          padding: EdgeInsets.symmetric(
-            horizontal: isTablet ? 16 : 12,
-            vertical: isTablet ? 8 : 6,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.account_balance_wallet_rounded,
-                color: Colors.white,
-                size: isTablet ? 18 : 16,
-              ),
-              SizedBox(width: isTablet ? 8 : 6),
-              Text(
-                '₹ 0',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: walletFontSize,
-                ),
-              ),
-            ],
-          ),
-        ),
-        
+        // Container(
+        //   margin: EdgeInsets.only(right: isTablet ? 16 : 12),
+        //   padding: EdgeInsets.symmetric(
+        //     horizontal: isTablet ? 16 : 12,
+        //     vertical: isTablet ? 8 : 6,
+        //   ),
+        //   decoration: BoxDecoration(
+        //     color: Colors.white.withOpacity(0.15),
+        //     borderRadius: BorderRadius.circular(20),
+        //     border: Border.all(
+        //       color: Colors.white.withOpacity(0.3),
+        //       width: 1,
+        //     ),
+        //   ),
+        //   child: Row(
+        //     mainAxisSize: MainAxisSize.min,
+        //     children: [
+        //       Icon(
+        //         Icons.account_balance_wallet_rounded,
+        //         color: Colors.white,
+        //         size: isTablet ? 18 : 16,
+        //       ),
+        //       SizedBox(width: isTablet ? 8 : 6),
+        //       Text(
+        //         '₹ 0',
+        //         style: TextStyle(
+        //           color: Colors.white,
+        //           fontWeight: FontWeight.bold,
+        //           fontSize: walletFontSize,
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
       ],
     );
   }
@@ -388,7 +392,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                     ),
                     SizedBox(height: isTablet ? 6 : 4),
                     Text(
-                      'Welcome back!',
+                      'Welcome!',
                       style: TextStyle(
                         fontSize: subtitleFontSize,
                         color: Colors.white.withOpacity(0.9),

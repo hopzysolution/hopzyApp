@@ -522,7 +522,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                     SizedBox(height: isTablet ? 32 : (isSmallScreen ? 20 : 24)),
                   CustomActionButton(
   onPressed:  () => _handleSendOtp(context),//_isFormValid && !_isLoading ? : null,
-  text: 'Send Verification Code',
+  text: 'Send Code to Signup',
   height: buttonHeight,
   backgroundColor: AppColors.primaryBlue ,// _isFormValid && !_isLoading ?: Colors.grey.shade300,
   foregroundColor: _isFormValid && !_isLoading ? Colors.white : Colors.grey.shade500,
@@ -535,10 +535,10 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
   borderRadius: 16,
 ),
                     if (!isKeyboardVisible) ...[
-                      SizedBox(
-                        height: isTablet ? 20 : (isSmallScreen ? 12 : 16),
-                      ),
-                      _buildSignUpLink(isTablet, isSmallScreen),
+                      // SizedBox(
+                      //   height: isTablet ? 20 : (isSmallScreen ? 12 : 16),
+                      // ),
+                      // _buildSignUpLink(isTablet, isSmallScreen),
                       SizedBox(
                         height: isTablet ? 16 : (isSmallScreen ? 8 : 12),
                       ),

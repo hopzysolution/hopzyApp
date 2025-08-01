@@ -28,7 +28,7 @@ class WelcomeSection extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              'Welcome Back!',
+              'Welcome!',
               style: TextStyle(
                 fontSize: titleFontSize,
                 fontWeight: FontWeight.w800,

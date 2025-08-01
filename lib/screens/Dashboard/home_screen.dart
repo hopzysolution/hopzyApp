@@ -62,6 +62,17 @@ class _HomeScreenState extends State<HomeScreen> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Container(
+          padding: EdgeInsets.only(top: 2, bottom: 5),
+          child: Text(
+            "Highly Trusted Buses",
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
         CustomSearchWidget(
           stations: context.read<HomeScreenBloc>().stations!,
           fromController: fromController,
@@ -112,6 +123,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 20), // Use this instead of Spacer
        
+        Container(
+          height: MediaQuery.of(context).size.height,
+          child: WebViewPagesScreenBody(
+            titleMain: "AI Trip Planner",
+            urlToLoad: "https://aitripplanner.hopzy.in/",
+            bodyTags: "",
+          ),
+        ),
       ],
     ),
   ),

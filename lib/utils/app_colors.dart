@@ -33,6 +33,7 @@ class AppColors {
   static const Color warning = Color(0xFFF59E0B); // Amber-500
   static const Color error = Color(0xFFEF4444); // Red-500
   static const Color info = Color(0xFF3B82F6); // Blue-500
+  static const Color appAssets = Color(0xFFFF8055);
 
   /// Light theme color scheme following Material Design 3
   static const ColorScheme lightColorScheme = ColorScheme(

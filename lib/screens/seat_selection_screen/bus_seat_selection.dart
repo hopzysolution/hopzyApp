@@ -136,7 +136,8 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
     final status = seatData['status'] as SeatStatus;
     final price = seatData['fare'] as int? ?? 0;
     final seatType = seatData['seatType'] as String? ?? 'seater';
-    final isSelected = selectedSeats.contains(seatNumber);
+    // final isSelected = selectedSeats.contains(seatNumber);
+    final isSelected = selectedSeats.any((seat) => seat.seatNo == seatNumber);
 
     double seatHeight = seatType.toLowerCase() == 'sleeper' ? 200.0 : 85.0;
 
@@ -181,12 +182,12 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                getSeatIcon(status),
-                color: Colors.white,
-                size: 16,
-              ),
-              const SizedBox(height: 2),
+              // Icon(
+              //   getSeatIcon(status),
+              //   color: Colors.white,
+              //   size: 16,
+              // ),
+              // const SizedBox(height: 2),
               if (_canSelectSeat(status))
                 Text(
                   '₹$price',
