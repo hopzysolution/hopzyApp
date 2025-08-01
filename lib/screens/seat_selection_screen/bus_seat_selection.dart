@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:ridebooking/models/bus_data.dart';
+import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 
 enum SeatStatus {
@@ -15,7 +16,7 @@ enum SeatStatus {
 
 class BusSeatSelectionScreen extends StatefulWidget {
   final BusData busData; // API data containing seat layout
-  final void Function(Set<String>) onSeatsSelected;
+  final void Function(Set<SeatModell>) onSeatsSelected;
 
   const BusSeatSelectionScreen(
       {Key? key, required this.busData, required this.onSeatsSelected})
@@ -26,7 +27,7 @@ class BusSeatSelectionScreen extends StatefulWidget {
 }
 
 class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
-  Set<String> selectedSeats = <String>{};
+  Set<SeatModell> selectedSeats = <SeatModell>{};
   List<List<Map<String, dynamic>?>> seatLayout = [];
   bool isUpperDeck = true;
 
@@ -145,8 +146,8 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
           if (_canSelectSeat(status)) {
             setState(() {
               isSelected
-                  ? selectedSeats.remove(seatNumber)
-                  : selectedSeats.add(seatNumber);
+                  ? selectedSeats.remove(SeatModell(seatNo: seatNumber, fare: price, available: status==true))
+                  : selectedSeats.add(SeatModell(seatNo: seatNumber, fare: price, available: status==true));
               print("Custom widget selected seats:--------->> $selectedSeats");
 
               widget.onSeatsSelected(selectedSeats);

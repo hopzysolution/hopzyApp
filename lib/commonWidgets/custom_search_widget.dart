@@ -129,13 +129,13 @@ final Function(StationDetails station) onToSelected;
                         const Icon(
                           Icons.calendar_today,
                           color: AppColors.primaryBlue,
-                          size: 20,
+                          size: 18,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           DateFormat('dd MMM yyyy').format(selectedDate),
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: AppColors.primaryBlue,
                           ),

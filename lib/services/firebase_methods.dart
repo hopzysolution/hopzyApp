@@ -38,8 +38,7 @@ class FirebaseMethods {
     await Session()
         .setFullName(userDetails.displayName!);
     await Session().setEmail(userDetails.email!);
-    await Session().setUserId(userDetails.uid);
-    await Session().setUserImage(userDetails.photoURL!);
+    // await Session().setUserId(userDetails.uid);9
     
     if (result != null) {
       Map<String, dynamic> userInfoMap = {

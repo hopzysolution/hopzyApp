@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:ridebooking/utils/session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
@@ -6,7 +9,7 @@ class ApiClient {
   factory ApiClient() => _instance;
   ApiClient._internal();
 
-  final Dio dio = Dio(BaseOptions(baseUrl: "http://localhost:8000/api"));
+  final Dio dio = Dio(BaseOptions(baseUrl: "http://10.0.2.2:8000/api"));
 
   void init() {
     dio.interceptors.add(InterceptorsWrapper(
@@ -76,10 +79,18 @@ class ApiClient {
       'email': email,
       'otp': otp,
     });
+    // if(response.toString().contains("status")){
+      Map<String, dynamic> parsed = json.decode(response.toString());
+      print("---===>>${parsed["data"]["accessToken"]}-----${parsed.toString()}-------->>>>${response.toString()}");
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('accessToken', response.data['accessToken']);
-    await prefs.setString('refreshToken', response.data['refreshToken']);
+
+    await Session().setToken(parsed["data"]["accessToken"]);
+
+    await prefs.setString('accessToken', parsed["data"]["accessToken"]);
+    await prefs.setString('refreshToken', parsed["data"]["refreshToken"]);
+    
+    
 
     return response;
   }

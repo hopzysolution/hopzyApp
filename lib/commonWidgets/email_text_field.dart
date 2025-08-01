@@ -1,9 +1,8 @@
-// widgets/common/mobile_number_field.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ridebooking/utils/app_colors.dart';// Adjust the path as needed
+import 'package:ridebooking/utils/app_colors.dart'; // Adjust the path if needed
 
-class MobileNumberField extends StatelessWidget {
+class EmailField extends StatelessWidget {
   final BuildContext context;
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -13,7 +12,7 @@ class MobileNumberField extends StatelessWidget {
   final void Function()? onSubmit;
   final void Function()? onTap;
 
-  const MobileNumberField({
+  const EmailField({
     super.key,
     required this.context,
     required this.controller,
@@ -49,12 +48,10 @@ class MobileNumberField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         focusNode: focusNode,
-        keyboardType: TextInputType.phone,
-        maxLength: 10,
+        keyboardType: TextInputType.emailAddress,
         textInputAction: TextInputAction.done,
         inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(10),
+          FilteringTextInputFormatter.deny(RegExp(r'\s')), // prevent spaces
         ],
         style: TextStyle(
           fontSize: fontSize,
@@ -63,7 +60,7 @@ class MobileNumberField extends StatelessWidget {
           letterSpacing: 0.5,
         ),
         decoration: InputDecoration(
-          hintText: 'Mobile Number',
+          hintText: 'Email Address',
           hintStyle: TextStyle(
             color: Colors.grey.shade500,
             fontWeight: FontWeight.w500,
@@ -93,25 +90,10 @@ class MobileNumberField extends StatelessWidget {
                 ),
               ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.phone_outlined,
-                  color:
-                      hasFocus ? AppColors.primaryBlue : Colors.grey.shade500,
-                  size: iconSize,
-                ),
-                SizedBox(width: isTablet ? 12 : (isSmallScreen ? 8 : 10)),
-                Text(
-                  "+91",
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
+            child: Icon(
+              Icons.email_outlined,
+              color: hasFocus ? AppColors.primaryBlue : Colors.grey.shade500,
+              size: iconSize,
             ),
           ),
           suffixIcon: hasValue
@@ -122,9 +104,7 @@ class MobileNumberField extends StatelessWidget {
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: Icon(
-                      isFormValid
-                          ? Icons.check_circle
-                          : Icons.error_outline,
+                      isFormValid ? Icons.check_circle : Icons.error_outline,
                       color: isFormValid
                           ? Colors.green.shade500
                           : Colors.orange.shade400,
@@ -134,7 +114,6 @@ class MobileNumberField extends StatelessWidget {
                   ),
                 )
               : null,
-          counterText: "",
           filled: true,
           fillColor: Colors.white,
           border: OutlineInputBorder(
@@ -158,15 +137,25 @@ class MobileNumberField extends StatelessWidget {
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
-            borderSide:
-                BorderSide(color: Colors.orange.shade400, width: 2.5),
+            borderSide: BorderSide(color: Colors.orange.shade400, width: 2.5),
           ),
           contentPadding: EdgeInsets.symmetric(
             vertical: verticalPadding,
             horizontal: isTablet ? 24 : (isSmallScreen ? 14 : 18),
           ),
         ),
-        // vm
+        validator: (value) {
+  if (value == null || value.trim().isEmpty) {
+  return 'Email is required';
+} else if (value.trim().length > 30) {
+  return 'Email must be under 30 characters';
+} else if (!RegExp(r"^[\w\.-]+@[\w\.-]+\.(com)$").hasMatch(value.trim())) {
+  return 'Email must be valid and end with .com';
+}
+return null;
+
+},
+
         onFieldSubmitted: (_) => onSubmit?.call(),
         onTap: () {
           HapticFeedback.selectionClick();

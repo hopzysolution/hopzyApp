@@ -8,8 +8,10 @@ import 'package:ridebooking/bloc/seat_layout_bloc/seat_layout_state.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/bus_data.dart';
 import 'package:ridebooking/models/seat_layout_data_model.dart';
+import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/screens/seat_selection_screen/bus_seat_selection.dart';
 import 'package:ridebooking/screens/seat_selection_screen/enhanced_seat.dart';
+import 'package:ridebooking/utils/app_const.dart';
 
 class SeatSelectionScreen extends StatefulWidget {
     final Availabletrips? trip;
@@ -31,7 +33,7 @@ enum SeatStatus {
 
 class _SeatSelectionScreenState extends State<SeatSelectionScreen>
     with TickerProviderStateMixin {
-  Set<String> selectedSeats = {};
+  Set<SeatModell> selectedSeats = {};
   DraggableScrollableController _bottomSheetController =
       DraggableScrollableController();
 
@@ -130,7 +132,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
                       ),
                     );
                   } else if (state is SeatLayoutLoaded) {
-                    return _buildSeatSelection(state.seatLayout!);
+                    return _buildSeatSelection(state.seatLayout!,state.busData!);
                   }
                   return Container();
                 },
@@ -144,7 +146,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
 //  BusData busData = 
 
 
-  Widget _buildSeatSelection(SeatLayoutDataModel seatLayoutData) {
+  Widget _buildSeatSelection(SeatLayoutDataModel seatLayoutData,BusData busData,) {
   
         return       Stack(
 
@@ -152,455 +154,10 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
           // Main content area - seat layout
           Positioned.fill(
               child: BusSeatSelectionScreen(
-            busData: BusData.fromJson({
-    "totalRows": 8,
-    "totalColumns": 5,
-    "seats": [
-      // Lower Deck
-      {
-        "seatNumber": "L1",
-        "row": 0,
-        "column": 0,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L2",
-        "row": 0,
-        "column": 1,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "female",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L3",
-        "row": 0,
-        "column": 3,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L4",
-        "row": 0,
-        "column": 4,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "male",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-
-      {
-        "seatNumber": "L5",
-        "row": 1,
-        "column": 0,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L6",
-        "row": 1,
-        "column": 1,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "female",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L7",
-        "row": 1,
-        "column": 3,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L8",
-        "row": 1,
-        "column": 4,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-
-      {
-        "seatNumber": "L9",
-        "row": 2,
-        "column": 0,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "male",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L10",
-        "row": 2,
-        "column": 1,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "female",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L11",
-        "row": 2,
-        "column": 3,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "male",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L12",
-        "row": 2,
-        "column": 4,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-
-      {
-        "seatNumber": "L13",
-        "row": 3,
-        "column": 0,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L14",
-        "row": 3,
-        "column": 1,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "female",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L15",
-        "row": 3,
-        "column": 3,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L16",
-        "row": 3,
-        "column": 4,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-
-      {
-        "seatNumber": "L17",
-        "row": 4,
-        "column": 0,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "male",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L18",
-        "row": 4,
-        "column": 1,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L19",
-        "row": 4,
-        "column": 3,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-      {
-        "seatNumber": "L20",
-        "row": 4,
-        "column": 4,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "lower",
-        "gender": "female",
-        "seatType": "sleeper",
-        "isAC": false,
-        "tax": 50
-      },
-
-      // Upper Deck
-      {
-        "seatNumber": "U1",
-        "row": 0,
-        "column": 0,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U2",
-        "row": 0,
-        "column": 1,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "female",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U3",
-        "row": 0,
-        "column": 3,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U4",
-        "row": 0,
-        "column": 4,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "male",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-
-      {
-        "seatNumber": "U5",
-        "row": 1,
-        "column": 0,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U6",
-        "row": 1,
-        "column": 1,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "female",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U7",
-        "row": 1,
-        "column": 3,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U8",
-        "row": 1,
-        "column": 4,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-
-      {
-        "seatNumber": "U9",
-        "row": 2,
-        "column": 0,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "female",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U10",
-        "row": 2,
-        "column": 1,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U11",
-        "row": 2,
-        "column": 3,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U12",
-        "row": 2,
-        "column": 4,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "male",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-
-      {
-        "seatNumber": "U13",
-        "row": 3,
-        "column": 0,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U14",
-        "row": 3,
-        "column": 1,
-        "status": "available",
-        "fare": int.parse(int.parse(widget.trip!.fare.toString()).toString()),
-        "berth": "upper",
-        "gender": "female",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U15",
-        "row": 3,
-        "column": 3,
-        "status": "available",
-        "fare": int.parse(int.parse(int.parse(int.parse(widget.trip!.fare.toString()).toString()).toString()).toString()),
-        "berth": "upper",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      },
-      {
-        "seatNumber": "U16",
-        "row": 3,
-        "column": 4,
-        "status": "available",
-        "fare": int.parse(int.parse(int.parse(widget.trip!.fare.toString()).toString()).toString()),
-        "berth": "upper",
-        "gender": "any",
-        "seatType": "sleeper",
-        "isAC": true,
-        "tax": 70
-      }
-    ]
-  }),
-            onSeatsSelected: (Set<String> finaSeat) {
+           
+            busData: busData,//AppConst.busdata,
+            
+            onSeatsSelected: (Set<SeatModell> finaSeat) {
               print(
                   "Parent received 0--abc--finaSeat------selected seats:--------->> $finaSeat");
               setState(() {
@@ -620,6 +177,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
             maxChildSize: 0.8, // 70% of screen
             builder: (BuildContext context, ScrollController scrollController) {
               return EnhancedBusInfoBottomSheet(
+
                 tripData: widget.trip,
                 busInfo: BusInfo(
                   busType: widget.trip?.bustype ?? "Sleeper",

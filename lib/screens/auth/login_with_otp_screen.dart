@@ -7,6 +7,7 @@ import 'package:ridebooking/bloc/loginWithOtpBloc/login_with_otp_event.dart';
 import 'package:ridebooking/bloc/loginWithOtpBloc/login_with_otp_state.dart';
 import 'package:ridebooking/Animations/animated_logo.dart';
 import 'package:ridebooking/commonWidgets/custom_action_button.dart';
+import 'package:ridebooking/commonWidgets/email_text_field.dart';
 import 'package:ridebooking/commonWidgets/mobile_number_field.dart';
 import 'package:ridebooking/screens/auth/welcom_widget.dart';
 import 'package:ridebooking/screens/demoscreen.dart';
@@ -294,7 +295,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
       ToastMessage().showSuccessToast(
         state.message ?? 'Verification successful',
       );
-      Navigator.pushReplacementNamed(context, Routes.userInfo);
+      Navigator.pushReplacementNamed(context, Routes.dashboard);
     } else if (state is OtpFailureState) {
       ToastMessage().showErrorToast(state.error);
     }
@@ -312,8 +313,8 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
           return Transform.scale(
             scale: _pulseAnimation.value,
             child: Container(
-              width: containerSize,
-              height: containerSize,
+              width: containerSize*1.4,
+              height: containerSize*1.4,
               padding: EdgeInsets.all(isTablet ? 32 : 24),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -384,7 +385,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
     return OtpVerification(
       mobileNumber: _mobileController.text,
       onCompleted: (code) {
-        context.read<LoginWithOtpBloc>().add(OnOtpVerification(otp: code));
+        context.read<LoginWithOtpBloc>().add(OnOtpVerification(otp: code,email:_mobileController.text ));
       },
     );
   }
@@ -520,10 +521,10 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                     _buildForm(isTablet, isSmallScreen, context),
                     SizedBox(height: isTablet ? 32 : (isSmallScreen ? 20 : 24)),
                   CustomActionButton(
-  onPressed: _isFormValid && !_isLoading ? () => _handleSendOtp(context) : null,
+  onPressed:  () => _handleSendOtp(context),//_isFormValid && !_isLoading ? : null,
   text: 'Send Verification Code',
   height: buttonHeight,
-  backgroundColor: _isFormValid && !_isLoading ? AppColors.primaryBlue : Colors.grey.shade300,
+  backgroundColor: AppColors.primaryBlue ,// _isFormValid && !_isLoading ?: Colors.grey.shade300,
   foregroundColor: _isFormValid && !_isLoading ? Colors.white : Colors.grey.shade500,
   borderColor: Colors.transparent,
   fontSize: fontSize,
@@ -609,8 +610,11 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
   Widget _buildForm(bool isTablet, bool isSmallScreen, BuildContext context) {
     return Form(
       key: _formKey,
+  autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
-        children: [MobileNumberField(controller:_mobileController ,focusNode:_focusNode ,isFormValid:_isFormValid ,isTablet:isTablet,isSmallScreen: isSmallScreen,context:context)],
+        children: [
+          
+          EmailField(controller:_mobileController ,focusNode:_focusNode ,isFormValid:_isFormValid ,isTablet:isTablet,isSmallScreen: isSmallScreen,context:context)],
       ),
     );
   }
@@ -679,23 +683,23 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
   }
 
   void _handleSendOtp(BuildContext context) {
-    Navigator.pushNamed(context, Routes.dashboard);
-    // if (_formKey.currentState?.validate() ?? false) {
-    //   FocusScope.of(context).unfocus();
-    //   HapticFeedback.lightImpact();
+    // Navigator.pushNamed(context, Routes.dashboard);
+    if (_formKey.currentState?.validate() ?? false) {
+      FocusScope.of(context).unfocus();
+      HapticFeedback.lightImpact();
 
-    //   setState(() => _isLoading = true);
-    //   _buttonController.forward().then((_) {
-    //     _buttonController.reverse();
-    //   });
+      setState(() => _isLoading = true);
+      _buttonController.forward().then((_) {
+        _buttonController.reverse();
+      });
 
-    //   context.read<LoginWithOtpBloc>().add(
-    //     OnLoginButtonPressed(mobileNumber: _mobileController.text),
-    //   );
-    // } else {
-    //   HapticFeedback.heavyImpact();
-    //   _showErrorSnackBar('Enter valid 10-digit number');
-    // }
+      context.read<LoginWithOtpBloc>().add(
+        OnLoginButtonPressed(mobileNumber: _mobileController.text),
+      );
+    } else {
+      HapticFeedback.heavyImpact();
+      _showErrorSnackBar('Enter valid 10-digit number');
+    }
   }
 
   void _navigateToSignUp() {

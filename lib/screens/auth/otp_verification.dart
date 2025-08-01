@@ -28,8 +28,8 @@ class _OtpVerificationState extends State<OtpVerification>
     with TickerProviderStateMixin {
   // Controllers and Focus Nodes
   final List<TextEditingController> _controllers =
-      List.generate(6, (index) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
+      List.generate(4, (index) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
   
   // Animation Controllers
   late AnimationController _slideController;
@@ -130,7 +130,7 @@ class _OtpVerificationState extends State<OtpVerification>
     if (value.isNotEmpty) {
       HapticFeedback.lightImpact();
       
-      if (index < 5) {
+      if (index < 3) {
         FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
       } else {
         FocusScope.of(context).unfocus();
@@ -151,7 +151,7 @@ class _OtpVerificationState extends State<OtpVerification>
 
   void _verifyOtp() {
     String finalInput = _controllers.map((e) => e.text).join();
-    if (finalInput.length == 6) {
+    if (finalInput.length == 4) {
       setState(() => _isVerifying = true);
       HapticFeedback.mediumImpact();
       
@@ -208,7 +208,7 @@ class _OtpVerificationState extends State<OtpVerification>
     // Focus first field
     _focusNodes[0].requestFocus();
     
-    ToastMessage().showToast("OTP resent to +91 ${widget.mobileNumber}");
+    ToastMessage().showToast("OTP resent to  ${widget.mobileNumber}");
   }
 
   void _changePhoneNumber() {
@@ -355,7 +355,7 @@ class _OtpVerificationState extends State<OtpVerification>
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(6, (index) => _buildOtpField(index)),
+                  children: List.generate(4, (index) => _buildOtpField(index)),
                 ),
                 if (_isVerifying) ...[
                   const SizedBox(height: 20),

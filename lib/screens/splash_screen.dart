@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ridebooking/screens/demoscreen.dart';
 import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
 import 'package:ridebooking/utils/route_generate.dart';
+import 'package:ridebooking/utils/session.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -49,12 +50,21 @@ class _SplashScreenState extends State<SplashScreen>
     // Navigate after zoom finishes
     _zoomController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        Navigator.pushReplacementNamed(
-          context,Routes.loginWithOtpScreen, // Navigate to Login with OTP screen
-        );
+       callNextPage();
       }
     });
   }
+
+callNextPage()async{
+   String token= await Session().getToken();
+   if(token.isEmpty)
+        Navigator.pushReplacementNamed(
+          context,Routes.dashboard, // Navigate to Login with OTP screen
+        );
+        else{
+          Navigator.pushReplacementNamed(context,Routes.dashboard);
+        }
+}
 
   @override
   void dispose() {

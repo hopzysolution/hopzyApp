@@ -7,10 +7,13 @@ import 'package:ridebooking/bloc/loginWithOtpBloc/login_with_otp_state.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/repository/ApiRepository.dart';
 import 'package:ridebooking/services/firebase_methods.dart';
+import 'package:ridebooking/utils/Api_client.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/session.dart';
 class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
   String? mobileNumber;
+
+   final api = ApiClient();
   LoginWithOtpBloc() : super(LoginWithOtpInitial()) {
 
 
@@ -40,21 +43,17 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
       // For example, call an API to verify the mobile number
       // and emit the appropriate state based on the response.
       emit(LoginWithOtpLoading());
-      var formData={
-    "countryCode": "+91",
-    "mobileNumber": mobileNumber,//"8659868689",
-    "newUser": false,
-    "astroUser": false,
-    "firstName": "",
-    "lastName": "",
-    "verificationId":"fe4c1e2a-60fb-4fa4-8c5e-eb2f4d33bff1",// await Session.getDeviceId()
-                   };
-  var response =await ApiRepository.postAPI(ApiConst.loginWithOtp, formData);
+      
+                  
+
+// Request OTP
+       var response  = await api.requestOtp(event.mobileNumber!);
+  // var response =await ApiRepository.postAPI(ApiConst.loginWithOtp, formData);
 
   Map<String, dynamic> parsed = json.decode(response.toString());
 
-      if (response.toString().contains("statusCode")) {
-        if (parsed['statusCode'] == 200) {
+      if (response.toString().contains("status")) {
+        if (parsed['status'] == 1) {
           // Handle successful login
           emit(LoginWithOtpSuccess(message: parsed['message']));
         } else {
@@ -78,18 +77,15 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
       // Handle OTP verification logic here
       print("Otp verification event triggered with OTP: ${event.otp}");
       emit(LoginWithOtpLoading());
-      var formData = {
-    "countryCode": "+91",
-    "mobileNumber": mobileNumber,
-    "verificationId":"fe4c1e2a-60fb-4fa4-8c5e-eb2f4d33bff1",// await Session.getDeviceId(),
-    "otpCode": event.otp, 
-  };
-      var response = await ApiRepository.postAPI(ApiConst.verifyOtp, formData);
-
+      
+      // var response = await ApiRepository.postAPI(ApiConst.verifyOtp, formData);
+      // Verify OTP
+        var response = await api.verifyOtp(event.email, event.otp);
+            print("Tokens saved------->>>: ${response.data}");
       Map<String, dynamic> parsed = json.decode(response.toString());
 
-      if (response.toString().contains("statusCode")) {
-        if (parsed['statusCode'] == 200) {
+      if (response.toString().contains("status")) {
+        if (parsed['status'] == 1) {
            print("--------  result  -->>>>>>>>>${response.toString()}");
           // Handle successful OTP verification
           emit(OtpVerifiedState(message: "User Logged In Successfully"));

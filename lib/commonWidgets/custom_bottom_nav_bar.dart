@@ -52,7 +52,7 @@ class CustomBottomNavBar extends StatelessWidget {
           color: AppColors.neutral100,
           activeColor: AppColors.neutral100,
           iconSize: 24,
-          tabBackgroundColor: AppColors.neutral100.withOpacity(0.4),
+          tabBackgroundColor: AppColors.neutral900,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           tabs: const [
             GButton(

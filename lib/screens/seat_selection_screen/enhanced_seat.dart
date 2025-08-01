@@ -1,9 +1,19 @@
 // Enhanced Bottom Sheet Widget
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:ridebooking/bloc/booking_bloc/booking_bloc.dart';
+import 'package:ridebooking/bloc/booking_bloc/booking_event.dart';
+import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/models/passenger_model.dart';
+import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/utils/session.dart';
+import 'package:ridebooking/utils/toast_messages.dart';
+import 'package:ridebooking/widgets/contact_details_card.dart';
+import 'package:ridebooking/widgets/passenger_card.dart';
+import 'package:ridebooking/widgets/traveler_info_card.dart';
 
 // You'll need to import your BusInfo class or define it here
 class BusInfo {
@@ -29,7 +39,7 @@ class BusInfo {
 class EnhancedBusInfoBottomSheet extends StatefulWidget {
   Availabletrips? tripData;
   final BusInfo busInfo;
-  final Set<String>? selectedSeats;
+  final Set<SeatModell>? selectedSeats;
   final ScrollController? scrollController;
 
    EnhancedBusInfoBottomSheet(
@@ -48,24 +58,48 @@ class _EnhancedBusInfoBottomSheetState
     extends State<EnhancedBusInfoBottomSheet> {
   int selectedTabIndex = 0;
   final List<String> tabs = [
-    'Rate & Reviews',
-    'Bus route',
     'Boarding',
     'Dropping',
-    'Passengers'
+    'Passengers',
+    'Rate & Reviews',
+    'Bus route'
   ];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+  //  saveSelectedSeat();
    
   }
+List<Availabletrips>? tripsData;
+  // saveSelectedSeat()async{
+  //   await Session.saveAllSelectedSeats(widget.selectedSeats!);
+  // tripsData =  await Session().getTripsFromSession();
+  // }
+
+  List<Passenger>? finalSelectedPassenger;
 
   @override
   Widget build(BuildContext context) {
     print("-------abc------selected--${widget.selectedSeats}");
-    return Container(
+      
+    return
+    
+    BlocProvider(create: (context)=>BookingBloc(widget.tripData!),
+    child: BlocListener<BookingBloc,BookingState>(
+      listener: (context,state){
+        if (state is BookingFailure) {
+               ToastMessage().showErrorToast(state.error);
+            }
+        // if(state is )
+      },
+      child: BlocBuilder<BookingBloc,BookingState>(
+        builder: (context,state){
+         if (state is BookingLoading) {
+             return  Center(child: CircularProgressIndicator());
+            }else{
+              return  Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -236,7 +270,7 @@ class _EnhancedBusInfoBottomSheetState
                   SizedBox(height: 20),
 
                   // Tab content
-                  _buildTabContent(),
+                  _buildTabContent(context,widget.tripData!),
 
                   SizedBox(height: 20),
                 ],
@@ -310,11 +344,18 @@ class _EnhancedBusInfoBottomSheetState
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                      BlocProvider.of<BookingBloc>(context).add(OnContinueButtonClick(
+                        bpoint: selectedBoardingPointId,
+                        noofseats: widget.selectedSeats!.length,
+                        selectedPassenger: finalSelectedPassenger,
+                        totalfare:( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt()
+                      ));
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       child: Text(
@@ -331,20 +372,31 @@ class _EnhancedBusInfoBottomSheetState
         ],
       ),
     );
+ 
+            }
+        }
+        
+        
+        ),
+      ),
+    );
+
+    
+ 
   }
 
-  Widget _buildTabContent() {
+  Widget _buildTabContent(BuildContext context, Availabletrips tripData) {
     switch (selectedTabIndex) {
       case 0: // Rate & Reviews
-        return _buildRateReviewsTab();
-      case 1: // Bus route
-        return _buildBusRouteTab();
-      case 2: // Boarding
         return _buildBoardingTab();
-      case 3: // Dropping
+      case 1: // Bus route
         return _buildDroppingTab();
+      case 2: // Boarding
+        return _buildPassengersTab(context,tripData);
+      case 3: // Dropping
+        return _buildBusRouteTab();
       case 4: // Passengers
-        return _buildPassengersTab();
+        return _buildRateReviewsTab();
       default:
         return Container();
     }
@@ -399,6 +451,7 @@ class _EnhancedBusInfoBottomSheetState
     );
   }
   String? _selectedBoardingPoint;
+  int? selectedBoardingPointId;
 Widget _buildBoardingTab() {
   final bpDetails = widget.tripData?.boardingpoint?.bpDetails;
 
@@ -416,6 +469,7 @@ Widget _buildBoardingTab() {
           : '--:--';
       final String stationName = detail.stnname ?? '';
       final String selectedValue = '$venue-$boardTime';
+      final int selsctedId=int.parse(detail.id.toString());
 
       return _buildBoardingPoint(
           venue,
@@ -426,6 +480,7 @@ Widget _buildBoardingTab() {
           onTap: () {
             setState(() {
               _selectedBoardingPoint = selectedValue;
+              selectedBoardingPointId= selsctedId;
             });
             print('Selected boarding point: $venue at $boardTime');
           },
@@ -493,8 +548,11 @@ Widget _buildBoardingTab() {
     );
   }
 
+//Droping point
 
-  Widget _buildDroppingTab() {
+String? _selectedDroppingPoint;
+
+Widget _buildDroppingTab() {
   final dpDetails = widget.tripData?.droppingpoint?.dpDetails;
 
   if (dpDetails == null || dpDetails.isEmpty) {
@@ -510,25 +568,134 @@ Widget _buildBoardingTab() {
           ? DateFormat('hh:mm a').format(DateTime.parse(detail.droptime.toString()))
           : '--:--';
       final String stationName = detail.stationname ?? '';
+      final String selectedValue = '$venue-$dropTime';
 
-      return _buildDroppingPoint(venue, dropTime, stationName);
+      return _buildDroppingPoint(
+        venue,
+        dropTime,
+        stationName,
+        groupValue: _selectedDroppingPoint,
+        selectedValue: selectedValue,
+        onTap: () {
+          setState(() {
+            _selectedDroppingPoint = selectedValue;
+          });
+          print('Selected dropping point: $venue at $dropTime');
+        },
+      );
     }),
   );
 }
 
+Widget _buildDroppingPoint(
+  String location,
+  String time,
+  String description, {
+  VoidCallback? onTap,
+  required String? groupValue,
+  required String selectedValue,
+}) {
+  return Container(
+    margin: EdgeInsets.only(bottom: 16),
+    padding: EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.grey[300]!),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        location,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            time,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            description,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+      leading: Radio<String>(
+        value: selectedValue,
+        groupValue: groupValue,
+        onChanged: (value) {
+          if (onTap != null) {
+            onTap();
+          }
+        },
+      ),
+      onTap: onTap,
+    ),
+  );
+}
 
-  Widget _buildPassengersTab() {
-    return Column(
-      children: [
-        _buildPassengerInfo('Total Seats', '40'),
-        _buildPassengerInfo('Available', '15'),
-        _buildPassengerInfo('Booked', '25'),
-        _buildPassengerInfo('Female Only', '8'),
-        _buildPassengerInfo('Male Only', '2'),
-      ],
+//   Widget _buildDroppingTab() {
+//   final dpDetails = widget.tripData?.droppingpoint?.dpDetails;
+
+//   if (dpDetails == null || dpDetails.isEmpty) {
+//     return const Center(child: Text("No dropping points available"));
+//   }
+
+//   return Column(
+//     children: List.generate(dpDetails.length, (int index) {
+//       final detail = dpDetails[index];
+
+//       final String venue = detail.venue ?? '';
+//       final String dropTime = detail.droptime != null
+//           ? DateFormat('hh:mm a').format(DateTime.parse(detail.droptime.toString()))
+//           : '--:--';
+//       final String stationName = detail.stationname ?? '';
+
+//       return _buildDroppingPoint(venue, dropTime, stationName);
+//     }),
+//   );
+// }
+
+
+  Widget _buildPassengersTab(BuildContext context,Availabletrips tripsData) {
+       return SingleChildScrollView(
+      // padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children:  [
+          TravelerInfoCard(
+            boardingInfo: "Mon, 5 Aug | 10:00 AM",
+            boardingPoint: "tripsData",
+            droppingInfo: "Mon, 5 Aug | 4:00 PM",
+            droppingPoint: "Indiranagar Metro",
+            seatCount: 8,
+            seatDetails: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8'],
+          ),
+          // SizedBox(height: 16),
+          // ContactDetailsCard(),
+          SizedBox(height: 16),
+          PassengerCard(selectedSeats:  widget.selectedSeats,
+          selectedPassengerss: (List<Passenger> finalPassengerList) {
+            finalSelectedPassenger=finalPassengerList;
+          },
+          ),
+        ],
+      ),
     );
   }
 
+ 
   Widget _buildHighlightItem(IconData icon, String text) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8),
@@ -679,47 +846,47 @@ Widget _buildBoardingTab() {
 //   );
 // }
 
-  Widget _buildDroppingPoint(String location, String time, String description, {VoidCallback? onTap}) {
-  return Container(
-    margin: EdgeInsets.only(bottom: 16),
-    padding: EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey[300]!),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(
-        location,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            time,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            description,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
-      ),
-      onTap: onTap,
-    ),
-  );
-}
+//   Widget _buildDroppingPoint(String location, String time, String description, {VoidCallback? onTap}) {
+//   return Container(
+//     margin: EdgeInsets.only(bottom: 16),
+//     padding: EdgeInsets.all(12),
+//     decoration: BoxDecoration(
+//       border: Border.all(color: Colors.grey[300]!),
+//       borderRadius: BorderRadius.circular(8),
+//     ),
+//     child: ListTile(
+//       contentPadding: EdgeInsets.zero,
+//       title: Text(
+//         location,
+//         style: TextStyle(
+//           fontSize: 14,
+//           fontWeight: FontWeight.w500,
+//         ),
+//       ),
+//       subtitle: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Text(
+//             time,
+//             style: TextStyle(
+//               fontSize: 12,
+//               color: Colors.red,
+//               fontWeight: FontWeight.bold,
+//             ),
+//           ),
+//           Text(
+//             description,
+//             style: TextStyle(
+//               fontSize: 12,
+//               color: Colors.grey[600],
+//             ),
+//           ),
+//         ],
+//       ),
+//       onTap: onTap,
+//     ),
+//   );
+// }
 
   Widget _buildPassengerInfo(String label, String value) {
     return Padding(

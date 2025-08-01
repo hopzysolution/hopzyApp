@@ -51,6 +51,7 @@ dependencies:
   dotted_line: ^3.2.3
   phosphor_flutter: ^2.1.0
   webview_flutter: ^4.13.0
+  razorpay_flutter: ^1.4.0
 
 dev_dependencies:
   flutter_test:

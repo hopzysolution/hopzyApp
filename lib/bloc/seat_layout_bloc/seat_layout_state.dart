@@ -1,12 +1,16 @@
+import 'package:ridebooking/models/bus_data.dart';
 import 'package:ridebooking/models/seat_layout_data_model.dart';
+import 'package:ridebooking/models/seat_modell.dart';
 
 abstract class SeatLayoutState {}
 class SeatLayoutInitial extends SeatLayoutState {}
 class SeatLayoutLoading extends SeatLayoutState {}
 class SeatLayoutLoaded extends SeatLayoutState {
   final SeatLayoutDataModel? seatLayout;
+  BusData? busData;
+  List<SeatModell>? seatModelList;
 
-  SeatLayoutLoaded({this.seatLayout});
+  SeatLayoutLoaded({this.seatLayout,this.busData,this.seatModelList});
 }
 class SeatLayoutFailure extends SeatLayoutState {
   final String error;

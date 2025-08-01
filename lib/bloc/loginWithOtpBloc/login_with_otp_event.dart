@@ -9,9 +9,10 @@ class OnLoginButtonPressed extends LoginWithOtpEvent {
 }
 
 class OnOtpVerification extends LoginWithOtpEvent {
+  String email;
   String otp;
 
-  OnOtpVerification({required this.otp});
+  OnOtpVerification({required this.otp,required this.email});
 }
 
 class OnSignWithGoogle extends LoginWithOtpEvent {
