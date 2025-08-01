@@ -32,14 +32,14 @@ BookingBloc(this.tripData) : super(BookingInitial()) {
 var formData = {
   "routeid": tripData.routeid,
   "tripid": tripData.tripid,
-  "bpoint": 522446,
-  "noofseats": 1,
+  "bpoint": bpoint,
+  "noofseats": noofseats,
   "mobileno": "8305933803",
   "email": "aadityagupta778@gmail.com",
-  "totalfare": 1050,
+  "totalfare": totalfare,
   "bookedat": DateFormat('yyyy-MM-dd').format(DateTime.now()),
   "seatInfo": {
-  "passengerInfo": selectedPassenger
+  "passengerInfo": selectedPassenger.map((p) => p.toJson()).toList()
   },
   "opid": "VGT"
 };

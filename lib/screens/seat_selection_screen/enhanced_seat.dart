@@ -9,6 +9,7 @@ import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
+import 'package:ridebooking/screens/razor_pay_page.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
 import 'package:ridebooking/widgets/contact_details_card.dart';
@@ -345,12 +346,13 @@ List<Availabletrips>? tripsData;
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                      BlocProvider.of<BookingBloc>(context).add(OnContinueButtonClick(
-                        bpoint: selectedBoardingPointId,
-                        noofseats: widget.selectedSeats!.length,
-                        selectedPassenger: finalSelectedPassenger,
-                        totalfare:( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt()
-                      ));
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>RazorpayPage()));
+                      // BlocProvider.of<BookingBloc>(context).add(OnContinueButtonClick(
+                      //   bpoint: selectedBoardingPointId,
+                      //   noofseats: widget.selectedSeats!.length,
+                      //   selectedPassenger: finalSelectedPassenger,
+                      //   totalfare:( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt()
+                      // ));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,

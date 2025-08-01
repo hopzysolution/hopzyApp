@@ -9,7 +9,7 @@ class ApiClient {
   factory ApiClient() => _instance;
   ApiClient._internal();
 
-  final Dio dio = Dio(BaseOptions(baseUrl: "http://10.0.2.2:8000/api"));
+  final Dio dio = Dio(BaseOptions(baseUrl: "https://prodapi.hopzy.in"));
 
   void init() {
     dio.interceptors.add(InterceptorsWrapper(

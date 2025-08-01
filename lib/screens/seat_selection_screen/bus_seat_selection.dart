@@ -38,6 +38,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
   }
 
   void _initializeSeatLayout() {
+    
     final seats = widget.busData.seats ?? [];
     final rows = widget.busData.totalRows ?? 10;
     final columns = widget.busData.totalColumns ?? 5;
@@ -147,8 +148,8 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
           if (_canSelectSeat(status)) {
             setState(() {
               isSelected
-                  ? selectedSeats.remove(SeatModell(seatNo: seatNumber, fare: price, available: status==true))
-                  : selectedSeats.add(SeatModell(seatNo: seatNumber, fare: price, available: status==true));
+                  ? selectedSeats.remove(SeatModell(seatNo: seatNumber, fare: price, available: status.name ))
+                  : selectedSeats.add(SeatModell(seatNo: seatNumber, fare: price, available: status.name));
               print("Custom widget selected seats:--------->> $selectedSeats");
 
               widget.onSeatsSelected(selectedSeats);

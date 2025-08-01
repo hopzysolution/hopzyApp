@@ -1,7 +1,7 @@
 class SeatModell {
   final String seatNo;
   final int fare;
-  final bool available;
+  final String available;
 
   SeatModell({
     required this.seatNo,
@@ -13,7 +13,7 @@ class SeatModell {
     return SeatModell(
       seatNo: json['seatNo'] ?? '',
       fare: json['fare'] ,
-      available: json['seatstatus'] == 'A', // Available if status is 'A'
+      available: json['seatstatus'] , // Available if status is 'A'
     );
   }
 

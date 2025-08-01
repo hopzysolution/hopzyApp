@@ -117,7 +117,7 @@ List<SeatModell>? seatModelList;
       return SeatModell(
         seatNo: seat.seatNo ?? '',
         fare: seat.fare ?? 0,
-        available: seat.seatstatus == 'A',
+        available: seat.seatstatus!,
       );
     }).toList();
 
@@ -128,53 +128,45 @@ List<SeatModell>? seatModelList;
     }
   }
 
-  BusData updatedBusData = BusData();
-  updateBusData(SeatLayoutDataModel seatLayoutDataModel) {
-    // Step 1: Existing static BusData
-    final BusData originalBusData = AppConst.busdata;
+  BusData? updatedBusData;
 
-      // seatLayoutDataModel = seatLayoutDataModel;
+updateBusData(SeatLayoutDataModel seatLayoutDataModel) {
+  final BusData originalBusData = AppConst.busdata;
+List<Seats> updatedSeats = seatModelList!.asMap().entries.map((entry) {
+  int index = entry.key;
+  SeatModell seat = entry.value;
 
-// Step 2: New seat data from SeatLayoutDataModel
-    List<SeatInfo> seatInfoList = seatLayoutDataModel.layout?.seatInfo ?? [];
+  Seats? original = (originalBusData.seats != null && index < originalBusData.seats!.length)
+      ? originalBusData.seats![index]
+      : null;
 
-// Step 3: Update only seatNumber, fare, and status
-    List<Seats> updatedSeats = originalBusData.seats?.map((busSeat) {
-          final matchingSeat = seatInfoList.firstWhere(
-            (info) => info.seatNo == busSeat.seatNumber,
-            orElse: () => SeatInfo(),
-          );
+  return Seats(
+    seatNumber: seat.seatNo,
+    fare: seat.fare,
+    status: seat.available=="A"?"Available":"",
+    row: original?.row ?? 0,
+    column: original?.column ?? 0,
+    berth: original?.berth ?? '',
+    gender: original?.gender ?? '',
+    seatType: original?.seatType ?? '',
+    isAC: original?.isAC ?? false,
+    tax: original?.tax ?? 0,
+  );
+}).toList();
 
-          return Seats(
-            seatNumber: matchingSeat.seatNo ?? busSeat.seatNumber,
-            fare: matchingSeat.fare ?? busSeat.fare,
-            status: matchingSeat.seatstatus ?? busSeat.status,
 
-            // Preserve original values for all others
-            row: busSeat.row,
-            column: busSeat.column,
-            berth: busSeat.berth,
-            gender: busSeat.gender,
-            seatType: busSeat.seatType,
-            isAC: busSeat.isAC,
-            tax: busSeat.tax,
-          );
-        }).toList() ??
-        [];
+  updatedBusData = BusData(
+    totalRows: originalBusData.totalRows,
+    totalColumns: originalBusData.totalColumns,
+    seats: updatedSeats,
+  );
 
-// Step 4: Create new BusData with updated seats
-    updatedBusData = BusData(
-      totalRows: originalBusData.totalRows,
-      totalColumns: originalBusData.totalColumns,
-      seats: updatedSeats,
-    );
-
-// ✅ Print to verify
-    for (var seat in updatedBusData.seats ?? []) {
-      print(
-          'SeatNo:-------->>>>> ${seat.seatNumber}, Fare: ${seat.fare}, Status: ${seat.status}');
-    }
+  // Print for verification
+  for (var seat in updatedBusData!.seats ?? []) {
+    print('=======>>SeatNo: ${seat.seatNumber}, Fare: ${seat.fare}, Status: ${seat.status}');
   }
+}
+
 
 
 }
