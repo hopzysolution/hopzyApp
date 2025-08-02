@@ -6,8 +6,8 @@ class BookingInitial extends BookingState {}
 class BookingLoading extends BookingState {}
 class BookingLoaded extends BookingState {
   // final List<StationDetails>? stations;
-
-  // BookingLoaded({this.stations});
+int? fare;
+  BookingLoaded({this.fare});
 }
 class BookingFailure extends BookingState {
   final String error;

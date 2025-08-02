@@ -13,6 +13,7 @@ import 'package:ridebooking/screens/razor_pay_page.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
 import 'package:ridebooking/widgets/contact_details_card.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ridebooking/widgets/passenger_card.dart';
 import 'package:ridebooking/widgets/traveler_info_card.dart';
 
@@ -66,13 +67,41 @@ class _EnhancedBusInfoBottomSheetState
     'Bus route'
   ];
 
+ late Razorpay _razorpay;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+  _razorpay = Razorpay();
+
+  _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+  _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+  _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   //  saveSelectedSeat();
    
   }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+  print("✅ Payment success: ${response.paymentId}");
+  
+
+  // 👉 Call your trip API or booking confirmation logic here
+
+
+  ToastMessage().showSuccessToast("Payment successful!");
+}
+
+void _handlePaymentError(PaymentFailureResponse response) {
+  print("❌ Payment failed: ${response.message}");
+  ToastMessage().showErrorToast("Payment failed. Please try again.");
+}
+
+void _handleExternalWallet(ExternalWalletResponse response) {
+  print("💼 External wallet selected: ${response.walletName}");
+}
+
+
+
 List<Availabletrips>? tripsData;
   // saveSelectedSeat()async{
   //   await Session.saveAllSelectedSeats(widget.selectedSeats!);
@@ -346,13 +375,13 @@ List<Availabletrips>? tripsData;
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>RazorpayPage()));
-                      // BlocProvider.of<BookingBloc>(context).add(OnContinueButtonClick(
-                      //   bpoint: selectedBoardingPointId,
-                      //   noofseats: widget.selectedSeats!.length,
-                      //   selectedPassenger: finalSelectedPassenger,
-                      //   totalfare:( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt()
-                      // ));
+                        // Navigator.push(context, MaterialPageRoute(builder: (context)=>RazorpayPage()));
+                      BlocProvider.of<BookingBloc>(context).add(OnContinueButtonClick(
+                        bpoint: selectedBoardingPointId,
+                        noofseats: widget.selectedSeats!.length,
+                        selectedPassenger: finalSelectedPassenger,
+                        totalfare:( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt()
+                      ));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
@@ -408,21 +437,7 @@ List<Availabletrips>? tripsData;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Text(
-        //   'Bus Highlights',
-        //   style: TextStyle(
-        //     fontSize: 16,
-        //     fontWeight: FontWeight.bold,
-        //     color: Colors.black87,
-        //   ),
-        // ),
-        // SizedBox(height: 16),
-        // _buildHighlightItem(Icons.wifi, 'Free WiFi'),
-        // _buildHighlightItem(Icons.ac_unit, 'AC'),
-        // _buildHighlightItem(Icons.charging_station, 'Charging Point'),
-        // _buildHighlightItem(Icons.water_drop, 'Water Bottle'),
-        // _buildHighlightItem(Icons.local_movies, 'Entertainment'),
-        // SizedBox(height: 20),
+       
         Text(
           'Customer Reviews',
           style: TextStyle(
@@ -806,89 +821,6 @@ Widget _buildDroppingPoint(
     );
   }
 
-//   Widget _buildBoardingPoint(String location, String time, String description, {VoidCallback? onTap}) {
-//   return Container(
-//     margin: EdgeInsets.only(bottom: 16),
-//     padding: EdgeInsets.all(12),
-//     decoration: BoxDecoration(
-//       border: Border.all(color: Colors.grey[300]!),
-//       borderRadius: BorderRadius.circular(8),
-//     ),
-//     child: ListTile(
-//       contentPadding: EdgeInsets.zero,
-//       title: Text(
-//         location,
-//         style: TextStyle(
-//           fontSize: 14,
-//           fontWeight: FontWeight.w500,
-//         ),
-//       ),
-//       subtitle: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Text(
-//             time,
-//             style: TextStyle(
-//               fontSize: 12,
-//               color: Colors.red,
-//               fontWeight: FontWeight.bold,
-//             ),
-//           ),
-//           Text(
-//             description,
-//             style: TextStyle(
-//               fontSize: 12,
-//               color: Colors.grey[600],
-//             ),
-//           ),
-//         ],
-//       ),
-//       onTap: onTap,
-//     ),
-//   );
-// }
-
-//   Widget _buildDroppingPoint(String location, String time, String description, {VoidCallback? onTap}) {
-//   return Container(
-//     margin: EdgeInsets.only(bottom: 16),
-//     padding: EdgeInsets.all(12),
-//     decoration: BoxDecoration(
-//       border: Border.all(color: Colors.grey[300]!),
-//       borderRadius: BorderRadius.circular(8),
-//     ),
-//     child: ListTile(
-//       contentPadding: EdgeInsets.zero,
-//       title: Text(
-//         location,
-//         style: TextStyle(
-//           fontSize: 14,
-//           fontWeight: FontWeight.w500,
-//         ),
-//       ),
-//       subtitle: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Text(
-//             time,
-//             style: TextStyle(
-//               fontSize: 12,
-//               color: Colors.red,
-//               fontWeight: FontWeight.bold,
-//             ),
-//           ),
-//           Text(
-//             description,
-//             style: TextStyle(
-//               fontSize: 12,
-//               color: Colors.grey[600],
-//             ),
-//           ),
-//         ],
-//       ),
-//       onTap: onTap,
-//     ),
-//   );
-// }
 
   Widget _buildPassengerInfo(String label, String value) {
     return Padding(
@@ -912,4 +844,9 @@ Widget _buildDroppingPoint(
       ),
     );
   }
+  @override
+void dispose() {
+  _razorpay.clear(); // Very important
+  super.dispose();
+}
 }

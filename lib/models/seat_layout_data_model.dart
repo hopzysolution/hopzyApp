@@ -204,7 +204,7 @@ class SeatInfo {
   String? position;
   String? row;
   String? col;
-  Null? gender;
+  String? gender;
   String? seattype;
   String? berth;
 
@@ -234,7 +234,7 @@ class SeatInfo {
     position = json['position'];
     row = json['row'];
     col = json['col'];
-    gender = json['gender'];
+    gender = json['gender']??"";
     seattype = json['seattype'];
     berth = json['berth'];
   }

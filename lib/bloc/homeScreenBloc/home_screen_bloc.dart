@@ -1,12 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_event.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_state.dart';
-import 'package:ridebooking/models/all_trip_data_model.dart' hide Availabletrips;
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/station_model.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/repository/ApiRepository.dart';
-import 'package:ridebooking/repository/ApiResponse.dart';
 import 'package:ridebooking/utils/session.dart';
 
 class HomeScreenBloc extends Bloc<HomeScreenEvent,HomeScreenState> {
@@ -53,7 +51,8 @@ List<Availabletrips> allTrips = [];
   List<Availabletrips> availableaatripsList=[];
 
   void getAvailableTrips(var formData) async {
-    emit(HomeScreenLoading());
+    
+    (HomeScreenLoading());
 
     try {
       var response = await ApiRepository.postAPI(ApiConst.getAvailableTrips,formData);

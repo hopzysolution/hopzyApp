@@ -114,9 +114,9 @@ class ApiRepository {
     }
   }
 
-  static Future<dynamic> postAPI(String apiName, var formData) async {
+  static Future<dynamic> postAPI(String apiName, var formData,{String? basurl2}) async {
     try {
-      String callUrl = ApiConst.baseUrl + apiName;
+      String callUrl =basurl2!=null?basurl2+apiName :ApiConst.baseUrl + apiName;
 
       
       String token = await Session().getToken();

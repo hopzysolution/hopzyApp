@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ridebooking/bloc/booking_bloc/booking_event.dart';
+import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -94,4 +97,81 @@ class ApiClient {
 
     return response;
   }
+
+   createOrder(int fare,String phoneNo,String email,  OnContinueButtonClick event,
+    Emitter<BookingState> emit,) async{
+
+     emit(BookingLoading());
+    try {
+//       final formData = {
+//   "amount": 1050,
+//   "phone": phoneNo,
+//   "email": email
+// };
+
+final response = await dio.post('/auth/verify-otp', data: {
+       "amount": 1050,
+  "phone": phoneNo,
+  "email": email
+    });
+
+      // final response = await ApiRepository.postAPI(ApiConst.createOrder, formData,basurl2: ApiConst.baseUrl2);
+
+      final data = response.data;
+
+       print("Response from createorder api $data");
+
+      // if (data["status"] != null && data["status"]["success"] == true) {
+      //   await Session().setPnr(data["BookingInfo"]["PNR"]);
+      //   emit(BookingLoaded());
+      // } else {
+      //   final message = data["status"]?["message"] ?? "Failed to load stations";
+      //   emit(BookingFailure(error: message));
+      // }
+    } catch (e) {
+      print("Error in getTentativeBooking: $e");
+      emit(BookingFailure(error: "Something went wrong. Please try again."));
+    }
+
+  }
+
+ paymentVerification(int fare,String phoneNo,String email,  OnContinueButtonClick event,
+    Emitter<BookingState> emit,) async{
+
+     emit(BookingLoading());
+    try {
+//       final formData = {
+//   "amount": 1050,
+//   "phone": phoneNo,
+//   "email": email
+// };
+
+final response = await dio.post('/auth/verify-otp', data: {
+       "amount": 1050,
+  "phone": phoneNo,
+  "email": email
+    });
+
+      // final response = await ApiRepository.postAPI(ApiConst.createOrder, formData,basurl2: ApiConst.baseUrl2);
+
+      final data = response.data;
+
+       print("Response from createorder api $data");
+
+      // if (data["status"] != null && data["status"]["success"] == true) {
+      //   await Session().setPnr(data["BookingInfo"]["PNR"]);
+      //   emit(BookingLoaded());
+      // } else {
+      //   final message = data["status"]?["message"] ?? "Failed to load stations";
+      //   emit(BookingFailure(error: message));
+      // }
+    } catch (e) {
+      print("Error in getTentativeBooking: $e");
+      emit(BookingFailure(error: "Something went wrong. Please try again."));
+    }
+
+  }
+
+
+
 }

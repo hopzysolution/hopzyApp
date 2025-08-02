@@ -5,6 +5,8 @@ class ApiConst {
   // Base URL for the API
   static String baseUrl = "https://ops.vaagaibus.com/api/";
 
+  static String baseUrl2="https://prodapi.hopzy.in/";
+
   static const String accessToken= "MTIxYzMyYzExNWMxMTNjOTljMTEyYzEwOGM5NWMxMDdjOTljMzJjNTZjMzJjOTVjMTEwYzEwM2M5NWMxMDFjOTljMTA4YzExNGMzMmM0MmMzMmMxMTBjOTVjMTEzYzExM2MxMTdjMTA5YzExMmM5OGMzMmM1NmMzMmM0N2M0OGM0OWMzMmMxMjNjNjQ";
 
   //login with otp
@@ -22,6 +24,8 @@ class ApiConst {
   static const String getSeatLayout= "GetSeatLayout/apiagent";
 
   static const String getTentativeBooking ="TentativeBooking/apiagent";
+
+  static const String createOrder = "public/create-order";
 
   
 
