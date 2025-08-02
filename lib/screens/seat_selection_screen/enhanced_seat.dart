@@ -10,6 +10,7 @@ import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/screens/razor_pay_page.dart';
+import 'package:ridebooking/utils/Api_client.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
 import 'package:ridebooking/widgets/contact_details_card.dart';
@@ -83,8 +84,8 @@ class _EnhancedBusInfoBottomSheetState
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
   print("✅ Payment success: ${response.paymentId}");
-  
 
+  ApiClient().paymentVerification(response);
   // 👉 Call your trip API or booking confirmation logic here
 
 
@@ -99,6 +100,32 @@ void _handlePaymentError(PaymentFailureResponse response) {
 void _handleExternalWallet(ExternalWalletResponse response) {
   print("💼 External wallet selected: ${response.walletName}");
 }
+
+void _openRazorpayCheckout(int totalFare) {
+  // var totalAmount = (widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())) * 100;
+
+  var options = {
+    'key': 'rzp_test_qTYlmJGXuKbQ98',
+    'amount': totalFare, // Amount in paisa
+    'name': 'VaagaiBus',
+    'description': 'Bus ticket booking',
+    'prefill': {
+      'contact': '8305933803',
+      'email': 'aadityagupta778@gmail.com',
+    },
+    'external': {
+      'wallets': ['paytm']
+    }
+  };
+
+  try {
+    _razorpay.open(options);
+  } catch (e) {
+    debugPrint('Error: $e');
+    ToastMessage().showErrorToast("Failed to open Razorpay");
+  }
+}
+
 
 
 
@@ -382,6 +409,7 @@ List<Availabletrips>? tripsData;
                         selectedPassenger: finalSelectedPassenger,
                         totalfare:( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt()
                       ));
+                      _openRazorpayCheckout(( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,

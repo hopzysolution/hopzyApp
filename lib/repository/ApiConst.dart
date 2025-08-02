@@ -13,7 +13,6 @@ class ApiConst {
   static const String loginWithOtp = " ";
 
   //verify otp
-  static const String verifyOtp = " ";
 
   static const String getStations = "GetStations/apiagent";
 
@@ -26,6 +25,14 @@ class ApiConst {
   static const String getTentativeBooking ="TentativeBooking/apiagent";
 
   static const String createOrder = "public/create-order";
+
+  static const String paymentVerification ="public/verify-payment";
+
+  static const String verifyOtp = "auth/verify-otp";
+
+  static const String requesOtp = "auth/request-otp";
+
+  static const String refreshTokenApi="auth/refresh-token";
 
   
 

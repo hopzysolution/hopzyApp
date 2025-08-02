@@ -84,6 +84,9 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
   BookingBloc(this.tripData) : super(BookingInitial()) {
     on<OnContinueButtonClick>(_onContinueButtonClick);
+
+    // on<OnPaymentVerification>((event, emit) => ApiClient().paymentVerification(event.response!, event, emit),);
+
   }
 
   // Refactored event handler (async!)
@@ -118,7 +121,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
        ApiClient().createOrder(event.totalfare!,"8305933803","aadityagupta778@gmail.com",event,emit);
         await Session().setPnr(data["BookingInfo"]["PNR"]);
         emit(BookingLoaded(fare:event.totalfare!));
-        
+
       } else {
         final message = data["status"]?["message"] ?? "Failed to load stations";
         emit(BookingFailure(error: message));

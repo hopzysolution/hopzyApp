@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_event.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
+import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,7 +14,7 @@ class ApiClient {
   factory ApiClient() => _instance;
   ApiClient._internal();
 
-  final Dio dio = Dio(BaseOptions(baseUrl: "https://prodapi.hopzy.in"));
+  final Dio dio = Dio(BaseOptions(baseUrl: "https://prodapi.hopzy.in/"));
 
   void init() {
     dio.interceptors.add(InterceptorsWrapper(
@@ -20,7 +22,7 @@ class ApiClient {
         final prefs = await SharedPreferences.getInstance();
         final token = prefs.getString('accessToken');
 
-        if (token != null && options.path != "/auth/refresh-token") {
+        if (token != null && options.path != ApiConst.refreshTokenApi) {
           options.headers['Authorization'] = 'Bearer $token';
         }
 
@@ -60,7 +62,7 @@ class ApiClient {
 
   Future<String?> _refreshAccessToken(String refreshToken) async {
     try {
-      final response = await dio.post('/auth/refresh-token', data: {
+      final response = await dio.post(ApiConst.refreshTokenApi, data: {
         'refreshToken': refreshToken,
       });
 
@@ -73,12 +75,12 @@ class ApiClient {
 
   // Request OTP
   Future<Response> requestOtp(String email) {
-    return dio.post('/auth/request-otp', data: {'email': email});
+    return dio.post(ApiConst.requesOtp, data: {'email': email});
   }
 
   // Verify OTP
   Future<Response> verifyOtp(String email, String otp) async {
-    final response = await dio.post('/auth/verify-otp', data: {
+    final response = await dio.post(ApiConst.verifyOtp, data: {
       'email': email,
       'otp': otp,
     });
@@ -109,7 +111,7 @@ class ApiClient {
 //   "email": email
 // };
 
-final response = await dio.post('/auth/verify-otp', data: {
+final response = await dio.post(ApiConst.createOrder, data: {
        "amount": 1050,
   "phone": phoneNo,
   "email": email
@@ -135,10 +137,9 @@ final response = await dio.post('/auth/verify-otp', data: {
 
   }
 
- paymentVerification(int fare,String phoneNo,String email,  OnContinueButtonClick event,
-    Emitter<BookingState> emit,) async{
+ paymentVerification(PaymentSuccessResponse paymentVerify) async{
 
-     emit(BookingLoading());
+    //  emit(BookingLoading());
     try {
 //       final formData = {
 //   "amount": 1050,
@@ -146,17 +147,19 @@ final response = await dio.post('/auth/verify-otp', data: {
 //   "email": email
 // };
 
-final response = await dio.post('/auth/verify-otp', data: {
-       "amount": 1050,
-  "phone": phoneNo,
-  "email": email
-    });
+final response = await dio.post(ApiConst.paymentVerification, data: {
+  "razorpay_order_id": paymentVerify.orderId,
+  "razorpay_payment_id": paymentVerify.paymentId,
+  "razorpay_signature": paymentVerify.signature,
+  "user_id": "user_id_here",
+  "amount": 500
+});
 
       // final response = await ApiRepository.postAPI(ApiConst.createOrder, formData,basurl2: ApiConst.baseUrl2);
 
       final data = response.data;
 
-       print("Response from createorder api $data");
+       print("Response from createorder api ----------->>>> $data");
 
       // if (data["status"] != null && data["status"]["success"] == true) {
       //   await Session().setPnr(data["BookingInfo"]["PNR"]);
@@ -167,7 +170,7 @@ final response = await dio.post('/auth/verify-otp', data: {
       // }
     } catch (e) {
       print("Error in getTentativeBooking: $e");
-      emit(BookingFailure(error: "Something went wrong. Please try again."));
+      // emit(BookingFailure(error: "Something went wrong. Please try again."));
     }
 
   }
