@@ -81,12 +81,14 @@ import 'package:ridebooking/utils/session.dart';
 
 class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final Availabletrips tripData;
+  final String paymentVerified;
 
-  BookingBloc(this.tripData) : super(BookingInitial()) {
+  BookingBloc(this.tripData,this.paymentVerified) : super(BookingInitial()) {
     on<OnContinueButtonClick>(_onContinueButtonClick);
 
     // on<OnPaymentVerification>((event, emit) => ApiClient().paymentVerification(event.response!, event, emit),);
-
+  paymentVerified=="Payment successful."?
+  confirmTentativeBooking():"";
   }
 
   // Refactored event handler (async!)
@@ -133,6 +135,36 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   }
 
 
+  Future confirmTentativeBooking() async{
+    String pnr = await Session().getPnr();
+    emit(BookingLoading());
+    try {
+      final formData = {
+        "pnr" :pnr,
+        "opid": "VGT"
+      };
+
+      final response = await ApiRepository.postAPI(ApiConst.confirmTentative, formData);
+
+      final data = response.data;
+
+      if (data["status"] != null && data["status"]["success"] == true) {
+      //  ApiClient().createOrder(event.totalfare!,"8305933803","aadityagupta778@gmail.com",event,emit);
+      //   await Session().setPnr(data["BookingInfo"]["PNR"]);
+
+        emit(BookingSuccess(success: "Booking Confirm"));
+
+      } else {
+        final message = data["status"]?["message"] ?? "Failed to load stations";
+        emit(BookingFailure(error: message));
+      }
+    } catch (e) {
+      print("Error in getTentativeBooking=exception=====>>>>: $e");
+      emit(BookingFailure(error: "Something went wrong. Please try again."));
+    }
+
+
+  }
 
 //   createOrder(int fare,String phoneNo,String email) async{
 

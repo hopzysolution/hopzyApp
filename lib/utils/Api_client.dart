@@ -2,9 +2,13 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_event.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
+import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/models/passenger_model.dart';
+import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -137,15 +141,9 @@ final response = await dio.post(ApiConst.createOrder, data: {
 
   }
 
- paymentVerification(PaymentSuccessResponse paymentVerify) async{
+Future paymentVerification(PaymentSuccessResponse paymentVerify) async{
 
-    //  emit(BookingLoading());
     try {
-//       final formData = {
-//   "amount": 1050,
-//   "phone": phoneNo,
-//   "email": email
-// };
 
 final response = await dio.post(ApiConst.paymentVerification, data: {
   "razorpay_order_id": paymentVerify.orderId,
@@ -155,22 +153,50 @@ final response = await dio.post(ApiConst.paymentVerification, data: {
   "amount": 500
 });
 
-      // final response = await ApiRepository.postAPI(ApiConst.createOrder, formData,basurl2: ApiConst.baseUrl2);
-
-      final data = response.data;
+        final data = response.data;
 
        print("Response from createorder api ----------->>>> $data");
 
-      // if (data["status"] != null && data["status"]["success"] == true) {
-      //   await Session().setPnr(data["BookingInfo"]["PNR"]);
-      //   emit(BookingLoaded());
-      // } else {
-      //   final message = data["status"]?["message"] ?? "Failed to load stations";
-      //   emit(BookingFailure(error: message));
-      // }
+       return data;
+
     } catch (e) {
       print("Error in getTentativeBooking: $e");
-      // emit(BookingFailure(error: "Something went wrong. Please try again."));
+    }
+
+  }
+
+
+  Future confirmBooking(Availabletrips tripData,String bpoint,Set<SeatModell> selectedSeats,List<Passenger> selectedPassenger,String pnr,String orderId) async{
+
+    try {
+
+final response = await dio.post(ApiConst.paymentVerification, data: {
+        "razorpay_order_id": orderId,
+        "pnr": pnr,
+        "routeid": tripData.routeid,
+        "tripid": tripData.tripid,
+        "bpoint": bpoint,
+        "noofseats": selectedSeats.length,
+        "mobileno": "8305933803",
+        "email": "aadityagupta778@gmail.com",
+        "totalfare": ( selectedSeats.length * int.parse(tripData.fare.toString())).toInt()+50,
+        "bookedat": DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        "seatInfo": {
+          "passengerInfo": selectedPassenger
+              .map((p) => p.toJson())
+              .toList()
+        },
+        "opid": "VGT"
+      });
+
+        final data = response.data;
+
+       print("Response from createorder api ----------->>>> $data");
+
+       return data;
+
+    } catch (e) {
+      print("Error in getTentativeBooking: $e");
     }
 
   }

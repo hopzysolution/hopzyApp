@@ -15,6 +15,12 @@ class BookingFailure extends BookingState {
   BookingFailure({required this.error});
 }
 
+class BookingSuccess extends BookingState {
+  final String success;
+
+  BookingSuccess({required this.success});
+}
+
 // class AllTripSuccessState extends BookingState {
 
 // final List<Availabletrips>? allTrips;

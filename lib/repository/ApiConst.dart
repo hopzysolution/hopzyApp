@@ -34,7 +34,9 @@ class ApiConst {
 
   static const String refreshTokenApi="auth/refresh-token";
 
-  
+  static const String confirmTentative = "ConfirmTentativeBooking/apiagent";
+
+  static const String confirmBooking = "public/confirm-booking";
 
 
 

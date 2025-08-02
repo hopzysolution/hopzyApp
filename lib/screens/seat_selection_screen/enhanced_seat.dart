@@ -81,12 +81,20 @@ class _EnhancedBusInfoBottomSheetState
   //  saveSelectedSeat();
    
   }
-
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+String paymentVerified="notVerified";
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async{
   print("✅ Payment success: ${response.paymentId}");
 
-  ApiClient().paymentVerification(response);
+  final respo = await ApiClient().paymentVerification(response);
   // 👉 Call your trip API or booking confirmation logic here
+  String pnr=await Session().getPnr();
+  if(respo["status"]==1){
+    ApiClient().confirmBooking(widget.tripData!,_selectedBoardingPoint!,widget.selectedSeats!,finalSelectedPassenger!,pnr,response.orderId!);
+    paymentVerified=respo["message"];
+setState(() {
+  
+});
+  }
 
 
   ToastMessage().showSuccessToast("Payment successful!");
@@ -143,13 +151,16 @@ List<Availabletrips>? tripsData;
       
     return
     
-    BlocProvider(create: (context)=>BookingBloc(widget.tripData!),
+    BlocProvider(create: (context)=>BookingBloc(widget.tripData!,paymentVerified),
     child: BlocListener<BookingBloc,BookingState>(
       listener: (context,state){
         if (state is BookingFailure) {
                ToastMessage().showErrorToast(state.error);
             }
-        // if(state is )
+
+        if(state is BookingSuccess){
+          ToastMessage().showSuccessToast(state.success);
+        }
       },
       child: BlocBuilder<BookingBloc,BookingState>(
         builder: (context,state){
