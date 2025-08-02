@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ridebooking/commonWidgets/custom_action_button.dart';
 import 'package:ridebooking/commonWidgets/station_search_view.dart';
-import 'package:ridebooking/models/station_model.dart';
+import 'package:ridebooking/models/all_trip_data_model.dart';
+// import 'package:ridebooking/models/station_model.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 
 class CustomSearchWidget extends StatelessWidget {
@@ -12,9 +13,11 @@ class CustomSearchWidget extends StatelessWidget {
   final VoidCallback onSearchTap;
   final DateTime selectedDate;
   final Function(DateTime) onDateSelected;
-  final List<StationDetails> stations;
-  final Function(StationDetails station) onFromSelected;
-final Function(StationDetails station) onToSelected;
+  final List<AllAvailabletrips> allAvailabletrips;
+  final Function(AllAvailabletrips station) onFromSelected;
+  final Function(AllAvailabletrips station) onToSelected;
+  final List<AllAvailabletrips> fromOptions;
+  final List<AllAvailabletrips> toOptions;
 
   const CustomSearchWidget({
     Key? key,
@@ -24,10 +27,11 @@ final Function(StationDetails station) onToSelected;
     required this.onSearchTap,
     required this.selectedDate,
     required this.onDateSelected,
-    required this.stations,
+    required this.allAvailabletrips,
     required this.onToSelected,
     required this.onFromSelected,
-
+    required this.fromOptions,
+    required this.toOptions,
   }) : super(key: key);
 
   @override
@@ -61,6 +65,7 @@ final Function(StationDetails station) onToSelected;
                     controller: fromController,
                     icon: Icons.directions_bus,
                     hintText: 'From',
+                    options: fromOptions,
                   ),
                   const Divider(height: 1, thickness: 1, color: Colors.grey),
                   _buildTextField(
@@ -68,6 +73,7 @@ final Function(StationDetails station) onToSelected;
                     controller: toController,
                     icon: Icons.directions_bus,
                     hintText: 'To',
+                    options: toOptions,
                   ),
                 ],
               ),
@@ -187,6 +193,7 @@ final Function(StationDetails station) onToSelected;
     required TextEditingController controller,
     required IconData icon,
     required String hintText,
+    required List<AllAvailabletrips>? options,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -221,26 +228,24 @@ final Function(StationDetails station) onToSelected;
                 ),
               ),
               onTap: () async {
-              final selectedStation = await Navigator.push<StationDetails>(
-  context,
-  MaterialPageRoute(
-    builder: (context) => StationSearchView(
-      stationList: stations,
-    ),
-  ),
-);
+                final selectedStation = await Navigator.push<AllAvailabletrips>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StationSearchView(
+                      allAvailabletripsList: options!
+                    ),
+                  ),
+                );
 
-if (selectedStation != null) {
-  controller.text = selectedStation.station ?? '';
-  // You can also store selectedStation.stationId wherever needed
-  if (hintText.toLowerCase() == 'from') {
-    onFromSelected(selectedStation);
-  } else if (hintText.toLowerCase() == 'to') {
-    onToSelected(selectedStation);
-  }
-
-}
-
+                if (selectedStation != null) {
+                  controller.text = selectedStation.srcname ?? '';
+                  // You can also store selectedStation.stationId wherever needed
+                  if (hintText.toLowerCase() == 'from') {
+                    onFromSelected(selectedStation);
+                  } else if (hintText.toLowerCase() == 'to') {
+                    onToSelected(selectedStation);
+                  }
+                }
               },
             ),
           ),

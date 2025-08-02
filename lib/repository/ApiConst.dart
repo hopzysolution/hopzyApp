@@ -14,11 +14,12 @@ class ApiConst {
 
   //verify otp
 
-  static const String getStations = "GetStations/apiagent";
+  // static const String getStations = "GetStations/apiagent";
 
   static const String getAllAvailableTrips = "GetAllAvailableTripsOnADay/apiagent";
 
   static const String getAvailableTrips = "GetAvailableTrips/apiagent";
+  static const String getAllAvailableTripsOnADay = "GetAllAvailableTripsOnADay/apiagent";
 
   static const String getSeatLayout= "GetSeatLayout/apiagent";
 

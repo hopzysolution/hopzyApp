@@ -219,7 +219,13 @@ class _PassengerCardState extends State<PassengerCard>
                 child: Column(
                   children: List.generate(passengers.length, (index) {
                     final p = passengers[index];
-                    final isSelected = selectedPassengers.contains(p);
+                    // final isSelected = selectedPassengers.contains(p);
+                    // Manually compare based on name, age, and gender
+                    final isSelected = selectedPassengers.any((selectedPassenger) {
+                      return selectedPassenger.name == p.name &&
+                            selectedPassenger.age == p.age &&
+                            selectedPassenger.gender == p.gender;
+                    });
                     return AnimatedContainer(
                       duration: Duration(milliseconds: 200 + (index * 50)),
                       margin: const EdgeInsets.only(bottom: 5),

@@ -1,6 +1,6 @@
 class AllTripDataModel {
   Status? status;
-  List<Availabletrips>? availabletrips;
+  List<AllAvailabletrips>? availabletrips;
 
   AllTripDataModel({this.status, this.availabletrips});
 
@@ -8,9 +8,9 @@ class AllTripDataModel {
     status =
         json['status'] != null ? new Status.fromJson(json['status']) : null;
     if (json['availabletrips'] != null) {
-      availabletrips = <Availabletrips>[];
+      availabletrips = <AllAvailabletrips>[];
       json['availabletrips'].forEach((v) {
-        availabletrips!.add(new Availabletrips.fromJson(v));
+        availabletrips!.add(new AllAvailabletrips.fromJson(v));
       });
     }
   }
@@ -82,7 +82,7 @@ class Profiledata {
   }
 }
 
-class Availabletrips {
+class AllAvailabletrips {
   String? operatorid;
   String? operatorname;
   String? routeid;
@@ -99,7 +99,7 @@ class Availabletrips {
   String? subtripid;
   String? tripidV2;
 
-  Availabletrips(
+  AllAvailabletrips(
       {this.operatorid,
       this.operatorname,
       this.routeid,
@@ -116,7 +116,7 @@ class Availabletrips {
       this.subtripid,
       this.tripidV2});
 
-  Availabletrips.fromJson(Map<String, dynamic> json) {
+  AllAvailabletrips.fromJson(Map<String, dynamic> json) {
     operatorid = json['operatorid'];
     operatorname = json['operatorname'];
     routeid = json['routeid'];

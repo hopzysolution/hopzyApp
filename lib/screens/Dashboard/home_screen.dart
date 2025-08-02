@@ -5,7 +5,8 @@ import 'package:ridebooking/bloc/homeScreenBloc/home_screen_bloc.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_event.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_state.dart';
 import 'package:ridebooking/commonWidgets/custom_search_widget.dart';
-import 'package:ridebooking/models/station_model.dart';
+import 'package:ridebooking/models/all_trip_data_model.dart';
+// import 'package:ridebooking/models/station_model.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
 import 'package:ridebooking/utils/webview_page_screen.dart';
@@ -23,8 +24,74 @@ class _HomeScreenState extends State<HomeScreen> {
 
   DateTime selectedDate = DateTime.now();
 
-  StationDetails? selectedFromStation;
-  StationDetails? selectedToStation;
+  AllAvailabletrips? selectedFromStation;
+  AllAvailabletrips? selectedToStation;
+
+  // List<AllAvailabletrips> getFromOptions2(List<AllAvailabletrips> trips) {
+  //   final Map<String, Map<String, String>> unique = {};
+  //   for (var trip in trips) {
+  //     if (!unique.containsKey(trip.srcid)) {
+  //       unique[trip.srcid ?? ""] = {
+  //         'label': trip.srcname ?? "",
+  //         'value': trip.srcid ?? "",
+  //         'routeid': trip.routeid ?? "",
+  //       };
+  //     }
+  //   }
+  //   return unique.values.toList();
+  // }
+
+  List<AllAvailabletrips> getFromOptions(List<AllAvailabletrips> trips) {
+    final Map<String, AllAvailabletrips> unique = {};
+    for (var trip in trips) {
+      if (trip.srcid != null && !unique.containsKey(trip.srcid)) {
+        unique[trip.srcid!] = AllAvailabletrips(
+          srcname: trip.srcname ?? "",
+          srcid: trip.srcid ?? "",
+          routeid: trip.routeid ?? "",
+        );
+      }
+    }
+    return unique.values.toList();
+  }
+
+  List<AllAvailabletrips> getToOptions({
+    required List<AllAvailabletrips> trips,
+    required AllAvailabletrips fromOption,
+  }) {
+    final Map<String, AllAvailabletrips> uniqueDstMap = {};
+
+    final filtered = trips.where(
+      (trip) =>
+          trip.routeid == fromOption.routeid && trip.srcid == fromOption.srcid,
+    );
+    for (var trip in filtered) {
+      // print("--------getToOptions===${trip.toJson()}");
+      if (trip.dstid != null && !uniqueDstMap.containsKey(trip.dstid)) {
+        uniqueDstMap[trip.dstid!] = AllAvailabletrips(
+          ////////////
+          dstname: trip.srcname ?? "", //check this
+          dstid: trip.srcid ?? "",
+          srcid: trip.dstid,
+          srcname: trip.dstname ?? "",
+          ////////////
+          arrivaltime: trip.arrivaltime,
+          availseats: trip.availseats,
+          bustype: trip.bustype,
+          depaturetime: trip.depaturetime,
+          operatorid: trip.operatorid,
+          operatorname: trip.operatorname,
+          routeid: trip.routeid,
+          subtripid: trip.subtripid,
+          totalseats: trip.totalseats,
+          tripid: trip.tripid,
+          tripidV2: trip.tripidV2,
+        );
+      }
+    }
+
+    return uniqueDstMap.values.toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +102,17 @@ class _HomeScreenState extends State<HomeScreen> {
           if (state is HomeScreenFailure) {
             ToastMessage().showErrorToast(state.error);
           }
-           if(state is AllTripSuccessState){
-              Navigator.pushNamed(context, Routes.availableTrips, arguments: state.allTrips);
-            }
+          if (state is AllTripSuccessState) {
+            Navigator.pushNamed(
+              context,
+              Routes.availableTrips,
+              arguments: state.allTrips,
+            );
+          }
         },
         child: BlocBuilder<HomeScreenBloc, HomeScreenState>(
           builder: (context, state) {
-            if (state is HomeScreenLoading) {
+            if (state is HomeScreenLoading || state is HomeScreenInitial) {
               return const Center(child: CircularProgressIndicator());
             }
 
@@ -54,88 +125,117 @@ class _HomeScreenState extends State<HomeScreen> {
             //   );
             // }
 
-           
+            final List<AllAvailabletrips> fromOptions = getFromOptions(
+              context.read<HomeScreenBloc>().allAvailabletrips!,
+            );
+
+            final List<AllAvailabletrips> toOptions =
+                selectedFromStation != null
+                ? getToOptions(
+                    trips: context.read<HomeScreenBloc>().allAvailabletrips!,
+                    fromOption: selectedFromStation!, //selectedFromOption!,
+                  )
+                : [];
 
             return SingleChildScrollView(
-  child: Container(
-    padding: const EdgeInsets.all(10.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: EdgeInsets.only(top: 2, bottom: 5),
-          child: Text(
-            "Highly Trusted Buses",
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        CustomSearchWidget(
-          stations: context.read<HomeScreenBloc>().stations!,
-          fromController: fromController,
-          toController: toController,
-          selectedDate: selectedDate,
-          onDateSelected: (DateTime date) {
-            setState(() {
-              selectedDate = date;
-            });
-          },
-          onSwapTap: () {
-            final tempText = fromController.text;
-            fromController.text = toController.text;
-            toController.text = tempText;
+              child: Container(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.only(top: 2, bottom: 5),
+                      child: Text(
+                        "Highly Trusted Buses",
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    CustomSearchWidget(
+                      fromOptions: fromOptions,
+                      toOptions: toOptions,
+                      allAvailabletrips: context
+                          .read<HomeScreenBloc>()
+                          .allAvailabletrips!,
+                      fromController: fromController,
+                      toController: toController,
+                      selectedDate: selectedDate,
+                      onDateSelected: (DateTime date) {
+                        setState(() {
+                          selectedDate = date;
+                        });
+                      },
+                      onSwapTap: () {
+                        final tempText = fromController.text;
+                        fromController.text = toController.text;
+                        toController.text = tempText;
 
-            final tempStation = selectedFromStation;
-            selectedFromStation = selectedToStation;
-            selectedToStation = tempStation;
+                        final tempStation = selectedFromStation;
+                        selectedFromStation = selectedToStation;
+                        selectedToStation = tempStation;
+                        setState(() {}); // Refresh dropdowns
 
-            print("Swapped stations: ${selectedFromStation?.station} and ${selectedToStation?.station}");
-          },
-          onSearchTap: () {
-            print("Searching for trips from ${fromController.text} to ${selectedToStation?.station} on $selectedDate");
+                        print(
+                          "Swapped stations: ${selectedFromStation?.srcname} and ${selectedToStation?.srcname}",
+                        );
+                      },
+                      onSearchTap: () {
+                        print(
+                          "Searching for trips from ${fromController.text} to ${selectedToStation?.srcname} on $selectedDate",
+                        );
+                        print(
+                          "Searching for trips from ${selectedFromStation!.srcid} to ${selectedToStation?.toJson()} on $selectedDate",
+                        );
 
-            if (selectedFromStation == null || selectedToStation == null) {
-              ToastMessage().showErrorToast("Please select both stations.");
-              return;
-            }
+                        if (selectedFromStation == null ||
+                            selectedToStation == null) {
+                          ToastMessage().showErrorToast(
+                            "Please select both stations.",
+                          );
+                          return;
+                        }
 
-            String dateSelected = DateFormat('yyyy-MM-dd').format(selectedDate);
+                        String dateSelected = DateFormat(
+                          'yyyy-MM-dd',
+                        ).format(selectedDate);
 
-            context.read<HomeScreenBloc>().add(
-              SearchAvailableTripsEvent(
-                from: selectedFromStation!.stationId!,
-                to: selectedToStation!.stationId!,
-                date: dateSelected,
+                        context.read<HomeScreenBloc>().add(
+                          SearchAvailableTripsEvent(
+                            from: selectedFromStation!.srcid!,
+                            to: selectedToStation!.srcid!,
+                            date: dateSelected,
+                          ),
+                        );
+                      },
+                      onFromSelected: (AllAvailabletrips allAvailabletrips) {
+                        selectedFromStation = allAvailabletrips;
+                        setState(() {}); // Rebuild so toOptions updates
+                      },
+                      onToSelected: (AllAvailabletrips station) {
+                        selectedToStation = station;
+                        print(
+                          "Selected To Station: ${selectedToStation?.srcname}",
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20), // Use this instead of Spacer
+
+                    Container(
+                      height: MediaQuery.of(context).size.height,
+                      child: WebViewPagesScreenBody(
+                        titleMain: "AI Trip Planner",
+                        urlToLoad: "https://aitripplanner.hopzy.in/",
+                        bodyTags: "",
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
-          },
-          onFromSelected: (StationDetails station) {
-            selectedFromStation = station;
-            print("Selected From Station: ${selectedFromStation?.station}");
-          },
-          onToSelected: (StationDetails station) {
-            selectedToStation = station;
-            print("Selected To Station: ${selectedToStation?.station}");
-          },
-        ),
-        const SizedBox(height: 20), // Use this instead of Spacer
-       
-        Container(
-          height: MediaQuery.of(context).size.height,
-          child: WebViewPagesScreenBody(
-            titleMain: "AI Trip Planner",
-            urlToLoad: "https://aitripplanner.hopzy.in/",
-            bodyTags: "",
-          ),
-        ),
-      ],
-    ),
-  ),
-);
-
           },
         ),
       ),
