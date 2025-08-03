@@ -113,7 +113,8 @@ void _openRazorpayCheckout(int totalFare) {
   // var totalAmount = (widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())) * 100;
 
   var options = {
-    'key': 'rzp_test_qTYlmJGXuKbQ98',
+    // VITE_RAZORPAY_KEY_ID=rzp_test_qTYImJGXuKbQ98
+    'key': 'rzp_test_qTYImJGXuKbQ98',
     'amount': totalFare, // Amount in paisa
     'name': 'VaagaiBus',
     'description': 'Bus ticket booking',
