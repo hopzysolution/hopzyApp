@@ -1,67 +1,67 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:ridebooking/services/database_methods.dart';
-import 'package:ridebooking/utils/route_generate.dart';
-import 'package:ridebooking/utils/session.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:flutter/material.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:ridebooking/services/database_methods.dart';
+// import 'package:ridebooking/utils/route_generate.dart';
+// import 'package:ridebooking/utils/session.dart';
 
-class FirebaseMethods {
-
-
-  final FirebaseAuth auth = FirebaseAuth.instance;
+// class FirebaseMethods {
 
 
-  signInWithGoogle(BuildContext context) async {
-    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-    final GoogleSignIn googleSignIn = GoogleSignIn();
+//   final FirebaseAuth auth = FirebaseAuth.instance;
 
-    final GoogleSignInAccount? googleSignInAccount =
-        await googleSignIn.signIn();
 
-    final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount!.authentication;
+//   signInWithGoogle(BuildContext context) async {
+//     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+//     final GoogleSignIn googleSignIn = GoogleSignIn();
 
-    final AuthCredential credential = GoogleAuthProvider.credential(
-        idToken: googleSignInAuthentication.idToken,
-        accessToken: googleSignInAuthentication.accessToken);
+//     final GoogleSignInAccount? googleSignInAccount =
+//         await googleSignIn.signIn();
 
-    UserCredential result = await firebaseAuth.signInWithCredential(credential);
+//     final GoogleSignInAuthentication googleSignInAuthentication =
+//         await googleSignInAccount!.authentication;
 
-    User? userDetails = result.user;
+//     final AuthCredential credential = GoogleAuthProvider.credential(
+//         idToken: googleSignInAuthentication.idToken,
+//         accessToken: googleSignInAuthentication.accessToken);
 
-    // String randomstr = randomAlphaNumeric(5);
+//     UserCredential result = await firebaseAuth.signInWithCredential(credential);
 
-    String userName = userDetails!.email!.replaceAll("@gmail.com", "");
-    String firstletter = userName.substring(0, 1).toUpperCase();
+//     User? userDetails = result.user;
 
-    // NotificationServices notificationServices = NotificationServices();
-    await Session()
-        .setFullName(userDetails.displayName!);
-    await Session().setEmail(userDetails.email!);
-    // await Session().setUserId(userDetails.uid);9
+//     // String randomstr = randomAlphaNumeric(5);
+
+//     String userName = userDetails!.email!.replaceAll("@gmail.com", "");
+//     String firstletter = userName.substring(0, 1).toUpperCase();
+
+//     // NotificationServices notificationServices = NotificationServices();
+//     await Session()
+//         .setFullName(userDetails.displayName!);
+//     await Session().setEmail(userDetails.email!);
+//     // await Session().setUserId(userDetails.uid);9
     
-    if (result != null) {
-      Map<String, dynamic> userInfoMap = {
-        "Name": userDetails!.displayName,
-        "Email": userDetails!.email,
-        "Image": userDetails.photoURL,
-        "Id": userDetails.uid,
-        "username": userName.toUpperCase(),
-        "SearchKey": firstletter,
-      };
+//     if (result != null) {
+//       Map<String, dynamic> userInfoMap = {
+//         "Name": userDetails!.displayName,
+//         "Email": userDetails!.email,
+//         "Image": userDetails.photoURL,
+//         "Id": userDetails.uid,
+//         "username": userName.toUpperCase(),
+//         "SearchKey": firstletter,
+//       };
 
-      await DatabaseMethods().addUser(userInfoMap, userDetails.uid);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.green,
-          content: Text(
-            "User registered successfully",
-            style: TextStyle(
-                fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
-          )));
+//       await DatabaseMethods().addUser(userInfoMap, userDetails.uid);
+//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+//           backgroundColor: Colors.green,
+//           content: Text(
+//             "User registered successfully",
+//             style: TextStyle(
+//                 fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
+//           )));
 
-      Navigator.pushReplacementNamed(context, Routes.homeScreen);
-    }
-  }
+//       Navigator.pushReplacementNamed(context, Routes.homeScreen);
+//     }
+//   }
 
 
-}
+// }

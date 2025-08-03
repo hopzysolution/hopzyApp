@@ -17,20 +17,20 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
   LoginWithOtpBloc() : super(LoginWithOtpInitial()) {
 
 
-      on<OnSignWithGoogle>((event, State) async {
-      emit(LoginWithOtpInitial());
-      Session preferenceHelper = Session();
-      String? name = await preferenceHelper.getFullName();
-      if (name == null || name.isEmpty) {
-        try {
-          FirebaseMethods().signInWithGoogle(event.context);
-        } catch (e) {
-          print("Exception in signInWithGoogle ----> ${e}");
-        }
-      } else {
-        Navigator.pushReplacementNamed(event.context, Routes.homeScreen);
-      }
-    });
+    //   on<OnSignWithGoogle>((event, State) async {
+    //   emit(LoginWithOtpInitial());
+    //   Session preferenceHelper = Session();
+    //   String? name = await preferenceHelper.getFullName();
+    //   if (name == null || name.isEmpty) {
+    //     try {
+    //       FirebaseMethods().signInWithGoogle(event.context);
+    //     } catch (e) {
+    //       print("Exception in signInWithGoogle ----> ${e}");
+    //     }
+    //   } else {
+    //     Navigator.pushReplacementNamed(event.context, Routes.homeScreen);
+    //   }
+    // });
 
 
 

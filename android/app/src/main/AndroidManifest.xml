@@ -14,7 +14,6 @@ git
         android:name="${applicationName}"
         android:label="ridebooking"
         android:icon="@mipmap/launcher_icon"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/LaunchTheme">
 
         <activity

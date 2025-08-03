@@ -420,7 +420,7 @@ List<Availabletrips>? tripsData;
                         selectedPassenger: finalSelectedPassenger,
                         totalfare:( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt()
                       ));
-                      _openRazorpayCheckout(( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt());
+                      _openRazorpayCheckout(1000);//( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,

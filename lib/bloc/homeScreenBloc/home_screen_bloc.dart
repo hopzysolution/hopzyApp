@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_event.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_state.dart';
 import 'package:ridebooking/models/all_trip_data_model.dart';
@@ -85,7 +86,7 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     emit(HomeScreenLoading());
 
     try {
-      var formData = {"tripdate": "2025-08-03", "opid": "VGT"};
+      var formData = {"tripdate": DateFormat('yyyy-MM-dd').format(DateTime.now()), "opid": "VGT"};
       var response = await ApiRepository.postAPI(
         ApiConst.getAllAvailableTripsOnADay,
         formData,
