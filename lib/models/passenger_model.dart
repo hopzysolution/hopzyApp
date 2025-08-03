@@ -13,7 +13,7 @@ class Passenger {
       this.fare});
 
   Map<String, dynamic> toJson() => {
-        'name': name,
+        'Name': name,
         'age': age,
         'gender': gender,
         'seatNo': seatNo,
@@ -22,7 +22,7 @@ class Passenger {
 
   factory Passenger.fromJson(Map<String, dynamic> json) {
     return Passenger(
-      name: json['name'],
+      name: json['Name'],
       age: json['age'],
       gender: json['gender'],
       seatNo: json['seatNo'],

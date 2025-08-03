@@ -25,19 +25,17 @@ class ApiConst {
 
   static const String getTentativeBooking ="TentativeBooking/apiagent";
 
-  static const String createOrder = "public/create-order";
 
-  static const String paymentVerification ="public/verify-payment";
+  static const String createOrder = "api/public/create-order";
+  static const String paymentVerification ="api/public/verify-payment";
+  static const String verifyOtp = "api/auth/verify-otp";
+  static const String requesOtp = "api/auth/request-otp";
+  static const String refreshTokenApi="api/auth/refresh-token";
+  static const String confirmBooking = "api/public/confirm-booking";
 
-  static const String verifyOtp = "auth/verify-otp";
-
-  static const String requesOtp = "auth/request-otp";
-
-  static const String refreshTokenApi="auth/refresh-token";
 
   static const String confirmTentative = "ConfirmTentativeBooking/apiagent";
 
-  static const String confirmBooking = "public/confirm-booking";
 
 
 

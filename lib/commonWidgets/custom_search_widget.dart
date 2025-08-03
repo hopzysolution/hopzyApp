@@ -5,6 +5,8 @@ import 'package:ridebooking/commonWidgets/station_search_view.dart';
 import 'package:ridebooking/models/all_trip_data_model.dart';
 // import 'package:ridebooking/models/station_model.dart';
 import 'package:ridebooking/utils/app_colors.dart';
+import 'package:ridebooking/globels.dart' as globals;
+import '../../utils/utils.dart';
 
 class CustomSearchWidget extends StatelessWidget {
   final TextEditingController fromController;
@@ -115,6 +117,8 @@ class CustomSearchWidget extends StatelessWidget {
                       lastDate: DateTime.now().add(const Duration(days: 30)),
                     );
                     if (picked != null) {
+                      final DateFormat formatter = DateFormat('dd-MM-yyyy');
+                      globals.selectedDate = formatter.format(picked); // String now
                       onDateSelected(
                         picked,
                       ); // <-- this notifies the parent to update
@@ -159,7 +163,10 @@ class CustomSearchWidget extends StatelessWidget {
                   borderColor: AppColors.primaryBlue,
                   backgroundColor: Colors.white,
                   textColor: AppColors.neutral900,
-                  onPressed: () => onDateSelected(DateTime.now()),
+                  onPressed: () {
+                    globals.selectedDate = Utils.todaysDate();
+                    onDateSelected(DateTime.now());
+                  },
                   text: "Today",
                 ),
               ),
@@ -169,8 +176,10 @@ class CustomSearchWidget extends StatelessWidget {
                 flex: 1,
                 child: CustomActionButton(
                   backgroundColor: AppColors.primaryBlue,
-                  onPressed: () =>
-                      onDateSelected(DateTime.now().add(Duration(days: 1))),
+                  onPressed: () {
+                    globals.selectedDate = Utils.futureDate();
+                    onDateSelected(DateTime.now().add(Duration(days: 1)));
+                  },
                   text: "Tomorrow",
                 ),
               ),
@@ -231,9 +240,8 @@ class CustomSearchWidget extends StatelessWidget {
                 final selectedStation = await Navigator.push<AllAvailabletrips>(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => StationSearchView(
-                      allAvailabletripsList: options!
-                    ),
+                    builder: (context) =>
+                        StationSearchView(allAvailabletripsList: options!),
                   ),
                 );
 

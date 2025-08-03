@@ -12,6 +12,7 @@ import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ridebooking/globels.dart' as globals;
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
@@ -107,6 +108,8 @@ class ApiClient {
    createOrder(int fare,String phoneNo,String email,  OnContinueButtonClick event,
     Emitter<BookingState> emit,) async{
 
+        print('---abc----1--create order inside call');
+
      emit(BookingLoading());
     try {
 //       final formData = {
@@ -120,10 +123,12 @@ final response = await dio.post(ApiConst.createOrder, data: {
   "phone": phoneNo,
   "email": email
     });
+        print('---abc---2---create order inside call');
 
       // final response = await ApiRepository.postAPI(ApiConst.createOrder, formData,basurl2: ApiConst.baseUrl2);
 
       final data = response.data;
+        print('---abc------create order inside call');
 
        print("Response from createorder api $data");
 
@@ -180,7 +185,7 @@ final response = await dio.post(ApiConst.paymentVerification, data: {
         "mobileno": "8305933803",
         "email": "aadityagupta778@gmail.com",
         "totalfare": ( selectedSeats.length * int.parse(tripData.fare.toString())).toInt()+50,
-        "bookedat": DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        "bookedat": globals.selectedDate, //DateFormat('yyyy-MM-dd').format(DateTime.now()),
         "seatInfo": {
           "passengerInfo": selectedPassenger
               .map((p) => p.toJson())

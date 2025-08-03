@@ -115,7 +115,7 @@ void _openRazorpayCheckout(int totalFare) {
   var options = {
     // VITE_RAZORPAY_KEY_ID=rzp_test_qTYImJGXuKbQ98
     'key': 'rzp_test_qTYImJGXuKbQ98',
-    'amount': totalFare, // Amount in paisa
+    'amount': (totalFare+50) * 100, // Amount in paisa
     'name': 'VaagaiBus',
     'description': 'Bus ticket booking',
     'prefill': {
@@ -161,6 +161,9 @@ List<Availabletrips>? tripsData;
 
         if(state is BookingSuccess){
           ToastMessage().showSuccessToast(state.success);
+        }
+        if (state is BookingLoaded) {
+          ToastMessage().showSuccessToast("Booking Confirmed");//---abc--
         }
       },
       child: BlocBuilder<BookingBloc,BookingState>(

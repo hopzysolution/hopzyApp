@@ -8,6 +8,7 @@ import 'package:ridebooking/models/station_model.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/repository/ApiRepository.dart';
 import 'package:ridebooking/utils/session.dart';
+import 'package:ridebooking/globels.dart' as globals;
 
 class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
   List<AllAvailabletrips>? allAvailabletrips;
@@ -19,7 +20,7 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       var formData = {
         "src": event.from,
         "dst": event.to,
-        "tripdate": event.date,
+        "tripdate": globals.selectedDate, //event.date,
         "opid": "VGT",
       };
 
@@ -86,7 +87,12 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     emit(HomeScreenLoading());
 
     try {
-      var formData = {"tripdate": DateFormat('yyyy-MM-dd').format(DateTime.now()), "opid": "VGT"};
+      // var formData = {"tripdate": DateFormat('yyyy-MM-dd').format(DateTime.now()), "opid": "VGT"};
+      var formData = {
+        "tripdate": globals.selectedDate,
+        "opid": "VGT",
+      };
+
       var response = await ApiRepository.postAPI(
         ApiConst.getAllAvailableTripsOnADay,
         formData,

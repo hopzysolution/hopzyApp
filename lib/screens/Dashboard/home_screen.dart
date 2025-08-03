@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController fromController = TextEditingController();
   final TextEditingController toController = TextEditingController();
 
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate = DateTime.now().add(Duration(days: 1)); //DateTime.now();
 
   AllAvailabletrips? selectedFromStation;
   AllAvailabletrips? selectedToStation;
