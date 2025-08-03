@@ -191,12 +191,12 @@ final response = await dio.post(ApiConst.paymentVerification, data: {
 
         final data = response.data;
 
-       print("Response from createorder api ----------->>>> $data");
+       print("Response from confirmbooking api ----------->>>> $data");
 
        return data;
 
     } catch (e) {
-      print("Error in getTentativeBooking: $e");
+      print("Error in confirmTentativeBooking: $e");
     }
 
   }

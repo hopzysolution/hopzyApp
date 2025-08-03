@@ -3,7 +3,7 @@ class Passenger {
   final int age;
   final String gender;
   final String? seatNo;
-  final String? fare;
+  final int? fare;
 
   Passenger(
       {required this.name,

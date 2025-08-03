@@ -107,11 +107,13 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         "email": "aadityagupta778@gmail.com",
         "totalfare": event.totalfare!+50,
         "bookedat": DateFormat('yyyy-MM-dd').format(DateTime.now()),
-        "seatInfo": {
-          "passengerInfo": event.selectedPassenger!
-              .map((p) => p.toJson())
-              .toList()
-        },
+       "seatInfo": {
+  "passengerInfo": event.selectedPassenger!
+      .map((p) => p.toJson()
+        ..update('fare', (value) => (value ?? 0) + 50))
+      .toList(),
+},
+
         "opid": "VGT"
       };
 

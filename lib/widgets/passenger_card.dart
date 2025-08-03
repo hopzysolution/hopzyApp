@@ -269,7 +269,7 @@ class _PassengerCardState extends State<PassengerCard>
                                   age: p.age,
                                   gender: p.gender,
                                   seatNo: seatModell!.seatNo,
-                                  fare: seatModell.fare.toString(),
+                                  fare: seatModell.fare,
                                 );
 
                                 selectedPassengers.add(psn);
@@ -297,7 +297,7 @@ class _PassengerCardState extends State<PassengerCard>
                                           age: p.age,
                                           gender: p.gender,
                                           seatNo: seatModell!.seatNo,
-                                          fare: seatModell.fare.toString(),
+                                          fare: seatModell.fare,
                                         );
 
                                         selectedPassengers.add(psn);
