@@ -16,3 +16,4 @@ class OnPaymentVerification extends BookingEvent{
   PaymentSuccessResponse? response;
   OnPaymentVerification({this.response});
 }
+

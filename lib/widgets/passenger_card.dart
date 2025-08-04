@@ -350,9 +350,9 @@ class _PassengerCardState extends State<PassengerCard>
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(
-                                              color: p.gender == 'Male'
+                                              color: p.gender == 'male'
                                                   ? Colors.cyan.shade50
-                                                  : p.gender == 'Female'
+                                                  : p.gender == 'female'
                                                       ? Colors.pink.shade50
                                                       : Colors.purple.shade50,
                                               borderRadius:
@@ -362,15 +362,15 @@ class _PassengerCardState extends State<PassengerCard>
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 Icon(
-                                                  p.gender == 'Male'
+                                                  p.gender == 'male'
                                                       ? Icons.male
-                                                      : p.gender == 'Female'
+                                                      : p.gender == 'female'
                                                           ? Icons.female
                                                           : Icons.person,
                                                   size: 14,
-                                                  color: p.gender == 'Male'
+                                                  color: p.gender == 'male'
                                                       ? Colors.cyan.shade700
-                                                      : p.gender == 'Female'
+                                                      : p.gender == 'female'
                                                           ? Colors.pink.shade700
                                                           : Colors
                                                               .purple.shade700,
@@ -380,9 +380,9 @@ class _PassengerCardState extends State<PassengerCard>
                                                   p.gender,
                                                   style: TextStyle(
                                                     fontSize: 12,
-                                                    color: p.gender == 'Male'
+                                                    color: p.gender == 'male'
                                                         ? Colors.cyan.shade700
-                                                        : p.gender == 'Female'
+                                                        : p.gender == 'female'
                                                             ? Colors
                                                                 .pink.shade700
                                                             : Colors.purple
@@ -436,7 +436,7 @@ class _AddPassengerFormState extends State<_AddPassengerForm>
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final ageController = TextEditingController();
-  String gender = 'Male';
+  String gender = 'male';
   late AnimationController _slideController;
   late Animation<Offset> _slideAnimation;
 
@@ -594,32 +594,32 @@ class _AddPassengerFormState extends State<_AddPassengerForm>
                   value: gender,
                   items: [
                     DropdownMenuItem(
-                      value: 'Male',
+                      value: 'male',
                       child: Row(
                         children: const [
                           // Icon(Icons.male, color: Colors.cyan),
                           SizedBox(width: 8),
-                          Text('Male'),
+                          Text('male'),
                         ],
                       ),
                     ),
                     DropdownMenuItem(
-                      value: 'Female',
+                      value: 'female',
                       child: Row(
                         children: const [
                           // Icon(Icons.female, color: Colors.pink),
                           SizedBox(width: 8),
-                          Text('Female'),
+                          Text('female'),
                         ],
                       ),
                     ),
                     DropdownMenuItem(
-                      value: 'Other',
+                      value: 'other',
                       child: Row(
                         children: const [
                           // Icon(Icons.person, color: Colors.purple),
                           SizedBox(width: 8),
-                          Text('Other'),
+                          Text('other'),
                         ],
                       ),
                     ),
@@ -632,14 +632,14 @@ class _AddPassengerFormState extends State<_AddPassengerForm>
                   decoration: InputDecoration(
                     labelText: 'Gender',
                     prefixIcon: Icon(
-                      gender == 'Male'
+                      gender == 'male'
                           ? Icons.male
-                          : gender == 'Female'
+                          : gender == 'female'
                               ? Icons.female
                               : Icons.person,
-                      color: gender == 'Male'
+                      color: gender == 'male'
                           ? Colors.cyan
-                          : gender == 'Female'
+                          : gender == 'female'
                               ? Colors.pink
                               : Colors.purple,
                     ),

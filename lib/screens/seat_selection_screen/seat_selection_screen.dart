@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:ridebooking/bloc/seat_layout_bloc/seat_layout_bloc.dart';
-import 'package:ridebooking/bloc/seat_layout_bloc/seat_layout_event.dart';
 import 'package:ridebooking/bloc/seat_layout_bloc/seat_layout_state.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/bus_data.dart';
@@ -11,7 +10,7 @@ import 'package:ridebooking/models/seat_layout_data_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/screens/seat_selection_screen/bus_seat_selection.dart';
 import 'package:ridebooking/screens/seat_selection_screen/enhanced_seat.dart';
-import 'package:ridebooking/utils/app_const.dart';
+import 'package:ridebooking/globels.dart' as globals;
 
 class SeatSelectionScreen extends StatefulWidget {
     final Availabletrips? trip;
@@ -182,7 +181,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
                 busInfo: BusInfo(
                   busType: widget.trip?.bustype ?? "Sleeper",
                 //   coSaving: "5",
-                  date: "2025-07-29",
+                  date: globals.selectedDate,
                   name: "Neo Electric Bus",
                   operator: widget.trip?.operatorname ?? "Unknown Operator",
                   rating: 4.5,

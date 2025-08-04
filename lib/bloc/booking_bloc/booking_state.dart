@@ -21,6 +21,13 @@ class BookingSuccess extends BookingState {
   BookingSuccess({required this.success});
 }
 
+
+class RazorpaySuccessState extends BookingState{
+  String? razorpay_order_id;
+  RazorpaySuccessState({this.razorpay_order_id});
+}
+
+
 // class AllTripSuccessState extends BookingState {
 
 // final List<Availabletrips>? allTrips;

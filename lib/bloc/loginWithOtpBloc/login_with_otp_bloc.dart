@@ -38,6 +38,7 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
 
 
     on<OnLoginButtonPressed>((event, emit) async {
+       print("Request Otp button clicked bloc ");
       mobileNumber = event.mobileNumber;
       // Here you can handle the login logic
       // For example, call an API to verify the mobile number
@@ -47,9 +48,10 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
                   
 
 // Request OTP
+
        var response  = await api.requestOtp(event.mobileNumber!);
   // var response =await ApiRepository.postAPI(ApiConst.loginWithOtp, formData);
-
+        if( response==null) {emit(LoginWithOtpFailure(error: "Server error data not found"));}else{
   Map<String, dynamic> parsed = json.decode(response.toString());
 
       if (response.toString().contains("status")) {
@@ -68,7 +70,7 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
 
 
       
-      
+        }
     });
 
     // Otp verification event
@@ -81,7 +83,7 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
       // var response = await ApiRepository.postAPI(ApiConst.verifyOtp, formData);
       // Verify OTP
         var response = await api.verifyOtp(event.email, event.otp);
-            print("Tokens saved------->>>: ${response.data}");
+            print("Tokens saved------->>>: ${response!.data}");
       Map<String, dynamic> parsed = json.decode(response.toString());
 
       if (response.toString().contains("status")) {

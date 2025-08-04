@@ -69,6 +69,7 @@ class _EnhancedBusInfoBottomSheetState
   ];
 
  late Razorpay _razorpay;
+ BookingBloc? forPayment;
   @override
   void initState() {
     // TODO: implement initState
@@ -85,19 +86,23 @@ String paymentVerified="notVerified";
   void _handlePaymentSuccess(PaymentSuccessResponse response) async{
   print("✅ Payment success: ${response.paymentId}");
 
-  final respo = await ApiClient().paymentVerification(response);
-  // 👉 Call your trip API or booking confirmation logic here
-  String pnr=await Session().getPnr();
-  if(respo["status"]==1){
-    ApiClient().confirmBooking(widget.tripData!,_selectedBoardingPoint!,widget.selectedSeats!,finalSelectedPassenger!,pnr,response.orderId!);
-    paymentVerified=respo["message"];
-setState(() {
+   ToastMessage().showSuccessToast("Payment successful!");
+  Future.delayed(Duration(seconds: 2));
+  ToastMessage().showSuccessToast("Booking Confirm");
+  forPayment!.paymentVerification(paymentVerify:response,bpoint:selectedBoardingPointId!.toString(),selectedSeats: widget.selectedSeats!,selectedPassenger:finalSelectedPassenger);
+//   final respo = await ApiClient().paymentVerification(response);
+//   // 👉 Call your trip API or booking confirmation logic here
+//   String pnr=await Session().getPnr();
+//   if(respo["status"]==1){
+//     ApiClient().confirmBooking(widget.tripData!,_selectedBoardingPoint!,widget.selectedSeats!,finalSelectedPassenger!,pnr,response.orderId!);
+//     paymentVerified=respo["message"];
+// setState(() {
   
-});
-  }
+// });
+//   }
 
 
-  ToastMessage().showSuccessToast("Payment successful!");
+ 
 }
 
 void _handlePaymentError(PaymentFailureResponse response) {
@@ -109,13 +114,13 @@ void _handleExternalWallet(ExternalWalletResponse response) {
   print("💼 External wallet selected: ${response.walletName}");
 }
 
-void _openRazorpayCheckout(int totalFare) {
+void _openRazorpayCheckout(int totalFare,String orderId) {
   // var totalAmount = (widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())) * 100;
 
   var options = {
-    // VITE_RAZORPAY_KEY_ID=rzp_test_qTYImJGXuKbQ98
     'key': 'rzp_test_qTYImJGXuKbQ98',
     'amount': (totalFare+50) * 100, // Amount in paisa
+    'order_id': orderId, 
     'name': 'VaagaiBus',
     'description': 'Bus ticket booking',
     'prefill': {
@@ -158,6 +163,16 @@ List<Availabletrips>? tripsData;
         if (state is BookingFailure) {
                ToastMessage().showErrorToast(state.error);
             }
+        if(state is RazorpaySuccessState){
+
+          print('RazorpaySuccessState received with order_id: ${state.razorpay_order_id}'); // Debug log
+          
+          // Calculate total fare
+          int totalFare = widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString());
+          
+          // Call the checkout function with proper parameters
+          _openRazorpayCheckout(totalFare, state.razorpay_order_id!);
+        }
 
         if(state is BookingSuccess){
           ToastMessage().showSuccessToast(state.success);
@@ -168,6 +183,7 @@ List<Availabletrips>? tripsData;
       },
       child: BlocBuilder<BookingBloc,BookingState>(
         builder: (context,state){
+          forPayment=BlocProvider.of(context);
          if (state is BookingLoading) {
              return  Center(child: CircularProgressIndicator());
             }else{
@@ -418,13 +434,14 @@ List<Availabletrips>? tripsData;
                     child: ElevatedButton(
                       onPressed: () {
                         // Navigator.push(context, MaterialPageRoute(builder: (context)=>RazorpayPage()));
+                     if(_selectedBoardingPoint!=null&& _selectedDroppingPoint!=null&&finalSelectedPassenger!=null&&widget.selectedSeats!=null){ 
                       BlocProvider.of<BookingBloc>(context).add(OnContinueButtonClick(
                         bpoint: selectedBoardingPointId,
                         noofseats: widget.selectedSeats!.length,
                         selectedPassenger: finalSelectedPassenger,
                         totalfare:( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt()
                       ));
-                      _openRazorpayCheckout(1000);//( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt());
+                      }//( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
@@ -735,11 +752,11 @@ Widget _buildDroppingPoint(
         crossAxisAlignment: CrossAxisAlignment.start,
         children:  [
           TravelerInfoCard(
-            boardingInfo: "Mon, 5 Aug | 10:00 AM",
-            boardingPoint: "tripsData",
-            droppingInfo: "Mon, 5 Aug | 4:00 PM",
-            droppingPoint: "Indiranagar Metro",
-            seatCount: 8,
+            boardingInfo: _selectedBoardingPoint!,
+            boardingPoint: "",
+            droppingInfo: _selectedBoardingPoint!,
+            droppingPoint: "",
+            seatCount: widget.selectedSeats!.length,
             seatDetails: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8'],
           ),
           // SizedBox(height: 16),

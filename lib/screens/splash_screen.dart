@@ -19,7 +19,9 @@ class _SplashScreenState extends State<SplashScreen>
   late final Animation<double> _scaleAnimation;
   late final Animation<Color?> _backgroundColorAnimation;
 
-  final Color _targetColor = const Color(0xFF007BFF); // Example: Blue (match your logo)
+  final Color _targetColor = const Color(
+    0xFF007BFF,
+  ); // Example: Blue (match your logo)
 
   @override
   void initState() {
@@ -30,17 +32,14 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1000),
     );
 
-
     _scaleAnimation = Tween<double>(begin: 1.0, end: 25.0).animate(
       CurvedAnimation(parent: _zoomController, curve: Curves.easeInOut),
     );
 
-    _backgroundColorAnimation = ColorTween(
-      begin: Colors.white,
-      end: _targetColor,
-    ).animate(
-      CurvedAnimation(parent: _zoomController, curve: Curves.easeInOut),
-    );
+    _backgroundColorAnimation =
+        ColorTween(begin: Colors.white, end: _targetColor).animate(
+          CurvedAnimation(parent: _zoomController, curve: Curves.easeInOut),
+        );
 
     // Start zoom after 2 seconds
     Future.delayed(const Duration(seconds: 2), () {
@@ -50,29 +49,29 @@ class _SplashScreenState extends State<SplashScreen>
     // Navigate after zoom finishes
     _zoomController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-       callNextPage();
+        callNextPage();
       }
     });
   }
 
-callNextPage()async{
-   String token= await Session().getToken();
-   if(token.isEmpty)
-        Navigator.pushReplacementNamed(
-          context,Routes.dashboard, // Navigate to Login with OTP screen
-        );
-        else{
-          Navigator.pushReplacementNamed(context,Routes.dashboard);
-        }
-}
+  callNextPage() async {
+    String token = await Session().getToken();
+    if (token.isEmpty)
+      Navigator.pushReplacementNamed(
+        
+        context,
+        Routes.loginWithOtpScreen, // Navigate to Login with OTP screen
+      );
+    else {
+      Navigator.pushReplacementNamed(context, Routes.loginWithOtpScreen);
+    }
+  }
 
   @override
   void dispose() {
     _zoomController.dispose();
     super.dispose();
   }
-
- 
 
   @override
   Widget build(BuildContext context) {

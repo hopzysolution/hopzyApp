@@ -172,6 +172,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
+      
       body: SafeArea(
         child: _buildResponsiveBody(isTablet, screenHeight, context),
       ),
@@ -420,6 +421,31 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
           child: Column(
             children: [
               // Header Section
+             Row(
+  mainAxisAlignment: MainAxisAlignment.end,
+  children: [
+    TextButton(
+      onPressed: () {
+        Navigator.pushNamed(context, Routes.dashboard);
+      },
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        backgroundColor: Colors.grey.shade200,
+      ),
+      child: Text(
+        "Skip",
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
+      ),
+    ),
+  ],
+),
+
               Expanded(
                 flex: isKeyboardVisible ? 22 : headerFlex,
                 child: Container(
@@ -543,6 +569,9 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                         height: isTablet ? 16 : (isSmallScreen ? 8 : 12),
                       ),
                       _buildFooterText(isTablet, isSmallScreen, context),
+
+
+
                     ],
                   ],
                 ),
@@ -684,22 +713,26 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
 
   void _handleSendOtp(BuildContext context) {
     // Navigator.pushNamed(context, Routes.dashboard);
-    if (_formKey.currentState?.validate() ?? false) {
-      FocusScope.of(context).unfocus();
-      HapticFeedback.lightImpact();
-
-      setState(() => _isLoading = true);
-      _buttonController.forward().then((_) {
-        _buttonController.reverse();
-      });
-
-      context.read<LoginWithOtpBloc>().add(
+     print("send code to signup ");
+     context.read<LoginWithOtpBloc>().add(
         OnLoginButtonPressed(mobileNumber: _mobileController.text),
       );
-    } else {
-      HapticFeedback.heavyImpact();
-      _showErrorSnackBar('Enter valid 10-digit number');
-    }
+    // if (_formKey.currentState?.validate() ?? false) {
+    //   FocusScope.of(context).unfocus();
+    //   HapticFeedback.lightImpact();
+
+    //   setState(() => _isLoading = true);
+    //   _buttonController.forward().then((_) {
+    //     _buttonController.reverse();
+    //   });
+
+    //   context.read<LoginWithOtpBloc>().add(
+    //     OnLoginButtonPressed(mobileNumber: _mobileController.text),
+    //   );
+    // } else {
+    //   HapticFeedback.heavyImpact();
+    //   _showErrorSnackBar('Enter valid 10-digit number');
+    // }
   }
 
   void _navigateToSignUp() {

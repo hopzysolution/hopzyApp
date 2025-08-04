@@ -61,6 +61,17 @@ class Session {
     return prefs.setString("accessToken", setToken);
   }
 
+Future<String> getHopzyAccessToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString("hopzyAccessToken");
+    return token ?? "";
+  }
+
+  Future<bool> setHopzyAccessToken(String setToken) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    return prefs.setString("hopzyAccessToken", setToken);
+  }
 
  Future<String> getRefreshToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -147,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: EdgeInsets.only(top: 2, bottom: 5),
                       child: Text(
                         "Highly Trusted Buses",
-                        style: Theme.of(context).textTheme.titleMedium
+                        style: Theme.of(context).textTheme.titleLarge
                             ?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: Theme.of(context).colorScheme.onSurface,

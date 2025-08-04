@@ -86,6 +86,7 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
   void getAllAvailableTripsOnADay() async {
     emit(HomeScreenLoading());
 
+  print("Date Formate ======>>${DateFormat('yyyyMMddHHmmssSSS').format(DateTime.now())}=========>>>>>${globals.dateForTicket}");
     try {
       // var formData = {"tripdate": DateFormat('yyyy-MM-dd').format(DateTime.now()), "opid": "VGT"};
       var formData = {

@@ -9,7 +9,7 @@ class AnimatedLogo extends StatefulWidget {
     Key? key,
     this.size = 120,
     this.padding = const EdgeInsets.all(10),
-    this.assetPath = 'assets/images/HopzybluePin.png',
+    this.assetPath = 'assets/images/hopzywhitePin.png',
   }) : super(key: key);
 
   @override

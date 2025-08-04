@@ -13,11 +13,9 @@ class _TicketsState extends State<Tickets> {
   Widget build(BuildContext context) {
     return Scaffold(
      
-      body:  WebViewPagesScreenBody(
-          titleMain: "",
-          urlToLoad: "https://aitripplanner.hopzy.in/",
-          bodyTags: "",
-        ),
+      body:  Center(
+        child: Text("Tickets"),
+      )
     );
   }
 }

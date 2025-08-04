@@ -27,12 +27,8 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
 
   final List<Widget> _pages = [
    HomeScreen(),
-    //  Tickets(),
-    WebViewPagesScreenBody(
-      titleMain: "AI",
-      urlToLoad: "https://www.google.com",
-      bodyTags: "",
-    ),
+   Tickets(),
+   
    MasterList(),
    Account()
   ];
@@ -191,11 +187,14 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
           Container(
             padding: EdgeInsets.all(isTablet ? 8 : 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.black,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Image.asset(
+              
                 'assets/images/ticket.png',
+                color: Colors.white,
+                
                 width: isTablet ? 20 : 18,
                 height: isTablet ? 20 : 18,
               )

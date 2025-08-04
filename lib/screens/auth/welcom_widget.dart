@@ -45,8 +45,8 @@ class WelcomeSection extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: isTablet ? 16 : (isSmallScreen ? 8 : 12)),
-            Text(
-              'Enter your mobile number to continue your journey',
+            Text("Enter your email to continue your journey",
+              // 'Enter your mobile number to continue your journey',
               style: TextStyle(
                 fontSize: subtitleFontSize,
                 fontWeight: FontWeight.w500,
