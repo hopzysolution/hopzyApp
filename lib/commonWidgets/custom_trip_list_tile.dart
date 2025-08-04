@@ -64,7 +64,7 @@ class TripListTile extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.appAssets,
+                        color: AppColors.accent,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(

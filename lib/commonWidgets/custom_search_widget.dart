@@ -86,8 +86,8 @@ class CustomSearchWidget extends StatelessWidget {
                   onTap: onSwapTap,
                   child: Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: AppColors.primaryBlue,
+                    decoration:  BoxDecoration(
+                      color: AppColors.accent,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -136,9 +136,9 @@ class CustomSearchWidget extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                         Icon(
                           Icons.calendar_today,
-                          color: AppColors.primaryBlue,
+                          color: AppColors.vibrent,
                           size: 18,
                         ),
                         const SizedBox(width: 8),
@@ -189,7 +189,7 @@ class CustomSearchWidget extends StatelessWidget {
           // Search Button
           CustomActionButton(
             onPressed: onSearchTap,
-            text: 'Hopein...',
+            text: 'Hop in...',
             icon: Icons.search,
           ),
         ],

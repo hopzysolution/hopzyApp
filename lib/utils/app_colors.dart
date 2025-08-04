@@ -2,6 +2,7 @@
 /// Uses semantic color roles that adapt to light/dark themes
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:ridebooking/utils/utils.dart';
 
 class AppColors {
   AppColors._();
@@ -34,6 +35,11 @@ class AppColors {
   static const Color error = Color(0xFFEF4444); // Red-500
   static const Color info = Color(0xFF3B82F6); // Blue-500
   static const Color appAssets = Color(0xFFFF8055);
+
+  static Color accent = Utils.hexToColor("#ff8055");
+  static Color vibrent= Utils.hexToColor("#ed1c24");
+
+  
 
   /// Light theme color scheme following Material Design 3
   static const ColorScheme lightColorScheme = ColorScheme(

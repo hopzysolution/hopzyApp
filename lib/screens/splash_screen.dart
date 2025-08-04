@@ -58,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen>
     String token = await Session().getToken();
     if (token.isEmpty)
       Navigator.pushReplacementNamed(
-        
+
         context,
         Routes.loginWithOtpScreen, // Navigate to Login with OTP screen
       );

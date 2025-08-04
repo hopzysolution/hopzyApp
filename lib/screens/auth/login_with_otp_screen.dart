@@ -421,30 +421,26 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
           child: Column(
             children: [
               // Header Section
-             Row(
-  mainAxisAlignment: MainAxisAlignment.end,
-  children: [
-    TextButton(
-      onPressed: () {
-        Navigator.pushNamed(context, Routes.dashboard);
-      },
-      style: TextButton.styleFrom(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        backgroundColor: Colors.grey.shade200,
-      ),
-      child: Text(
-        "Skip",
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Colors.black87,
-              fontWeight: FontWeight.w500,
-            ),
-      ),
-    ),
-  ],
-),
+              Row(
+                children: [
+                  Spacer(),
+                  InkWell(
+                    onTap: (){
+                      Navigator.pushNamed(context, Routes.dashboard);
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(20),
+                      child: Text("Skip",
+                      style: TextStyle(
+                        // decoration: TextDecorationStyle,
+                        color: AppColors.neutral100,
+                        fontWeight: FontWeight.bold
+                      ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
 
               Expanded(
                 flex: isKeyboardVisible ? 22 : headerFlex,

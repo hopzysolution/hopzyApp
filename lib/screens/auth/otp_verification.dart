@@ -273,7 +273,8 @@ class _OtpVerificationState extends State<OtpVerification>
     return Column(
       children: [
         Text(
-          "Verify Your Number",
+          "Verify Your Email",
+          // "Verify Your Number",
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             color: AppColors.neutral100,
             fontWeight: FontWeight.bold,
@@ -294,7 +295,7 @@ class _OtpVerificationState extends State<OtpVerification>
         ),
         const SizedBox(height: 20),
         Text(
-          "We've sent a 6-digit verification code to",
+          "We've sent a 4-digit verification code to",
           style: TextTheme.of(context).bodyLarge?.copyWith(
             color: Colors.white.withOpacity(0.8),
             fontWeight: FontWeight.w500,
@@ -319,7 +320,8 @@ class _OtpVerificationState extends State<OtpVerification>
             ),
           ),
           child: Text(
-            "+91 ${widget.mobileNumber}",
+            // "+91 
+            "${widget.mobileNumber}",
             style: TextTheme.of(context).bodyMedium?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w600,
