@@ -286,7 +286,7 @@ class _PassengerCardState extends State<PassengerCard>
                                   value: isSelected,
                                   onChanged: (value) {
                                     setState(() {
-                                      if (value == true) {
+                                      if (value == true && widget.selectedSeats!=null && widget.selectedSeats!.isNotEmpty) {
                                         int seatIndex =
                                             selectedPassengers.length;
                                         SeatModell? seatModell = widget.selectedSeats
@@ -307,6 +307,7 @@ class _PassengerCardState extends State<PassengerCard>
                                             (element) =>
                                                 element.name == p.name &&
                                                 element.age == p.age);
+                                        widget.selectedPassengerss?.call(selectedPassengers);
                                       }
                                     });
                                   },
