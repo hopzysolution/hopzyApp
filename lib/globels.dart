@@ -5,3 +5,6 @@ String selectedDate = DateFormat(
 ).format(DateTime.now().add(Duration(days: 1)));
 
 String dateForTicket=DateFormat('yyyyMMddHHmmssSSS').format(DateTime.now());
+
+String phoneNo="8305933803";
+String email="aadityagupta778@gmail.com";

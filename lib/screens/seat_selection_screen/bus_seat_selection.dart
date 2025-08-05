@@ -88,13 +88,13 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
   Color getSeatColor(SeatStatus status) {
     switch (status) {
       case SeatStatus.available:
-        return Colors.green.withOpacity(0.5);
+        return Colors.green;
       case SeatStatus.booked:
         return Colors.grey;
       case SeatStatus.femaleOnly:
-        return Colors.pink.withOpacity(0.3);
+        return Colors.pink;
       case SeatStatus.maleOnly:
-        return Colors.blue.withOpacity(0.3);
+        return Colors.blue;
       // case SeatStatus.femaleBooked:
       //   return Colors.pink.withOpacity(0.5);
       // case SeatStatus.maleBooked:
@@ -164,11 +164,11 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
               minWidth: 50, //50,
               maxWidth: 80),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.orange : getSeatColor(status),
+            color: isSelected ? AppColors.accent : AppColors.neutral400.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: getSeatColor(status).withOpacity(0.3),
-              width: 1,
+              color:isSelected?AppColors.accent: getSeatColor(status),
+              width: 2,
             ),
             boxShadow: [
               BoxShadow(
@@ -332,14 +332,15 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
                 minWidth: 50,
                 maxWidth: 80),
             decoration: BoxDecoration(
-              color: color,
+              border: Border.all(
+                color: color,
+                width: 2,
+
+              ),
+              color:label=="Selected"?color:label=="Already booked"?color: AppColors.neutral400.withOpacity(0.2),
               borderRadius: BorderRadius.circular(4),
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 14,
-            ),
+            child: Text(""),
           ),
           SizedBox(width: 12),
           Expanded(
@@ -384,13 +385,13 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
           ),
           SizedBox(height: 16),
           _buildLegendItem(
-              'Available', Colors.green.withOpacity(0.4), Icons.event_seat),
+              'Available', Colors.green, Icons.event_seat),
           _buildLegendItem('Already booked', Colors.grey, Icons.event_seat),
           _buildLegendItem('Available only for female passenger',
-              Colors.pink.withOpacity(0.4), Icons.female),
+              Colors.pink, Icons.female),
           _buildLegendItem('Available for male passenger',
-              Colors.blue.withOpacity(0.4), Icons.male),
-          _buildLegendItem('Selected', Colors.orange, Icons.event_seat),
+              Colors.blue, Icons.male),
+          _buildLegendItem('Selected', AppColors.accent, Icons.event_seat),
         ],
       ),
     );

@@ -102,8 +102,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         "tripid": tripData.tripid,
         "bpoint": event.bpoint!,
         "noofseats": event.noofseats!,
-        "mobileno": "8305933803",
-        "email": "aadityagupta747@gmail.com",
+        "mobileno": await Session().getEmail(), //globals.phoneNo,
+        "email": await Session().getPhoneNo(),// globals.email,
         "totalfare": event.totalfare! + 50,
         "bookedat": globals.selectedDate,
         "seatInfo": {
@@ -128,8 +128,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         print('---abc------create order before call');
         createOrder(
           event.totalfare!,
-          "8305933803",
-          "aadityagupta747@gmail.com"
+          await Session().getPhoneNo()??"9865329568",
+          await Session().getEmail()
         );
         pnr=data["BookingInfo"]["PNR"];
         await Session().setPnr(data["BookingInfo"]["PNR"]);
@@ -164,6 +164,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
           await Session().setPnr(data["BookingInfo"]["PNR"]);
 
         // emit(BookingSuccess(success: "Booking Confirm"));
+        emit(ConfirmBooking());
       } else {
         final message = data["status"]?["message"] ?? "Failed to load stations";
         emit(BookingFailure(error: message));
@@ -207,6 +208,7 @@ var formData={
       if (data["status"] == 1) {
           userId=data["data"]["user_id"];
         print("user_id = ${userId} order_id = ${data["data"]["order_id"]}");
+        Future.delayed(Duration(microseconds: 500));
         emit(RazorpaySuccessState(razorpay_order_id:data["data"]["order_id"] ));
       } else {
         final message = data["status"]?["message"] ?? "Failed to load stations";
@@ -272,8 +274,8 @@ Future<void> confirmBooking({Availabletrips? tripData,String? bpoint,Set<SeatMod
         "tripid": tripData.tripid,
         "bpoint": bpoint,
         "noofseats": selectedSeats!.length,
-        "mobileno": "8305933803",
-        "email": "aadityagupta747@gmail.com",
+        "mobileno": await Session().getPhoneNo(),
+        "email": await Session().getEmail(),
         "totalfare": ( selectedSeats.length * int.parse(tripData.fare.toString())).toInt()+50,
         "bookedat": globals.selectedDate, //DateFormat('yyyy-MM-dd').format(DateTime.now()),
         "ticketid":"ticket_${tripData!.routeid}_${tripData.tripid}_${globals.dateForTicket}" ,//"ticket_5906_149424_20250804074906571",

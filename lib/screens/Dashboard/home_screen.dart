@@ -226,8 +226,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     Container(
                       height: MediaQuery.of(context).size.height,
-                      child: WebViewPagesScreenBody(
-                        titleMain: "AI Trip Planner",
+                      child: WebViewPagesScreen(
+                        titleMain: "",
                         urlToLoad: "https://aitripplanner.hopzy.in/",
                         bodyTags: "",
                       ),

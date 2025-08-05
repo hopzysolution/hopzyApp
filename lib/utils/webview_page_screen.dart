@@ -5,7 +5,7 @@ import 'package:ridebooking/utils/app_theme.dart';
 import 'package:ridebooking/utils/app_typography.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class WebViewPagesScreen extends StatelessWidget {
+class WebViewPagesScreen extends StatefulWidget {
   String title = '', url = '', body = '';
 
   WebViewPagesScreen(
@@ -19,32 +19,37 @@ class WebViewPagesScreen extends StatelessWidget {
   }
 
   @override
+  State<WebViewPagesScreen> createState() => _WebViewPagesScreenState();
+}
+
+class _WebViewPagesScreenState extends State<WebViewPagesScreen> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          // leading: IconButton(
-          //     icon: Container(
-          //       width: 30, //MediaQuery.of(context).size.width * 0.09,
-          //       height: 30, //MediaQuery.of(context).size.height * 0.09,
-          //       padding: EdgeInsets.fromLTRB(5, 5, 2, 5),
-          //       child: SvgPicture.asset("assets/images/arrow-back.svg",
-          //           colorFilter: ColorFilter.mode(
-          //               AppTheme.appBarTextColor!, BlendMode.srcIn)),
-          //     ),
-          //     onPressed: () {
-          //       Navigator.of(context).pop();
-          //     }),
-          title: Text(title,
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black)),
-        ),
+        // appBar: AppBar(
+        //   // leading: IconButton(
+        //   //     icon: Container(
+        //   //       width: 30, //MediaQuery.of(context).size.width * 0.09,
+        //   //       height: 30, //MediaQuery.of(context).size.height * 0.09,
+        //   //       padding: EdgeInsets.fromLTRB(5, 5, 2, 5),
+        //   //       child: SvgPicture.asset("assets/images/arrow-back.svg",
+        //   //           colorFilter: ColorFilter.mode(
+        //   //               AppTheme.appBarTextColor!, BlendMode.srcIn)),
+        //   //     ),
+        //   //     onPressed: () {
+        //   //       Navigator.of(context).pop();
+        //   //     }),
+        //   title: Text(title,
+        //       style: TextStyle(
+        //           fontSize: 20,
+        //           fontWeight: FontWeight.bold,
+        //           color: Colors.black)),
+        // ),
         body: WebViewPagesScreenBody(
-          titleMain: title,
-          bodyTags: body,
-          urlToLoad: url,
+          titleMain: widget.title,
+          bodyTags: widget.body,
+          urlToLoad: widget.url,
         ));
   }
 }

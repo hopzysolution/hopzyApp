@@ -5,6 +5,7 @@ import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/app_sizes.dart';
 import 'package:ridebooking/utils/session.dart';
+import 'package:ridebooking/globels.dart' as globals;
 
 class PassengerCard extends StatefulWidget {
   Set<SeatModell>? selectedSeats;
@@ -467,6 +468,10 @@ class _AddPassengerFormState extends State<_AddPassengerForm>
   }
 
   void _submit() {
+    globals.phoneNo=phoneController.text;
+    globals.email=emailController.text;
+    Session().setEmail(emailController.text);
+    Session().setPhoneNo(phoneController.text);
     if (_formKey.currentState!.validate()) {
       final passenger = Passenger(
         name: nameController.text.trim(),
@@ -476,6 +481,9 @@ class _AddPassengerFormState extends State<_AddPassengerForm>
       widget.onPassengerAdded(passenger);
     }
   }
+
+  TextEditingController emailController = TextEditingController();
+  TextEditingController phoneController=TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -560,6 +568,52 @@ class _AddPassengerFormState extends State<_AddPassengerForm>
                   ),
                   validator: (value) =>
                       value!.isEmpty ? 'Please enter passenger name' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  keyboardType: TextInputType.emailAddress,
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF1976D2),
+                        width: 2,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
+                  ),
+                  // validator: (value) =>
+                  //     value!.isEmpty ? 'Please enter passenger name' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  keyboardType: TextInputType.phone,
+                  controller: phoneController,
+                  decoration: InputDecoration(
+                    labelText: 'Phone',
+                    prefixIcon: const Icon(Icons.phone_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF1976D2),
+                        width: 2,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
+                  ),
+                  // validator: (value) =>
+                  //     value!.isEmpty ? 'Please enter passenger name' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

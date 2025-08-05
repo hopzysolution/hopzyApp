@@ -414,9 +414,11 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
         isKeyboardVisible ? -keyboardHeight * 0.2 : 0,
         0,
       ),
-      child: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
-        child: SizedBox(
+      // child: 
+      // SingleChildScrollView(
+      //   physics: const ClampingScrollPhysics(),
+        child:
+         SizedBox(
           height: screenHeight,
           child: Column(
             children: [
@@ -451,7 +453,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                     vertical: isTablet ? 40 : (isSmallScreen ? 20 : 28),
                   ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       AnimatedBuilder(
                         animation: _logoController,
@@ -461,15 +463,16 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                             child: ScaleTransition(
                               scale: _logoScale,
                               child: AnimatedLogo(
-                                size: isTablet ? 160 : 120, 
-                                padding: const EdgeInsets.all(12)
+                                size: isTablet ? 190 : 150, 
+                                padding: EdgeInsets.all(2)
                               ),
                             ),
                           );
                         },
                       ),
                       SizedBox(
-                        height: isTablet ? 32 : (isSmallScreen ? 16 : 20),
+                        height: isTablet ? 32 : (isSmallScreen ? 5 : 10
+                        ),
                       ),
                       if (!isKeyboardVisible || !isSmallScreen)
                         WelcomeSection( opacityAnimation:  _contentOpacity,slideAnimation: _contentSlide,isTablet:  isTablet,isSmallScreen:  isSmallScreen,context: context),
@@ -492,7 +495,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
             ],
           ),
         ),
-      ),
+      // ),
     );
   }
 

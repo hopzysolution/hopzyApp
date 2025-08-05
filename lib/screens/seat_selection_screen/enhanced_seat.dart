@@ -11,6 +11,7 @@ import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/screens/razor_pay_page.dart';
 import 'package:ridebooking/utils/Api_client.dart';
+import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
 import 'package:ridebooking/widgets/contact_details_card.dart';
@@ -88,8 +89,7 @@ class _EnhancedBusInfoBottomSheetState
     print("✅ Payment success: ${response.paymentId}");
 
     ToastMessage().showSuccessToast("Payment successful!");
-    Future.delayed(Duration(seconds: 2));
-    ToastMessage().showSuccessToast("Booking Confirm");
+    Future.delayed(Duration(milliseconds: 500));
     forPayment!.paymentVerification(
       paymentVerify: response,
       bpoint: selectedBoardingPointId!.toString(),
@@ -111,6 +111,7 @@ class _EnhancedBusInfoBottomSheetState
   void _handlePaymentError(PaymentFailureResponse response) {
     print("❌ Payment failed: ${response.message}");
     ToastMessage().showErrorToast("Payment failed. Please try again.");
+
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
@@ -180,7 +181,16 @@ class _EnhancedBusInfoBottomSheetState
             ToastMessage().showSuccessToast(state.success);
           }
           if (state is BookingLoaded) {
+            // ToastMessage().showSuccessToast("Booking Confirmed"); //---abc--
+            Future.delayed(Duration(milliseconds: 500));
+
+                  // Navigator.pushReplacementNamed(context, Routes.dashboard);
+          }
+          if (state is ConfirmBooking) {
             ToastMessage().showSuccessToast("Booking Confirmed"); //---abc--
+            Future.delayed(Duration(milliseconds: 500));
+            
+                  Navigator.pushReplacementNamed(context, Routes.dashboard);
           }
         },
         child: BlocBuilder<BookingBloc, BookingState>(
@@ -776,6 +786,7 @@ class _EnhancedBusInfoBottomSheetState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          (_selectedBoardingPoint!=null && widget.selectedSeats!=null)?
           TravelerInfoCard(
             boardingInfo: _selectedBoardingPoint!,
             boardingPoint: "",
@@ -783,7 +794,7 @@ class _EnhancedBusInfoBottomSheetState
             droppingPoint: "",
             seatCount: widget.selectedSeats!.length,
             seatDetails: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8'],
-          ),
+          ):Container(),
           // SizedBox(height: 16),
           // ContactDetailsCard(),
           SizedBox(height: 16),

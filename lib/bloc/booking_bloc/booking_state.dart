@@ -27,6 +27,10 @@ class RazorpaySuccessState extends BookingState{
   RazorpaySuccessState({this.razorpay_order_id});
 }
 
+class ConfirmBooking extends BookingState{
+  
+}
+
 
 // class AllTripSuccessState extends BookingState {
 

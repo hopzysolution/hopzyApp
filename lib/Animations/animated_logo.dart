@@ -31,7 +31,7 @@ class _AnimatedLogoState extends State<AnimatedLogo> with SingleTickerProviderSt
 
     _pulseAnimation = Tween<double>(
       begin: 1.0,
-      end: 1.05,
+      end: 1.01,
     ).animate(CurvedAnimation(
       parent: _pulseController,
       curve: Curves.easeInOut,

@@ -85,8 +85,8 @@ class _SplashScreenState extends State<SplashScreen>
               scale: _scaleAnimation.value,
               child: Image.asset(
                 'assets/images/HopzybluePin.png', // Your logo
-                width: 100,
-                height: 100,
+                width: 180,
+                height: 180,
               ),
             ),
           ),
