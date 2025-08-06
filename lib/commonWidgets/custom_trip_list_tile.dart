@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ridebooking/models/trip_model.dart';
 import 'package:ridebooking/utils/app_colors.dart';
+import 'package:ridebooking/utils/app_sizes.dart';
 
 class TripListTile extends StatelessWidget {
   final TripModel trip;
@@ -47,15 +48,48 @@ class TripListTile extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Text(
-                      trip.operatorName,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        trip.operatorName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                       Row(
+                         children: [
+                           Text(
+                            _calculateDuration(trip.departureTime, trip.arrivalTime),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            ),
+                            Text(" • "
+                            ,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: AppColors.neutral400,
+                              
+                              // fontSize: AppSizes.md,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            
+                            ),
+                             Text(
+                        "${trip.availableSeats} Seats",//${trip.totalSeats} available',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isLowAvailability 
+                            ? colorScheme.error 
+                            : colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                         ],
+                       ),
+                    ],
                   ),
                   if (trip.price != null)//price
                     Container(
@@ -189,23 +223,23 @@ class TripListTile extends StatelessWidget {
                   ),
                   
                   // Duration and arrow
-                  Column(
-                    children: [
-                      Icon(
-                        Icons.access_time,
-                        size: 16,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _calculateDuration(trip.departureTime, trip.arrivalTime),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Column(
+                  //   children: [
+                  //     Icon(
+                  //       Icons.access_time,
+                  //       size: 16,
+                  //       color: colorScheme.onSurfaceVariant,
+                  //     ),
+                  //     const SizedBox(height: 4),
+                  //     Text(
+                  //       _calculateDuration(trip.departureTime, trip.arrivalTime),
+                  //       style: theme.textTheme.bodySmall?.copyWith(
+                  //         color: colorScheme.onSurfaceVariant,
+                  //         fontWeight: FontWeight.w500,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
               
@@ -246,47 +280,47 @@ class TripListTile extends StatelessWidget {
                   ),
                   
                   // Seat availability
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.event_seat,
-                        size: 16,
-                        color: isLowAvailability 
-                          ? colorScheme.error 
-                          : colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${trip.availableSeats}/${trip.totalSeats} available',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isLowAvailability 
-                            ? colorScheme.error 
-                            : colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      if (isLowAvailability) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.errorContainer,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'Filling Fast',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onErrorContainer,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     Icon(
+                  //       Icons.event_seat,
+                  //       size: 16,
+                  //       color: isLowAvailability 
+                  //         ? colorScheme.error 
+                  //         : colorScheme.onSurfaceVariant,
+                  //     ),
+                  //     const SizedBox(width: 4),
+                  //     Text(
+                  //       '${trip.availableSeats}/${trip.totalSeats} available',
+                  //       style: theme.textTheme.bodySmall?.copyWith(
+                  //         color: isLowAvailability 
+                  //           ? colorScheme.error 
+                  //           : colorScheme.onSurfaceVariant,
+                  //         fontWeight: FontWeight.w500,
+                  //       ),
+                  //     ),
+                  //     if (isLowAvailability) ...[
+                  //       const SizedBox(width: 8),
+                  //       Container(
+                  //         padding: const EdgeInsets.symmetric(
+                  //           horizontal: 6,
+                  //           vertical: 2,
+                  //         ),
+                  //         decoration: BoxDecoration(
+                  //           color: colorScheme.errorContainer,
+                  //           borderRadius: BorderRadius.circular(4),
+                  //         ),
+                  //         child: Text(
+                  //           'Filling Fast',
+                  //           style: theme.textTheme.labelSmall?.copyWith(
+                  //             color: colorScheme.onErrorContainer,
+                  //             fontWeight: FontWeight.w600,
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ],
+                  // ),
                 ],
               ),
               
