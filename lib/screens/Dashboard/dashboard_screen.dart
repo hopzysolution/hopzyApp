@@ -6,6 +6,7 @@ import 'package:ridebooking/screens/Dashboard/home_screen.dart';
 import 'package:ridebooking/screens/Dashboard/master_list.dart';
 import 'package:ridebooking/screens/Dashboard/tickets.dart';
 import 'package:ridebooking/utils/app_colors.dart';
+import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/screens/webview_pages/webview_pages_screen.dart';
 
@@ -105,10 +106,14 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
   }
 
   void _onDrawerItemTap(String title) {
+    if (title == "MyBookings") {
+      Navigator.pushNamed(context, Routes.bookingsScreen);
+    } else {
     Navigator.pop(context);
     HapticFeedback.selectionClick();
     
     _showSnackBar('Tapped $title', isError: false);
+    }
   }
 
   void _showSnackBar(String message, {bool isError = true}) {
@@ -410,7 +415,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
             _buildModernListTile(
               icon: Icons.shopping_bag_outlined,
               title: 'Bookings',
-              onTap: () => _onDrawerItemTap("MyOrders"),
+              onTap: () => _onDrawerItemTap("MyBookings"),
               isTablet: isTablet,
             ),
             _buildModernListTile(

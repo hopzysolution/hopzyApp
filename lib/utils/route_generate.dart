@@ -12,6 +12,7 @@ import 'package:ridebooking/screens/Dashboard/tickets.dart';
 import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
 import 'package:ridebooking/screens/auth/otp_verification.dart';
 import 'package:ridebooking/screens/available_trips_screen.dart';
+import 'package:ridebooking/screens/booking_screen.dart';
 import 'package:ridebooking/screens/splash_screen.dart';
 
 class Routes {
@@ -29,6 +30,7 @@ class Routes {
   static const String account = "/account";
   static const String dashboard = "/dashboard_screen";
   static const String availableTrips = "/available_trips_screen";
+  static const String bookingsScreen = "/bookings_screen";
 
   static Route<dynamic>? onCreateRoute(RouteSettings routeSettings) {
     var arg = routeSettings.arguments;
@@ -95,6 +97,12 @@ class Routes {
         return MaterialPageRoute(
           builder: (context) => AvailableTripsScreen(allTrips: data),
           settings: RouteSettings(arguments: arg),
+        );
+      case bookingsScreen:
+        return MaterialPageRoute(
+          builder: (context) {
+            return BookingListScreen();
+          },
         );
 
       default:

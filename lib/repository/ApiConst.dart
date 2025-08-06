@@ -32,7 +32,7 @@ class ApiConst {
   static const String requesOtp = "api/auth/request-otp";
   static const String refreshTokenApi="api/auth/refresh-token";
   static const String confirmBooking = "api/public/confirm-booking";
-
+  static const String getUserBookings = "api/private/user/bookings?page=1&limit=10";
 
   static const String confirmTentative = "ConfirmTentativeBooking/apiagent";
 
