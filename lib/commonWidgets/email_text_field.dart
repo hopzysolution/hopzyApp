@@ -60,7 +60,7 @@ class EmailField extends StatelessWidget {
           letterSpacing: 0.5,
         ),
         decoration: InputDecoration(
-          hintText: 'Email Address',
+          hintText: 'Email',
           hintStyle: TextStyle(
             color: Colors.grey.shade500,
             fontWeight: FontWeight.w500,

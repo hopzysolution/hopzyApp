@@ -34,6 +34,7 @@ class BusBookingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+     
       title: 'Hopezy',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
@@ -41,6 +42,13 @@ class BusBookingApp extends StatelessWidget {
       onGenerateRoute: Routes.onCreateRoute,
         initialRoute: Routes.splash,
       themeMode: ThemeMode.system, // or ThemeMode.light / dark
+      builder: (context, child) {
+        final mediaQuery = MediaQuery.of(context);
+        return MediaQuery(
+          data: mediaQuery.copyWith(textScaleFactor: 1.0),
+          child: child!,
+        );
+      },
     );
   }
 }

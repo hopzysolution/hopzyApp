@@ -11,6 +11,7 @@ import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/screens/razor_pay_page.dart';
 import 'package:ridebooking/utils/Api_client.dart';
+import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
@@ -66,8 +67,8 @@ class _EnhancedBusInfoBottomSheetState
     'Boarding',
     'Dropping',
     'Passengers',
-    'Rate & Reviews',
     'Bus route',
+    'Rate & Reviews',
   ];
 
   late Razorpay _razorpay;
@@ -868,7 +869,7 @@ class _EnhancedBusInfoBottomSheetState
           width: 12,
           height: 12,
           decoration: BoxDecoration(
-            color: isEndPoint ? Colors.red : Colors.grey,
+            color: isEndPoint ? AppColors.primaryBlue : Colors.red,
             shape: BoxShape.circle,
           ),
         ),

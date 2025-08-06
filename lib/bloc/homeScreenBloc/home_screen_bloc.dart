@@ -90,7 +90,9 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     try {
       // var formData = {"tripdate": DateFormat('yyyy-MM-dd').format(DateTime.now()), "opid": "VGT"};
       var formData = {
-        "tripdate": globals.selectedDate,
+        "tripdate": DateFormat(
+  'yyyy-MM-dd',
+).format(DateTime.now().add(Duration(days: 1))),
         "opid": "VGT",
       };
 

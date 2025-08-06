@@ -403,7 +403,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
     final isKeyboardVisible = keyboardHeight > 0;
 
     final isSmallScreen = screenHeight < 700;
-    final headerFlex = isTablet ? 42 : (isSmallScreen ? 32 : 38);
+    final headerFlex = isTablet ? 42 : (isSmallScreen ? 30 : 41);
     final formFlex = isTablet ? 58 : (isSmallScreen ? 68 : 62);
 
     return AnimatedContainer(
@@ -414,9 +414,9 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
         isKeyboardVisible ? -keyboardHeight * 0.2 : 0,
         0,
       ),
-      // child: 
-      // SingleChildScrollView(
-      //   physics: const ClampingScrollPhysics(),
+      child: 
+      SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
         child:
          SizedBox(
           height: screenHeight,
@@ -471,11 +471,12 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                         },
                       ),
                       SizedBox(
-                        height: isTablet ? 32 : (isSmallScreen ? 5 : 10
+                        height: isTablet ? 32 : (isSmallScreen ? 5 : 8
                         ),
                       ),
                       if (!isKeyboardVisible || !isSmallScreen)
                         WelcomeSection( opacityAnimation:  _contentOpacity,slideAnimation: _contentSlide,isTablet:  isTablet,isSmallScreen:  isSmallScreen,context: context),
+
                     ],
                   ),
                 ),
@@ -495,7 +496,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
             ],
           ),
         ),
-      // ),
+      ),
     );
   }
 
@@ -611,7 +612,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
             ),
             const SizedBox(width: 12),
             Text(
-              'Phone Verification',
+              'Mobile Verification',
               style: TextStyle(
                 fontSize: titleFontSize,
                 fontWeight: FontWeight.w800,

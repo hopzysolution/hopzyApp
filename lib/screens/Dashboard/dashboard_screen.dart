@@ -425,20 +425,20 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
               onTap: () => _onDrawerItemTap("LoyaltyHistory"),
               isTablet: isTablet,
             ),
-            _buildModernListTile(
-              icon: Icons.loyalty_outlined,
-              title: 'IRCTC details',
-              onTap: () => _onDrawerItemTap("LoyaltyHistory"),
-              isTablet: isTablet,
-            ),
+            // _buildModernListTile(
+            //   icon: Icons.loyalty_outlined,
+            //   title: 'IRCTC details',
+            //   onTap: () => _onDrawerItemTap("LoyaltyHistory"),
+            //   isTablet: isTablet,
+            // ),
 
-            _buildSectionHeader('Payments', isTablet),
-            _buildModernListTile(
-              icon: Icons.wallet,
-              title: 'redBus Wallet',
-              onTap: () => _onDrawerItemTap("MyQuestions"),
-              isTablet: isTablet,
-            ),
+            // _buildSectionHeader('Payments', isTablet),
+            // _buildModernListTile(
+            //   icon: Icons.wallet,
+            //   title: 'redBus Wallet',
+            //   onTap: () => _onDrawerItemTap("MyQuestions"),
+            //   isTablet: isTablet,
+            // ),
            
 
             SizedBox(height: isTablet ? 20 : 16),

@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController fromController = TextEditingController();
   final TextEditingController toController = TextEditingController();
 
-  DateTime selectedDate = DateTime.now().add(Duration(days: 1)); //DateTime.now();
+  DateTime selectedDate = DateTime.now(); //DateTime.now();
 
   AllAvailabletrips? selectedFromStation;
   AllAvailabletrips? selectedToStation;
@@ -184,12 +184,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                       onSearchTap: () {
-                        print(
-                          "Searching for trips from ${fromController.text} to ${selectedToStation?.srcname} on $selectedDate",
-                        );
-                        print(
-                          "Searching for trips from ${selectedFromStation!.srcid} to ${selectedToStation?.toJson()} on $selectedDate",
-                        );
+                        // print(
+                        //   "Searching for trips from ${fromController.text} to ${selectedToStation?.srcname} on $selectedDate",
+                        // );
+                        // print(
+                        //   "Searching for trips from ${selectedFromStation!.srcid} to ${selectedToStation?.toJson()} on $selectedDate",
+                        // );
 
                         if (selectedFromStation == null ||
                             selectedToStation == null) {

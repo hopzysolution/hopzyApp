@@ -12,7 +12,7 @@ git
 
     <application
         android:name="${applicationName}"
-        android:label="ridebooking"
+        android:label="Hopzy"
         android:icon="@mipmap/launcher_icon"
         android:theme="@style/LaunchTheme">
 

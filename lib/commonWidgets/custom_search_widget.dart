@@ -117,7 +117,7 @@ class CustomSearchWidget extends StatelessWidget {
                       lastDate: DateTime.now().add(const Duration(days: 30)),
                     );
                     if (picked != null) {
-                      final DateFormat formatter = DateFormat('dd-MM-yyyy');
+                      final DateFormat formatter = DateFormat('yyyy-MM-dd');
                       globals.selectedDate = formatter.format(picked); // String now
                       onDateSelected(
                         picked,
@@ -175,7 +175,9 @@ class CustomSearchWidget extends StatelessWidget {
               Flexible(
                 flex: 1,
                 child: CustomActionButton(
-                  backgroundColor: AppColors.primaryBlue,
+                  borderColor: AppColors.primaryBlue,
+                  backgroundColor: Colors.white,
+                  textColor: AppColors.neutral900,
                   onPressed: () {
                     globals.selectedDate = Utils.futureDate();
                     onDateSelected(DateTime.now().add(Duration(days: 1)));

@@ -90,7 +90,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
       case SeatStatus.available:
         return Colors.green;
       case SeatStatus.booked:
-        return Colors.grey;
+        return Colors.black;
       case SeatStatus.femaleOnly:
         return Colors.pink;
       case SeatStatus.maleOnly:
@@ -100,7 +100,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
       // case SeatStatus.maleBooked:
       //   return Colors.blue.withOpacity(0.5);
       default:
-        return Colors.grey.shade300;
+        return Colors.black;
     }
   }
 
@@ -164,7 +164,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
               minWidth: 50, //50,
               maxWidth: 80),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.accent : AppColors.neutral400.withOpacity(0.1),
+            color: isSelected ? AppColors.accent : AppColors.neutral100,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color:isSelected?AppColors.accent: getSeatColor(status),
@@ -193,7 +193,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
                 Text(
                   '₹$price',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.neutral900,
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
                   ),
@@ -206,7 +206,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
                 const Text(
                   'Sold',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.neutral900,
                     fontSize: 9,
                     fontWeight: FontWeight.w500,
                   ),
@@ -337,7 +337,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
                 width: 2,
 
               ),
-              color:label=="Selected"?color:label=="Already booked"?color: AppColors.neutral400.withOpacity(0.2),
+              color:label=="Selected"?color:label=="Already booked"?color: AppColors.neutral100,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(""),
@@ -386,7 +386,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
           SizedBox(height: 16),
           _buildLegendItem(
               'Available', Colors.green, Icons.event_seat),
-          _buildLegendItem('Already booked', Colors.grey, Icons.event_seat),
+          _buildLegendItem('Already booked', AppColors.neutral900, Icons.event_seat),
           _buildLegendItem('Available only for female passenger',
               Colors.pink, Icons.female),
           _buildLegendItem('Available for male passenger',
