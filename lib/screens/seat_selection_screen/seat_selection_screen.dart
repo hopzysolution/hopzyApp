@@ -11,6 +11,7 @@ import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/screens/seat_selection_screen/bus_seat_selection.dart';
 import 'package:ridebooking/screens/seat_selection_screen/enhanced_seat.dart';
 import 'package:ridebooking/globels.dart' as globals;
+import 'package:ridebooking/utils/app_colors.dart';
 
 class SeatSelectionScreen extends StatefulWidget {
     final Availabletrips? trip;
@@ -44,7 +45,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
       case SeatStatus.available:
         return Colors.green;
       case SeatStatus.booked:
-        return Colors.grey;
+        return AppColors.neutral900;
       case SeatStatus.femaleOnly:
         return Colors.pink;
       case SeatStatus.femaleBooked:
@@ -95,24 +96,29 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(
-              'Select Seats',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-               "${widget.trip!.src} --> ${widget.trip!.dst}",
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-                fontWeight: FontWeight.normal,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Select Seats',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                   "${widget.trip!.src} --> ${widget.trip!.dst}",
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

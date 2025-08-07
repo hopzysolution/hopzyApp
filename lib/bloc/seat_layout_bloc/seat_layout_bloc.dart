@@ -143,7 +143,7 @@ List<Seats> updatedSeats = seatModelList!.asMap().entries.map((entry) {
   return Seats(
     seatNumber: seat.seatNo,
     fare: seat.fare,
-    status: seat.available=="A"?"Available":"",
+    status: seat.available=="A"?"Available":seat.available=="F"?"femaleBooked":seat.available=="M"?"maleBooked":"booked",
     row: original?.row ?? 0,
     column: original?.column ?? 0,
     berth: original?.berth ?? '',

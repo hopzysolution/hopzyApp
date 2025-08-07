@@ -11,8 +11,7 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
       try {
         var response = await ApiRepository.getAPI(
           ApiConst.getUserBookings,
-          // formData,
-          // basurl2: ApiConst.baseUrl2
+          basurl2: ApiConst.baseUrl2
         );
         final data = response.data;
         print("------------------get user booking------data)-${data}-");
@@ -61,6 +60,34 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
       //     emit(BookingListFailure(error: "Something went wrong. Please try again."));
       //   }
     });
+  fetchBookingList();
+
+  }
+  fetchBookingList() async{
+    emit(BookingListLoading());
+      try {
+        var response = await ApiRepository.getAPI(
+          ApiConst.getUserBookings,
+          basurl2: ApiConst.baseUrl2
+        );
+        final data = response.data;
+        print("------------------get user booking------data)-${data}-");
+
+        if (data["status"] != null && data["status"]["success"] == true) {
+          final bookings = (data["bookings"] as List)
+              .map((json) => Booking.fromJson(json))
+              .toList();
+          emit(BookingListLoaded(bookings: bookings));
+        } else {
+          final message =
+              data["status"]?["message"] ?? "Failed to load bookings";
+          emit(BookingListFailure(error: message));
+        }
+      } catch (e) {
+        emit(
+          BookingListFailure(error: "Something went wrong. Please try again."),
+        );
+      }
   }
 }
 

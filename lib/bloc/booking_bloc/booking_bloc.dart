@@ -65,7 +65,6 @@
 // }
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_event.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
@@ -74,7 +73,6 @@ import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/repository/ApiRepository.dart';
-import 'package:ridebooking/utils/Api_client.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/globels.dart' as globals;
 
@@ -144,6 +142,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     }
   }
 
+
   Future confirmTentativeBooking() async {
     // String pnr = await Session().getPnr();
     emit(BookingLoading());
@@ -174,8 +173,6 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       emit(BookingFailure(error: "Something went wrong. Please try again."));
     }
   }
-
-
 
 
 Future<void> createOrder(int fare,String phoneNo,String email,
@@ -222,7 +219,6 @@ var formData={
   }
 
 
-
 Future<void> paymentVerification({PaymentSuccessResponse? paymentVerify,String? bpoint,Set<SeatModell>? selectedSeats,List<Passenger>? selectedPassenger}) async{
 
     try {
@@ -262,7 +258,6 @@ Future<void> paymentVerification({PaymentSuccessResponse? paymentVerify,String? 
   }
 
 
-  
 Future<void> confirmBooking({Availabletrips? tripData,String? bpoint,Set<SeatModell>? selectedSeats,List<Passenger>? selectedPassenger,String? orderId}) async{
 
     try {
@@ -327,33 +322,5 @@ final response = await ApiRepository.postAPI(ApiConst.confirmBooking, formData,b
 
 
 
-  //   createOrder(int fare,String phoneNo,String email) async{
-
-  //      emit(BookingLoading());
-  //     try {
-  //       final formData = {
-  //   "amount": 1050,
-  //   "phone": phoneNo,
-  //   "email": email
-  // };
-
-  //       final response = await ApiRepository.postAPI(ApiConst.createOrder, formData,basurl2: ApiConst.baseUrl2);
-
-  //       final data = response.data;
-
-  //        print("Response from createorder api $data");
-
-  //       // if (data["status"] != null && data["status"]["success"] == true) {
-  //       //   await Session().setPnr(data["BookingInfo"]["PNR"]);
-  //       //   emit(BookingLoaded());
-  //       // } else {
-  //       //   final message = data["status"]?["message"] ?? "Failed to load stations";
-  //       //   emit(BookingFailure(error: message));
-  //       // }
-  //     } catch (e) {
-  //       print("Error in getTentativeBooking: $e");
-  //       emit(BookingFailure(error: "Something went wrong. Please try again."));
-  //     }
-
-  //   }
+  
 }

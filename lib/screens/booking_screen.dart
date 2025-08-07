@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ridebooking/bloc/booking_list_bloc/booking_list_bloc.dart';
+import 'package:ridebooking/bloc/booking_list_bloc/booking_list_state.dart';
+import 'package:ridebooking/utils/toast_messages.dart';
 
 class BookingListScreen extends StatelessWidget {
   const BookingListScreen({super.key});
@@ -30,7 +34,20 @@ class BookingListScreen extends StatelessWidget {
       ),
     ];
 
-    return Scaffold(
+    return 
+    BlocProvider(create: (context)=>BookingListBloc(),
+    child:  BlocListener<BookingListBloc,BookingListState>(
+      listener: (context,state){
+        if(state is BookingListFailure){
+          ToastMessage().showErrorToast(state.error);
+        }
+      },
+      child: BlocBuilder<BookingListBloc,BookingListState>(
+        builder: (context,state){
+          if(state is BookingListLoading){
+            return CircularProgressIndicator();
+          }
+          return   Scaffold(
       appBar: AppBar(
         title: const Text('My Bookings'),
         centerTitle: true,
@@ -54,6 +71,16 @@ class BookingListScreen extends StatelessWidget {
               },
             ),
     );
+    
+      }),
+      
+      )
+    
+   
+    );
+    
+  
+ 
   }
 }
 

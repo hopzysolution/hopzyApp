@@ -7,10 +7,10 @@ import 'package:ridebooking/utils/app_colors.dart';
 enum SeatStatus {
   available,
   booked,
-  femaleOnly,
-  maleOnly,
-  // femaleBooked,
-  // maleBooked,
+  // femaleOnly,
+  // maleOnly,
+  femaleBooked,
+  maleBooked,
   unavailable,
 }
 
@@ -72,14 +72,14 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
         return SeatStatus.available;
       case 'booked':
         return SeatStatus.booked;
-      case 'female_only':
-        return SeatStatus.femaleOnly;
-      case 'male_only':
-        return SeatStatus.maleOnly;
-      // case 'female_booked':
-      //   return SeatStatus.femaleBooked;
-      // case 'male_booked':
-      //   return SeatStatus.maleBooked;
+      // case 'female_only':
+      //   return SeatStatus.femaleOnly;
+      // case 'male_only':
+      //   return SeatStatus.maleOnly;
+      case 'femalebooked':
+        return SeatStatus.femaleBooked;
+      case 'malebooked':
+        return SeatStatus.maleBooked;
       default:
         return SeatStatus.unavailable;
     }
@@ -88,29 +88,29 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
   Color getSeatColor(SeatStatus status) {
     switch (status) {
       case SeatStatus.available:
-        return Colors.green;
+        return Colors.white;
       case SeatStatus.booked:
         return Colors.black;
-      case SeatStatus.femaleOnly:
-        return Colors.pink;
-      case SeatStatus.maleOnly:
-        return Colors.blue;
-      // case SeatStatus.femaleBooked:
-      //   return Colors.pink.withOpacity(0.5);
-      // case SeatStatus.maleBooked:
-      //   return Colors.blue.withOpacity(0.5);
+      // case SeatStatus.femaleOnly:
+      //   return Colors.pink;
+      // case SeatStatus.maleOnly:
+      //   return Colors.blue;
+      case SeatStatus.femaleBooked:
+        return Colors.pink;//.withOpacity(0.5);
+      case SeatStatus.maleBooked:
+        return Colors.blue;//.withOpacity(0.5);
       default:
-        return Colors.black;
+        return Colors.white;
     }
   }
 
   IconData getSeatIcon(SeatStatus status) {
     switch (status) {
-      case SeatStatus.femaleOnly:
-        // case SeatStatus.femaleBooked:
+      // case SeatStatus.femaleOnly:
+        case SeatStatus.femaleBooked:
         return Icons.female;
-      case SeatStatus.maleOnly:
-        // case SeatStatus.maleBooked:
+      // case SeatStatus.maleOnly:
+        case SeatStatus.maleBooked:
         return Icons.male;
       default:
         return Icons.event_seat;
@@ -118,114 +118,117 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
   }
 
   bool _canSelectSeat(SeatStatus status) {
-    return status == SeatStatus.available ||
-        status == SeatStatus.femaleOnly ||
-        status == SeatStatus.maleOnly;
+    return status == SeatStatus.available ;
+    // ||
+    //     status == SeatStatus.femaleOnly ||
+    //     status == SeatStatus.maleOnly;
   }
-
-  Widget _buildSeat(
-      Map<String, dynamic>? seatData, int rowIndex, int colIndex) {
-    if (seatData == null) {
-      return Flexible(
-        child: Container(
-          margin: const EdgeInsets.all(2),
-        ),
-      );
-    }
-
-    final seatNumber = seatData['seatNumber'] as String;
-    final status = seatData['status'] as SeatStatus;
-    final price = seatData['fare'] as int? ?? 0;
-    final seatType = seatData['seatType'] as String? ?? 'seater';
-    // final isSelected = selectedSeats.contains(seatNumber);
-    final isSelected = selectedSeats.any((seat) => seat.seatNo == seatNumber);
-
-    double seatHeight = seatType.toLowerCase() == 'sleeper' ? 200.0 : 85.0;
-
+Widget _buildSeat(
+    Map<String, dynamic>? seatData, int rowIndex, int colIndex) {
+  if (seatData == null) {
     return Flexible(
-      child: GestureDetector(
-        onTap: () {
-          if (_canSelectSeat(status)) {
-            setState(() {
-              isSelected
-                  ? selectedSeats.remove(SeatModell(seatNo: seatNumber, fare: price, available: status.name ))
-                  : selectedSeats.add(SeatModell(seatNo: seatNumber, fare: price, available: status.name));
-              print("Custom widget selected seats:--------->> $selectedSeats");
-
-              widget.onSeatsSelected(selectedSeats);
-            });
-          }
-        },
-        child: Container(
-          margin: const EdgeInsets.all(2),
-          constraints: BoxConstraints(
-              minHeight: 85,//seatHeight,
-              maxHeight: 250,
-              minWidth: 50, //50,
-              maxWidth: 80),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.accent : AppColors.neutral100,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color:isSelected?AppColors.accent: getSeatColor(status),
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 2,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Icon(
-              //   getSeatIcon(status),
-              //   color: Colors.white,
-              //   size: 16,
-              // ),
-              // const SizedBox(height: 2),
-              if (_canSelectSeat(status))
-                Text(
-                  '₹$price',
-                  style: const TextStyle(
-                    color: AppColors.neutral900,
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              else if (status == SeatStatus.booked
-                  // ||
-                  //     status == SeatStatus.femaleBooked ||
-                  //     status == SeatStatus.maleBooked
-                  )
-                const Text(
-                  'Sold',
-                  style: TextStyle(
-                    color: AppColors.neutral900,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              // const SizedBox(height: 2),
-              // Text(
-              //   seatType.toUpperCase(),
-              //   style: const TextStyle(
-              //     color: Colors.white70,
-              //     fontSize: 8,
-              //     fontWeight: FontWeight.w400,
-              //   ),
-              // ),
-            ],
-          ),
-        ),
+      child: Container(
+        margin: const EdgeInsets.all(2),
       ),
     );
   }
+
+  final seatNumber = seatData['seatNumber'] as String;
+  final status = seatData['status'] as SeatStatus;
+  final price = seatData['fare'] as int? ?? 0;
+  final seatType = seatData['seatType'] as String? ?? 'seater';
+  
+  // Check if seat is selected - this should be calculated each time
+  bool isSelected = selectedSeats.any((seat) => seat.seatNo == seatNumber);
+
+  double seatHeight = seatType.toLowerCase() == 'sleeper' ? 200.0 : 85.0;
+
+  return Flexible(
+    child: GestureDetector(
+      onTap: () {
+        if (_canSelectSeat(status)) {
+          setState(() {
+            if (isSelected) {
+              // Remove seat if already selected
+              selectedSeats.removeWhere((seat) => seat.seatNo == seatNumber);
+            } else {
+              // Add seat if not selected
+              selectedSeats.add(SeatModell(
+                seatNo: seatNumber, 
+                fare: price, 
+                available: status.name
+              ));
+            }
+            
+            print("Custom widget selected seats:--------->> ${!isSelected}");
+            widget.onSeatsSelected(selectedSeats);
+          });
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.all(2),
+        constraints: BoxConstraints(
+          minHeight: 95, //seatHeight,
+          maxHeight: 250,
+          minWidth: 50, //50,
+          maxWidth: 80
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.accent : getSeatColor(status),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isSelected 
+              ? AppColors.accent 
+              : status == SeatStatus.available 
+                ? Colors.green 
+                : getSeatColor(status),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+          status==SeatStatus.available||status==SeatStatus.booked?SizedBox():  Icon(
+              getSeatIcon(status),
+              color: Colors.white,
+              size: 16,
+            ),
+            const SizedBox(height: 2),
+            if (_canSelectSeat(status))
+              Text(
+                '₹$price',
+                style: const TextStyle(
+                  color: AppColors.neutral900,
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            else if (status == SeatStatus.booked ||
+                     status == SeatStatus.femaleBooked ||
+                     status == SeatStatus.maleBooked)
+               Text(
+                'Sold',
+                style: TextStyle(
+                  color:status==SeatStatus.booked?Colors.white: AppColors.neutral900,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
   Widget _buildDeckSelector() {
     return Container(
@@ -337,7 +340,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
                 width: 2,
 
               ),
-              color:label=="Selected"?color:label=="Already booked"?color: AppColors.neutral100,
+              color:label=="Selected"?color:label=="Already booked"?color: Colors.white,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(""),

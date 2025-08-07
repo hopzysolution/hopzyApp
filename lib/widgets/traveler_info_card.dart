@@ -1,14 +1,17 @@
 
 import 'package:flutter/material.dart';
+import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/models/seat_modell.dart';
+import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/app_sizes.dart';
 
-class TravelerInfoCard extends StatelessWidget {
+class TravelerInfoCard extends StatefulWidget {
   final String boardingInfo;
   final String boardingPoint;
   final String droppingInfo;
   final String droppingPoint;
-  final int seatCount;
-  final List<String> seatDetails;
+  final Availabletrips tripData;
+  final Set<SeatModell> seatDetails;
 
   const TravelerInfoCard({
     super.key,
@@ -16,9 +19,30 @@ class TravelerInfoCard extends StatelessWidget {
     required this.boardingPoint,
     required this.droppingInfo,
     required this.droppingPoint,
-    required this.seatCount,
+    required this.tripData,
     required this.seatDetails,
   });
+
+  @override
+  State<TravelerInfoCard> createState() => _TravelerInfoCardState();
+}
+
+class _TravelerInfoCardState extends State<TravelerInfoCard> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    listOFSTring();
+    super.initState();
+  }
+List<String> noOfSeats=[];
+listOFSTring(){
+widget.seatDetails.map((e){
+return noOfSeats.add(e.seatNo.toString());
+}).toList();
+}
+
 
   void _showDetails(BuildContext context) {
     showModalBottomSheet(
@@ -98,15 +122,16 @@ class TravelerInfoCard extends StatelessWidget {
                     border: Border.all(color: Colors.grey[200]!),
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _seatDetailItem(
-                          "Seat No", "A1, A2"), // Replace with dynamic data
+                          "Seat No", noOfSeats.toString()), // Replace with dynamic data
                       const SizedBox(width: 16),
-                      _seatDetailItem("Type", "Sleeper"),
+                      _seatDetailItem("Type", widget.tripData.bustype!),
+                      // const SizedBox(width: 16),
+                      // _seatDetailItem("AC/Non-AC", widget.tripData.bustype!),
                       const SizedBox(width: 16),
-                      _seatDetailItem("AC/Non-AC", "AC"),
-                      const SizedBox(width: 16),
-                      _seatDetailItem("Qty", "2"),
+                      _seatDetailItem("Qty", widget.seatDetails.length.toString()),
                     ],
                   ),
                 ),
@@ -140,7 +165,7 @@ class TravelerInfoCard extends StatelessWidget {
                                 width: 12,
                                 height: 12,
                                 decoration: const BoxDecoration(
-                                  color: Colors.green,
+                                  color: AppColors.primaryBlue,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -161,12 +186,12 @@ class TravelerInfoCard extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.green,
+                                    color: AppColors.primaryBlue,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  boardingPoint, // Your dynamic boarding point
+                                  widget.boardingPoint, // Your dynamic boarding point
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
@@ -174,7 +199,7 @@ class TravelerInfoCard extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  boardingInfo, // Your dynamic boarding info
+                                  widget.boardingInfo, // Your dynamic boarding info
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
@@ -217,7 +242,7 @@ class TravelerInfoCard extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  droppingPoint, // Your dynamic dropping point
+                                  widget.droppingPoint, // Your dynamic dropping point
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
@@ -225,7 +250,7 @@ class TravelerInfoCard extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  droppingInfo, // Your dynamic dropping info
+                                  widget.droppingInfo, // Your dynamic dropping info
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
@@ -251,44 +276,44 @@ class TravelerInfoCard extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Seats details heading
-                const Text(
-                  "Seats Details",
+                 Text(
+                  "Amenities ",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                // const SizedBox(height: 8),
 
-                // Number of seats
+                // // Number of seats
                 Text(
-                  "${seatDetails.length} Seat(s)", // Dynamic seat count
+                  "${widget.tripData.amenities}.", // Dynamic seat count
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],
                   ),
                 ),
 
-                const SizedBox(height: 12),
+                // const SizedBox(height: 12),
 
-                // Seats list (horizontal scrollable)
-                Container(
-                  height: 40, // Increased height for better touch target
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: seatDetails.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final seat = seatDetails[index];
-                      return _seatContainer(
-                          seat, "Sleeper"); // Replace "Sleeper" if needed
-                    },
-                  ),
-                ),
+                // // Seats list (horizontal scrollable)
+                // Container(
+                //   height: 40, // Increased height for better touch target
+                //   child: ListView.separated(
+                //     scrollDirection: Axis.horizontal,
+                //     itemCount: seatDetails.length,
+                //     separatorBuilder: (context, index) =>
+                //         const SizedBox(width: 8),
+                //     itemBuilder: (context, index) {
+                //       final seat = seatDetails[index];
+                //       return _seatContainer(
+                //           seat, "Sleeper"); // Replace "Sleeper" if needed
+                //     },
+                //   ),
+                // ),
 
-                const SizedBox(height: 20), // Extra padding at bottom
+                // const SizedBox(height: 20), // Extra padding at bottom
               ],
             ),
           ),
@@ -300,22 +325,22 @@ class TravelerInfoCard extends StatelessWidget {
 // Helper widget for seat detail items
   Widget _seatDetailItem(String label, String value) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
+            fontSize: 14,
+            color: AppColors.neutral800,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
           style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+            fontSize: 12,
+            // fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -386,8 +411,6 @@ class TravelerInfoCard extends StatelessWidget {
     );
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     // getTripData
@@ -443,8 +466,8 @@ class TravelerInfoCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _infoColumn(
-                      boardingInfo,
-                      boardingPoint,
+                      widget.boardingInfo,
+                      widget.boardingPoint,
                       alignment: CrossAxisAlignment.start,
                       icon: Icons.trip_origin,
                       iconColor: Colors.green,
@@ -467,8 +490,8 @@ class TravelerInfoCard extends StatelessWidget {
                   ),
                   Expanded(
                     child: _infoColumn(
-                      droppingInfo,
-                      droppingPoint,
+                      widget.droppingInfo,
+                      widget.droppingPoint,
                       alignment: CrossAxisAlignment.end,
                       icon: Icons.location_on,
                       iconColor: Colors.red,
@@ -498,7 +521,7 @@ class TravelerInfoCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        "$seatCount seat${seatCount > 1 ? 's' : ''}",
+                        "${widget.seatDetails.length} seat${widget.seatDetails.length > 1 ? 's' : ''}",
                         style: const TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.w500,

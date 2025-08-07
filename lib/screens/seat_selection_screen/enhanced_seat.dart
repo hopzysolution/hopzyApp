@@ -9,13 +9,9 @@ import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
-import 'package:ridebooking/screens/razor_pay_page.dart';
-import 'package:ridebooking/utils/Api_client.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/route_generate.dart';
-import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
-import 'package:ridebooking/widgets/contact_details_card.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ridebooking/widgets/passenger_card.dart';
 import 'package:ridebooking/widgets/traveler_info_card.dart';
@@ -791,10 +787,10 @@ class _EnhancedBusInfoBottomSheetState
           TravelerInfoCard(
             boardingInfo: _selectedBoardingPoint!,
             boardingPoint: "",
-            droppingInfo: _selectedBoardingPoint!,
+            droppingInfo: _selectedDroppingPoint!,
             droppingPoint: "",
-            seatCount: widget.selectedSeats!.length,
-            seatDetails: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8'],
+            tripData: widget.tripData!,
+            seatDetails: widget.selectedSeats! ,
           ):Container(),
           // SizedBox(height: 16),
           // ContactDetailsCard(),
