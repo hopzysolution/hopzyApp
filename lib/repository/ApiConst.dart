@@ -25,6 +25,8 @@ class ApiConst {
 
   static const String getTentativeBooking ="TentativeBooking/apiagent";
 
+  static const String cancelBooking = "Cancel/apiagent";
+  static const String confirmCancelBooking = "ConfirmCancel/apiagent";
 
   static const String createOrder = "api/public/create-order";
   static const String paymentVerification ="api/public/verify-payment";

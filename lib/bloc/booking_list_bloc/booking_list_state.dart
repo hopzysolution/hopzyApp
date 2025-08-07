@@ -23,3 +23,9 @@ class BookingCancelledSuccess extends BookingListState {
 
   BookingCancelledSuccess({required this.message});
 }
+
+class CancelDetailsLoaded extends BookingListState {
+  final CancelDetails cancelDetails;
+
+  CancelDetailsLoaded({required this.cancelDetails});
+}

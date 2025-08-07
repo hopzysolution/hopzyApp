@@ -2,8 +2,16 @@ abstract class BookingListEvent {}
 
 class FetchBookingsEvent extends BookingListEvent {}
 
-class CancelBookingEvent extends BookingListEvent {
-  final String bookingId;
+class FetchCancelDetailsEvent extends BookingListEvent {
+  final String pnr;
+  final String seatNo;
 
-  CancelBookingEvent(this.bookingId);
+  FetchCancelDetailsEvent(this.pnr, this.seatNo);
+}
+
+class CancelBookingEvent extends BookingListEvent {
+  final String pnr;
+  final String seatNo;
+
+  CancelBookingEvent(this.pnr, this.seatNo);
 }
