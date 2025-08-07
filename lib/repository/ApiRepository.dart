@@ -14,29 +14,22 @@ class ApiRepository {
           String callingUrl =basurl2!=null?basurl2+apiName :ApiConst.baseUrl + apiName;
 
       String token = await Session().getToken();
-        if(basurl2!=null){
-        client.options.headers["token"]=token;
-        // 'Authorization': '••••••'
-        client.options.headers["Authorization"]=token;
+
+        if(basurl2 != null){
+          print("in header Authorization ---------->>>>>>");
+        client.options.headers["Authorization"]="Bearer $token";
         }
         else{
           
-        client.options.headers["User-Agent"]="insomnia/11.2.0";
-        client.options.headers["token"]=basurl2!=null?token:  ApiConst.accessToken;
+        // client.options.headers["User-Agent"]="insomnia/11.2.0";
+        client.options.headers["token"]=  ApiConst.accessToken;
         client.options.headers["Cookie"]="";
         client.options.headers["PHPSESSID"]="qjmtid5a30e8sdgpcdu7h9a399";
         }
         
-      //  token.isEmpty?"": client.options.headers["authorization"] = "Bearer " + token;
-
-      // if (token.isNotEmpty) {
-      //   client.options.headers["authorization"] = "Bearer " + token;
-      // }
-      // if(callingUrl.contains("getTutorials")){
-      //   client.options.headers["language"] = language;
-      // }
+      
       print("Calling url is --->>> : ${callingUrl}");
-      print("token of ------>>>>: ${ApiConst.accessToken}");
+      print("token of ------>>>>: ${token != null?token:ApiConst.accessToken}");
       print("header of ----->>>: ${client.options.headers.toString()}");
 
       var response = await client.get(callingUrl);
@@ -135,9 +128,14 @@ class ApiRepository {
         
         // client.options.headers["devicetoken"]="";
         // client.options.headers["deviceType"]=Platform.isAndroid? "ANDROID":Platform.isIOS? "IOS":"WEB";
-        
+        if(basurl2!=null){
        client.options.headers["User-Agent"]="insomnia/11.2.0";
-        client.options.headers["token"]=basurl2!=null?"": ApiConst.accessToken;
+        client.options.headers["Authorization"]=token;
+
+        }else{
+       client.options.headers["User-Agent"]="insomnia/11.2.0";
+        client.options.headers["token"]= ApiConst.accessToken;
+        }
         // client.options.headers["Cookie"]="";
         // client.options.headers["PHPSESSID"]="qjmtid5a30e8sdgpcdu7h9a399";
       

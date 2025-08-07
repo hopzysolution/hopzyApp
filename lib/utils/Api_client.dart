@@ -486,8 +486,9 @@ class ApiClient {
         ApiConst.requesOtp, 
         data: {'email': email},
       );
+      print("Api response =response.data;// =======>>>>${response.data}");
       
-      return response.data;// ApiResponse.success(response.data);
+      return ApiResponse.success(response.data);
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
     } catch (e) {
@@ -512,7 +513,7 @@ class ApiClient {
         );
       }
 
-      return data; //ApiResponse.success(data);
+      return ApiResponse.success(data);
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
     } catch (e) {

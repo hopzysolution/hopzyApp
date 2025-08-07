@@ -49,18 +49,19 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
 
 // Request OTP
 
-       var response  = await api.requestOtp(event.mobileNumber!);
+       ApiResponse response  = await api.requestOtp(event.mobileNumber!);
   // var response =await ApiRepository.postAPI(ApiConst.loginWithOtp, formData);
         if( response==null) {emit(LoginWithOtpFailure(error: "Server error data not found"));}else{
-  Map<String, dynamic> parsed = json.decode(response.toString());
+           print("Api response in bloc ========>>>>${response.data}");
+  // Map<String, dynamic> parsed = json.decode(response.data.toString());
 
-      if (response.toString().contains("status")) {
-        if (parsed['status'] == 1) {
+      if (response.data.toString().contains("status")) {
+        if (response.data['status'] == 1) {
           // Handle successful login
-          emit(LoginWithOtpSuccess(message: parsed['message']));
+          emit(LoginWithOtpSuccess(message: response.data['message']));
         } else {
           // Handle login failure
-          emit(LoginWithOtpFailure(error: parsed['message']));
+          emit(LoginWithOtpFailure(error: response.data['message']));
         }
       } else {
         // Handle unexpected response format
@@ -82,18 +83,18 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
       
       // var response = await ApiRepository.postAPI(ApiConst.verifyOtp, formData);
       // Verify OTP
-        var response = await api.verifyOtp(event.email, event.otp);
+        ApiResponse response = await api.verifyOtp(event.email, event.otp);
             print("Tokens saved------->>>: ${response!.data}");
-      Map<String, dynamic> parsed = json.decode(response.toString());
+      // Map<String, dynamic> parsed = json.decode(response.data.toString());
 
-      if (response.toString().contains("status")) {
-        if (parsed['status'] == 1) {
-           print("--------  result  -->>>>>>>>>${response.toString()}");
+      if (response.data.toString().contains("status")) {
+        if (response.data['status'] == 1) {
+           print("--------  result  -->>>>>>>>>${response.data.toString()}");
           // Handle successful OTP verification
           emit(OtpVerifiedState(message: "User Logged In Successfully"));
         } else {
           // Handle OTP verification failure
-          emit(OtpFailureState(error: parsed['message']));
+          emit(OtpFailureState(error: response.data['message']));
         }
       } else {
         // Handle unexpected response format
