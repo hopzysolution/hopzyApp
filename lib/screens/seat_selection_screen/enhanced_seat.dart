@@ -69,6 +69,7 @@ class _EnhancedBusInfoBottomSheetState
 
   late Razorpay _razorpay;
   BookingBloc? forPayment;
+  List<String> seats=[];
   @override
   void initState() {
     // TODO: implement initState
@@ -79,6 +80,13 @@ class _EnhancedBusInfoBottomSheetState
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
     //  saveSelectedSeat();
+    getSeatList();
+  }
+
+  getSeatList()async{
+    widget.selectedSeats!.map((e){
+      seats.add(e.seatNo.toString());
+    }).toList();
   }
 
   String paymentVerified = "notVerified";
@@ -185,14 +193,31 @@ class _EnhancedBusInfoBottomSheetState
           }
           if (state is ConfirmBooking) {
             ToastMessage().showSuccessToast("Booking Confirmed"); //---abc--
-            Future.delayed(Duration(milliseconds: 500));
-            
-                  Navigator.pushReplacementNamed(context, Routes.dashboard);
+            // Future.delayed(Duration(milliseconds: 500));
+            BlocProvider.of<BookingBloc>(context).add(ShowTicket(pnr:  state.pnr,userName: state.userName,tripData:widget.tripData,dropingPoint:_selectedDroppingPoint));
+                  // Navigator.pushReplacementNamed(context, Routes.dashboard);
+          }
+          if(state is ShowTicketState){
+           Navigator.pushReplacementNamed(
+  context,
+  Routes.tripDetailsScreen,
+  arguments: {
+    'ticketDetails': state.ticketDetails,
+    'tripData': state.tripData,
+    'dropingPoint': state.dropingPoint,
+  },
+);
           }
         },
+
         child: BlocBuilder<BookingBloc, BookingState>(
           builder: (context, state) {
             forPayment = BlocProvider.of(context);
+            // if(state is ShowTicketState){
+            //   return Center(
+            //     child: Text("Han BHai Aa gaya Swada...."),
+            //   );
+            // }
             if (state is BookingLoading) {
               return Center(child: CircularProgressIndicator());
             } else {
@@ -387,117 +412,97 @@ class _EnhancedBusInfoBottomSheetState
                       ),
                     ),
 
-                    // Continue button
-                    (_selectedBoardingPoint == null ||
-                            _selectedDroppingPoint == null ||
-                            finalSelectedPassenger == null ||
-                            finalSelectedPassenger!.isEmpty ||
-                            widget.selectedSeats == null ||
-                            widget.selectedSeats!.isEmpty)
-                        ? Container()
-                        // : Container(
-                        //     padding: EdgeInsets.all(16),
-                        //     decoration: BoxDecoration(
-                        //       color: Colors.white,
-                        //       boxShadow: [
-                        //         BoxShadow(
-                        //           color: Colors.black.withOpacity(0.1),
-                        //           blurRadius: 8,
-                        //           offset: Offset(0, -2),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //     child: Row(
-                        //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        //       children: [
-                        //         Expanded(
-                        //           child: Column(
-                        //             crossAxisAlignment: CrossAxisAlignment.start,
-                        //             mainAxisSize: MainAxisSize.min,
-                        //             children: [
-                        //               Text(
-                        //                 '${widget.selectedSeats!.length} seat(s) selected',
-                        //                 style: TextStyle(
-                        //                   fontWeight: FontWeight.bold,
-                        //                   fontSize: 16,
-                        //                 ),
-                        //               ),
-                        //               Text(
-                        //                 'Seats: ${widget.selectedSeats!.join(", ")}',
-                        //                 style: TextStyle(
-                        //                   color: Colors.grey.shade600,
-                        //                   fontSize: 14,
-                        //                 ),
-                        //               ),
-                        //             ],
-                        //           ),
-                        //         ),
-                        //         ElevatedButton(
-                        //           onPressed: () {},
-                        //           // style: ElevatedButton.styleFrom(
-                        //           //   backgroundColor: Colors.red,
-                        //           //   shape: RoundedRectangleBorder(
-                        //           //     borderRadius: BorderRadius.circular(25),
-                        //           //   ),
-                        //           // ),
-                        //           child: Text(
-                        //             'Continue',
-                        //             style: TextStyle(
-                        //               color: Colors.white,
-                        //               fontSize: 16,
-                        //               fontWeight: FontWeight.bold,
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ),
-                        : Container(
-                            padding: EdgeInsets.all(16),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  // Navigator.push(context, MaterialPageRoute(builder: (context)=>RazorpayPage()));
-                                  if (_selectedBoardingPoint != null &&
-                                      _selectedDroppingPoint != null &&
-                                      finalSelectedPassenger != null &&
-                                      widget.selectedSeats != null) {
-                                    BlocProvider.of<BookingBloc>(context).add(
-                                      OnContinueButtonClick(
-                                        bpoint: selectedBoardingPointId,
-                                        noofseats: widget.selectedSeats!.length,
-                                        selectedPassenger:
-                                            finalSelectedPassenger,
-                                        totalfare:
-                                            (widget.selectedSeats!.length *
-                                                    int.parse(
-                                                      widget.tripData!.fare
-                                                          .toString(),
-                                                    ))
-                                                .toInt(),
-                                      ),
-                                    );
-                                  } //( widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())).toInt());
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Continue',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                    // Continue button with selected seats display
+(_selectedBoardingPoint == null ||
+        _selectedDroppingPoint == null ||
+        finalSelectedPassenger == null ||
+        finalSelectedPassenger!.isEmpty ||
+        widget.selectedSeats == null ||
+        widget.selectedSeats!.isEmpty)
+    ? Container()
+    : Material(
+      elevation: 4,
+      shadowColor: AppColors.neutral900,
+      child: Column(
+          children: [
+         
+            // Container(
+              // child: ListView.builder(
+              //   itemCount: widget.selectedSeats!.length,
+              //   itemBuilder: (context,index){
+              Text(seats.toString().replaceAll("[", "").replaceAll("]", ""),
+              style: TextTheme.of(context).bodyLarge,
+              ),
+                   Container(
+      
+                    padding: EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+                    decoration: BoxDecoration(
+                       
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("${widget.selectedSeats!.length} seat selected",
+                        style: TextTheme.of(context).bodyLarge,
+                        ),
+                        Text("₹ ${int.parse(widget.tripData!.fare.toString())*widget.selectedSeats!.length}",
+                        style: TextTheme.of(context).titleMedium,
+                        
+                        ),
+                      ],
+                    ),
+                  ),
+                // }),
+            // ),
+            
+            
+            // Continue Button
+            Container(
+              padding: EdgeInsets.all(10),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Navigator.push(context, MaterialPageRoute(builder: (context)=>RazorpayPage()));
+                    if (_selectedBoardingPoint != null &&
+                        _selectedDroppingPoint != null &&
+                        finalSelectedPassenger != null &&
+                        widget.selectedSeats != null) {
+                      BlocProvider.of<BookingBloc>(context).add(
+                        OnContinueButtonClick(
+                          bpoint: selectedBoardingPointId,
+                          noofseats: widget.selectedSeats!.length,
+                          selectedPassenger: finalSelectedPassenger,
+                          totalfare: (widget.selectedSeats!.length *
+                                  int.parse(
+                                    widget.tripData!.fare.toString(),
+                                  ))
+                              .toInt(),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    'Proceed to pay',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+    ),
                   ],
                 ),
               );
@@ -583,10 +588,10 @@ class _EnhancedBusInfoBottomSheetState
         final String venue = detail.venue ?? '';
         final String boardTime = detail.boardtime != null
             ? DateFormat(
-                'hh:mm a',
+                'hh:mm a  dd MMM yyyy',
               ).format(DateTime.parse(detail.boardtime.toString()))
             : '--:--';
-        final String stationName = detail.stnname ?? '';
+        final String stationName = detail.address ?? '';
         final String selectedValue = '$venue-$boardTime';
         final int selsctedId = int.parse(detail.id.toString());
 
@@ -679,10 +684,10 @@ class _EnhancedBusInfoBottomSheetState
         final String venue = detail.venue ?? '';
         final String dropTime = detail.droptime != null
             ? DateFormat(
-                'hh:mm a',
+                'hh:mm a  dd MMM yyyy',
               ).format(DateTime.parse(detail.droptime.toString()))
             : '--:--';
-        final String stationName = detail.stationname ?? '';
+        final String stationName = detail.address ?? '';
         final String selectedValue = '$venue-$dropTime';
 
         return _buildDroppingPoint(

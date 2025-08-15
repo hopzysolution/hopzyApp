@@ -37,7 +37,10 @@ class ApiConst {
   static const String getUserBookings = "api/private/user/bookings?page=1&limit=10";
 
   static const String confirmTentative = "ConfirmTentativeBooking/apiagent";
+//ticket details
+  static const String ticketDetails ="GetTicketAllInfo/apiagent";
 
+  static const String cancelHopzyBooking="api/private/bookings/cancel";
 
 
 

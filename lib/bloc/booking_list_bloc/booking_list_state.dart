@@ -25,7 +25,8 @@ class BookingCancelledSuccess extends BookingListState {
 }
 
 class CancelDetailsLoaded extends BookingListState {
+  String? pnr;
   final CancelDetails cancelDetails;
 
-  CancelDetailsLoaded({required this.cancelDetails});
+  CancelDetailsLoaded({required this.cancelDetails,this.pnr});
 }

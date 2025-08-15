@@ -159,7 +159,8 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
           // Main content area - seat layout
           Positioned.fill(
               child: BusSeatSelectionScreen(
-           
+                // seatLayoutData: seatLayoutData,
+            seatLayout: seatLayoutData.layout!,
             busData: busData,//AppConst.busdata,
             
             onSeatsSelected: (Set<SeatModell> finaSeat) {

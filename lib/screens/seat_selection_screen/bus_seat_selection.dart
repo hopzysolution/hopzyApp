@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:ridebooking/models/bus_data.dart';
+import 'package:ridebooking/models/seat_layout_data_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 
@@ -17,9 +18,10 @@ enum SeatStatus {
 class BusSeatSelectionScreen extends StatefulWidget {
   final BusData busData; // API data containing seat layout
   final void Function(Set<SeatModell>) onSeatsSelected;
+  final Layout seatLayout;
 
   const BusSeatSelectionScreen(
-      {Key? key, required this.busData, required this.onSeatsSelected})
+      {Key? key, required this.busData, required this.onSeatsSelected,required this.seatLayout})
       : super(key: key);
 
   @override
@@ -35,6 +37,24 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
   void initState() {
     super.initState();
     _initializeSeatLayout();
+    _newSeatLayout();
+  }
+int? maxRows;
+int? maxCols;
+List<SeatInfo> upperSeats=[];
+List<SeatInfo> lowerSeats=[];
+  _newSeatLayout(){
+      final layout = widget.seatLayout;
+    final seatInfo = layout.seatInfo ?? [];
+     maxRows = int.parse(layout.maxrows!);
+     maxCols = int.parse(layout.maxcols!);
+
+    // Separate upper and lower berth seats
+    upperSeats = seatInfo.where((seat) => seat.berth == 'upper').toList();
+    lowerSeats = seatInfo.where((seat) => seat.berth == 'lower').toList();
+
+    print("Upper Seats:=========>>>>> ${upperSeats.length}, Lower Seats:========<><><><><> ${lowerSeats.length}");
+
   }
 
   void _initializeSeatLayout() {
@@ -85,46 +105,46 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
     }
   }
 
-  Color getSeatColor(SeatStatus status) {
+  Color getSeatColor(String status) {
     switch (status) {
-      case SeatStatus.available:
+      case "A":
         return Colors.white;
-      case SeatStatus.booked:
+      case "BK":
         return Colors.black;
       // case SeatStatus.femaleOnly:
       //   return Colors.pink;
       // case SeatStatus.maleOnly:
       //   return Colors.blue;
-      case SeatStatus.femaleBooked:
+      case "F":
         return Colors.pink;//.withOpacity(0.5);
-      case SeatStatus.maleBooked:
+      case "M":
         return Colors.blue;//.withOpacity(0.5);
       default:
         return Colors.white;
     }
   }
 
-  IconData getSeatIcon(SeatStatus status) {
+  IconData getSeatIcon(String status) {
     switch (status) {
       // case SeatStatus.femaleOnly:
-        case SeatStatus.femaleBooked:
+        case "F":
         return Icons.female;
       // case SeatStatus.maleOnly:
-        case SeatStatus.maleBooked:
+        case "M":
         return Icons.male;
       default:
         return Icons.event_seat;
     }
   }
 
-  bool _canSelectSeat(SeatStatus status) {
-    return status == SeatStatus.available ;
+  bool _canSelectSeat(String status) {
+    return status == "A" ;
     // ||
     //     status == SeatStatus.femaleOnly ||
     //     status == SeatStatus.maleOnly;
   }
 Widget _buildSeat(
-    Map<String, dynamic>? seatData, int rowIndex, int colIndex) {
+    SeatInfo? seatData, int rowIndex, int colIndex) {
   if (seatData == null) {
     return Flexible(
       child: Container(
@@ -133,10 +153,10 @@ Widget _buildSeat(
     );
   }
 
-  final seatNumber = seatData['seatNumber'] as String;
-  final status = seatData['status'] as SeatStatus;
-  final price = seatData['fare'] as int? ?? 0;
-  final seatType = seatData['seatType'] as String? ?? 'seater';
+  final seatNumber = seatData.seatNo as String;
+  final status = seatData.seatstatus =="A"?"available":seatData.seatstatus =="BK"?"booked":seatData.seatstatus =="F"?"femaleBooked":seatData.seatstatus =="M"?"maleBooked":"unavailable" ; //as SeatStatus;
+  final price = seatData.fare as int? ?? 0;
+  final seatType = seatData.seattype as String? ?? 'seater';
   
   // Check if seat is selected - this should be calculated each time
   bool isSelected = selectedSeats.any((seat) => seat.seatNo == seatNumber);
@@ -156,7 +176,7 @@ Widget _buildSeat(
               selectedSeats.add(SeatModell(
                 seatNo: seatNumber, 
                 fare: price, 
-                available: status.name
+                available: status
               ));
             }
             
@@ -400,154 +420,298 @@ Widget _buildSeat(
     );
   }
 
-  @override
+ Widget _buildBerthLayout(List<SeatInfo> seats, int maxRows, int maxCols, String berthType) {
+  return Container(
+    padding: const EdgeInsets.all(8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title
+        // Text(
+        //   berthType, // e.g., "Upper Berth"
+        //   style: const TextStyle(
+        //     fontSize: 14,
+        //     fontWeight: FontWeight.bold,
+        //     color: AppColors.neutral900,
+        //   ),
+        // ),
+        // const SizedBox(height: 8),
+
+        // Seat grid
+        Column(
+          children: List.generate(maxRows, (rowIndex) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(maxCols, (colIndex) {
+                  // Find seat for this position
+                  SeatInfo? seat = seats.firstWhere(
+                    (s) =>
+                        int.parse(s.row.toString()) == (rowIndex + 1) &&
+                        int.parse(s.col.toString()) == (colIndex + 1),
+                    orElse: () => SeatInfo(seatNo: '', seatstatus: ''),
+                  );
+
+                  if (seat.seatNo == '') {
+                    // Empty space
+                    return Container(
+                      width: 60,
+                      height: 40,
+                    );
+                  }
+
+                  return _buildSeatview(seat);
+                }),
+              ),
+            );
+          }),
+        ),
+      ],
+    ),
+  );
+}
+
+
+  Widget _buildSeatview(SeatInfo seat) {
+  print("Seat data:------------>> ${seat.toJson()}");
+  String seatNo = seat.seatNo ?? '';
+  String status = seat.seatstatus ?? '';
+  String? gender = seat.gender;
+  bool isSelected = selectedSeats.any((selectedSeat) => selectedSeat.seatNo == seatNo);
+
+  // Handle gangway (empty spaces)
+  if (seatNo == '-' || seat.seattype == 'gangway') {
+    return Container(
+      width: 60,
+      height: 40,
+    );
+  }
+
+  return Flexible(
+    child: GestureDetector(
+      onTap: () {
+        if (_canSelectSeat(status)) {
+          setState(() {
+            if (isSelected) {
+              // Remove the specific seat that matches the seatNo
+              selectedSeats.removeWhere((selectedSeat) => selectedSeat.seatNo == seatNo);
+            } else {
+              // Add seat if not selected
+              selectedSeats.add(SeatModell(
+                seatNo: seat.seatNo!, 
+                fare: seat.fare ?? 0, 
+                available: status
+              ));
+            }
+            
+            print("Custom widget selected seats:--------->> ${!isSelected}");
+            print("Selected seats count: ${selectedSeats.length}");
+            widget.onSeatsSelected(selectedSeats);
+          });
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.all(2),
+        constraints: BoxConstraints(
+          minHeight: 50,
+          maxHeight: 95,
+          minWidth: 95,
+          maxWidth: 250
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.accent : getSeatColor(status),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isSelected 
+              ? AppColors.accent 
+              : status == SeatStatus.available 
+                ? Colors.green 
+                : getSeatColor(status),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            status == "A" || status == "BK"
+              ? SizedBox() 
+              : RotatedBox(
+                  quarterTurns: -1,
+                  child: Icon(
+                    getSeatIcon(status),
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+            const SizedBox(height: 2),
+            if (_canSelectSeat(status))
+              RotatedBox(
+                quarterTurns: -1,
+                child: Column(
+                  children: [
+                    Text(
+                      seat.seatNo!,
+                      style: const TextStyle(
+                        color: AppColors.neutral900,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '₹${seat.fare}',
+                      style: const TextStyle(
+                        color: AppColors.neutral900,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    
+
+                  ],
+                ),
+              )
+            else if (status == "BK" ||
+                     status == "F" ||
+                     status == "M")
+              RotatedBox(
+                quarterTurns: -1,
+                child: Text(
+                  'Sold',
+                  style: TextStyle(
+                    color: status == "BK" ? Colors.white : AppColors.neutral900,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+   @override
   Widget build(BuildContext context) {
     print("no of seat ---------->>>>>>${widget.busData.seats!.length}");
+    
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      // appBar: AppBar(
-      //   title: Text('Select Seats'),
-      //   backgroundColor: Colors.red,
-      //   foregroundColor: Colors.white,
-      //   elevation: 0,
-      // ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 16,
-                bottom: MediaQuery.of(context).size.height * 0.25,
-              ),
-              child: Column(
-                children: [
-                  _buildDeckSelector(),
-
-                  // Seats grid
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: seatLayout.asMap().entries.map((rowEntry) {
-                        int rowIndex = rowEntry.key;
-                        List<Map<String, dynamic>?> row = rowEntry.value;
-
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 3),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              // Left side seats (usually 2 seats)
-                              ...row
-                                  .take(2)
-                                  .toList()
-                                  .asMap()
-                                  .entries
-                                  .map((seatEntry) {
-                                int seatIndex = seatEntry.key;
-                                return _buildSeat(
-                                    seatEntry.value, rowIndex, seatIndex);
-                              }),
-
-                              // Aisle space
-                              SizedBox(width: 20),
-
-                              // Right side seats (remaining seats)
-                              ...row
-                                  .skip(2)
-                                  .toList()
-                                  .asMap()
-                                  .entries
-                                  .map((seatEntry) {
-                                int seatIndex = seatEntry.key + 2;
-                                return _buildSeat(
-                                    seatEntry.value, rowIndex, seatIndex);
-                              }),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
-                  SizedBox(height: 20),
-                  _buildSeatLegend(),
-                ],
-              ),
-            ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Main rotated seat layout
+              seaLayoutWidgetr(),
+              
+              // Legend
+              _buildSeatLegend(),
+              
+              // Bottom padding for safe area
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
+            ],
           ),
-
-          // Bottom selection summary
-          // if (selectedSeats.isNotEmpty)
-          //   Container(
-          //     padding: EdgeInsets.all(16),
-          //     decoration: BoxDecoration(
-          //       color: Colors.white,
-          //       boxShadow: [
-          //         BoxShadow(
-          //           color: Colors.black.withOpacity(0.1),
-          //           blurRadius: 8,
-          //           offset: Offset(0, -2),
-          //         ),
-          //       ],
-          //     ),
-          //     child: Row(
-          //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //       children: [
-          //         Column(
-          //           crossAxisAlignment: CrossAxisAlignment.start,
-          //           mainAxisSize: MainAxisSize.min,
-          //           children: [
-          //             Text(
-          //               '${selectedSeats.length} seat(s) selected',
-          //               style: TextStyle(
-          //                 fontWeight: FontWeight.bold,
-          //                 fontSize: 16,
-          //               ),
-          //             ),
-          //             Text(
-          //               'Seats: ${selectedSeats.join(", ")}',
-          //               style: TextStyle(
-          //                 color: Colors.grey.shade600,
-          //                 fontSize: 14,
-          //               ),
-          //             ),
-          //           ],
-          //         ),
-          //         ElevatedButton(
-          //           onPressed: () {
-          //             // Handle seat selection confirmation
-          //             print('Selected seats: $selectedSeats');
-          //             widget.onSeatsSelected(selectedSeats.toList());
-          //           },
-          //           style: ElevatedButton.styleFrom(
-          //             backgroundColor: Colors.red,
-          //             foregroundColor: Colors.white,
-          //             padding:
-          //                 EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          //           ),
-          //           child: Text('Continue'),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-        ],
+        ),
       ),
     );
   }
+
+
+  seaLayoutWidgetr(){
+    return Center(
+      child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: RotatedBox(
+                    quarterTurns: 1,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Upper Berth
+                          
+                                                    Container(
+                           width: double.infinity,
+                           padding: const EdgeInsets.all(12),
+                           decoration: BoxDecoration(
+                             color: AppColors.neutral400.withOpacity(0.2),
+                             borderRadius: BorderRadius.circular(8),
+                             border: Border.all(color: AppColors.neutral400),
+                           ),
+                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                             children: [ 
+                              RotatedBox(
+                              quarterTurns: -1,
+                               child: Text(
+                                   'Upper Berth',
+                                   style: TextStyle(
+                                     fontSize: 14,
+                                     fontWeight: FontWeight.bold,
+                                     color: AppColors.neutral900,
+                                   ),
+                                 ),
+                             ),
+                               const SizedBox(height: 5),
+                               Expanded(child: _buildBerthLayout(upperSeats, maxRows!, maxCols!, 'upper')),
+                             ],
+                           ),
+                                                    ),
+                          
+                          const SizedBox(height: 16),
+                          
+                          // Lower Berth
+                          
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.neutral400.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppColors.neutral400),
+                            ),
+                            child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                             children: [ 
+                              RotatedBox(
+                              quarterTurns: -1,
+                               child: Text(
+                                   'Lower Berth',
+                                   style: TextStyle(
+                                     fontSize: 14,
+                                     fontWeight: FontWeight.bold,
+                                     color: AppColors.neutral900,
+                                   ),
+                                 ),
+                             ),
+                               const SizedBox(height: 5),
+                               Expanded(child: _buildBerthLayout(lowerSeats, maxRows!, maxCols!, 'lower')),
+                             ],
+                           ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+    );
+  }
+
+
 }
+
+
 
 // Example usage with API data
 // class BusBookingApp extends StatelessWidget {
@@ -620,6 +784,7 @@ Widget _buildSeat(
 // import 'package:flutter/material.dart';
 // import 'package:phosphor_flutter/phosphor_flutter.dart';
 // import 'package:ridebooking/models/seat_layout_data_model.dart';
+// import 'package:ridebooking/models/seat_modell.dart';
 
 // enum SeatStatus {
 //   available,
@@ -631,7 +796,7 @@ Widget _buildSeat(
 
 // class BusSeatSelectionScreen extends StatefulWidget {
 //   final SeatLayoutDataModel seatLayoutData;
-//   final void Function(Set<String>) onSeatsSelected;
+//   final void Function(Set<SeatModell>) onSeatsSelected;
 
 //   const BusSeatSelectionScreen({
 //     Key? key,
@@ -644,7 +809,7 @@ Widget _buildSeat(
 // }
 
 // class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
-//   Set<String> selectedSeats = <String>{};
+//   Set<SeatModell> selectedSeats = <SeatModell>{};
 //   List<List<Map<String, dynamic>?>> seatLayout = [];
 //   bool isUpperDeck = true;
 
@@ -779,7 +944,7 @@ Widget _buildSeat(
 //         onTap: () {
 //           if (_canSelectSeat(status)) {
 //             setState(() {
-//               isSelected ? selectedSeats.remove(seatNumber) : selectedSeats.add(seatNumber);
+//               isSelected ? selectedSeats.remove(selectedSeats) : selectedSeats.add(selectedSeats.first);
 //               widget.onSeatsSelected(selectedSeats);
 //             });
 //           }
@@ -958,77 +1123,80 @@ Widget _buildSeat(
 //   Widget build(BuildContext context) {
 //     return Scaffold(
 //       backgroundColor: Colors.grey.shade100,
-//       body: Column(
-//         children: [
-//           Expanded(
-//             child: SingleChildScrollView(
-//               padding: EdgeInsets.only(
-//                 left: 16,
-//                 right: 16,
-//                 top: 16,
-//                 bottom: MediaQuery.of(context).size.height * 0.25,
-//               ),
-//               child: Column(
-//                 children: [
-//                   _buildDeckSelector(),
-//                   Container(
-//                     padding: EdgeInsets.all(16),
-//                     decoration: BoxDecoration(
-//                       color: Colors.white,
-//                       borderRadius: BorderRadius.circular(12),
-//                       boxShadow: [
-//                         BoxShadow(
-//                           color: Colors.black.withOpacity(0.05),
-//                           blurRadius: 8,
-//                           offset: Offset(0, 2),
-//                         ),
-//                       ],
+//       body: RotatedBox(
+//         quarterTurns: 1,
+//         child: Column(
+//           children: [
+//             Expanded(
+//               child: SingleChildScrollView(
+//                 padding: EdgeInsets.only(
+//                   left: 16,
+//                   right: 16,
+//                   top: 16,
+//                   bottom: MediaQuery.of(context).size.height * 0.25,
+//                 ),
+//                 child: Column(
+//                   children: [
+//                     _buildDeckSelector(),
+//                     Container(
+//                       padding: EdgeInsets.all(16),
+//                       decoration: BoxDecoration(
+//                         color: Colors.white,
+//                         borderRadius: BorderRadius.circular(12),
+//                         boxShadow: [
+//                           BoxShadow(
+//                             color: Colors.black.withOpacity(0.05),
+//                             blurRadius: 8,
+//                             offset: Offset(0, 2),
+//                           ),
+//                         ],
+//                       ),
+//                       child: Column(
+//                         children: [
+//                           Row(
+//                             children: [
+//                               Spacer(),
+//                               Icon(
+//                                 PhosphorIcons.steeringWheel(),
+//                                 color: Colors.grey,
+//                                 size: 32.0,
+//                               ),
+//                               SizedBox(width: 20),
+//                             ],
+//                           ),
+//                           SizedBox(height: 8),
+//                           ...seatLayout.asMap().entries.map((rowEntry) {
+//                             int rowIndex = rowEntry.key;
+//                             List<Map<String, dynamic>?> row = rowEntry.value;
+//                             return Padding(
+//                               padding: EdgeInsets.symmetric(vertical: 3),
+//                               child: Row(
+//                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                                 children: [
+//                                   // Left side seats (first 2 columns with some spacing)
+//                                   ...row.take(9).toList().asMap().entries.map(
+//                                     (seatEntry) => _buildSeat(seatEntry.value, rowIndex, seatEntry.key),
+//                                   ),
+//                                   SizedBox(width: 20), // Aisle gap
+//                                   // Right side seats (remaining columns)
+//                                   ...row.skip(9).toList().asMap().entries.map(
+//                                     (seatEntry) => _buildSeat(seatEntry.value, rowIndex, seatEntry.key + 9),
+//                                   ),
+//                                 ],
+//                               ),
+//                             );
+//                           }),
+//                         ],
+//                       ),
 //                     ),
-//                     child: Column(
-//                       children: [
-//                         Row(
-//                           children: [
-//                             Spacer(),
-//                             Icon(
-//                               PhosphorIcons.steeringWheel(),
-//                               color: Colors.grey,
-//                               size: 32.0,
-//                             ),
-//                             SizedBox(width: 20),
-//                           ],
-//                         ),
-//                         SizedBox(height: 8),
-//                         ...seatLayout.asMap().entries.map((rowEntry) {
-//                           int rowIndex = rowEntry.key;
-//                           List<Map<String, dynamic>?> row = rowEntry.value;
-//                           return Padding(
-//                             padding: EdgeInsets.symmetric(vertical: 3),
-//                             child: Row(
-//                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                               children: [
-//                                 // Left side seats (first 2 columns with some spacing)
-//                                 ...row.take(9).toList().asMap().entries.map(
-//                                   (seatEntry) => _buildSeat(seatEntry.value, rowIndex, seatEntry.key),
-//                                 ),
-//                                 SizedBox(width: 20), // Aisle gap
-//                                 // Right side seats (remaining columns)
-//                                 ...row.skip(9).toList().asMap().entries.map(
-//                                   (seatEntry) => _buildSeat(seatEntry.value, rowIndex, seatEntry.key + 9),
-//                                 ),
-//                               ],
-//                             ),
-//                           );
-//                         }),
-//                       ],
-//                     ),
-//                   ),
-//                   SizedBox(height: 20),
-//                   _buildSeatLegend(),
-//                 ],
+//                     SizedBox(height: 20),
+//                     _buildSeatLegend(),
+//                   ],
+//                 ),
 //               ),
 //             ),
-//           ),
-//         ],
+//           ],
+//         ),
 //       ),
 //     );
 //   }

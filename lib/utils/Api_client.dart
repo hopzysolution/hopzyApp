@@ -368,6 +368,7 @@ class ApiClient {
     final prefs = await SharedPreferences.getInstance();
     
     await prefs.setString('accessToken', accessToken);
+    await Session().setToken(accessToken);
     await Session().setHopzyAccessToken(accessToken);
     
     if (refreshToken != null) {
@@ -446,6 +447,7 @@ class ApiClient {
   /// Call this when user logs in successfully
   Future<void> onLoginSuccess(String accessToken, String refreshToken) async {
     await _saveTokens(accessToken, refreshToken);
+    // await Session().setToken()
     _startPeriodicTokenRefresh(); // Start the periodic refresh
   }
 

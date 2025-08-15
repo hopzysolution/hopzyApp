@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:dotted_line/dotted_line.dart';
+import 'package:ridebooking/models/ticket_details_model.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 
 class BusReceiptWidget extends StatelessWidget {
@@ -14,13 +15,12 @@ class BusReceiptWidget extends StatelessWidget {
   final String droppingTime;
   final String totalSeats;
   final String seatNumbers;
-  final List<PassengerInfo> passengers;
+  final List<SeatDetails> seatdetails;
   final String phoneNumber;
   final VoidCallback? onHomePressed;
   final VoidCallback? onDownloadPressed;
   final double basicFare;
-  final double reservation;
-  final double rounding;
+  final double bookingtax;
   final double totalFare;
   final bool? isReceipt;
 
@@ -36,13 +36,12 @@ class BusReceiptWidget extends StatelessWidget {
       required this.droppingTime,
       required this.totalSeats,
       required this.seatNumbers,
-      required this.passengers,
+      required this.seatdetails,
       required this.phoneNumber,
       this.onHomePressed,
       this.onDownloadPressed,
       required this.basicFare,
-      required this.reservation,
-      required this.rounding,
+      required this.bookingtax,
       required this.totalFare,
       required this.isReceipt})
       : super(key: key);
@@ -74,7 +73,7 @@ class BusReceiptWidget extends StatelessWidget {
                     isReceipt!
                         ? Center(
                             child: Text(
-                              'Receipt',
+                              'Ticket',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: AppColors.neutral100,
@@ -160,7 +159,7 @@ class BusReceiptWidget extends StatelessWidget {
                         Expanded(
                           flex: 1,
                           child: Text(
-                            "--------->",
+                            "-->",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: AppColors.neutral100,
@@ -216,7 +215,7 @@ class BusReceiptWidget extends StatelessWidget {
         // Dotted line separator
         DottedLine(
           direction: Axis.horizontal,
-          lineLength: 280.0,
+          lineLength: MediaQuery.of(context).size.width*0.65,//280.0,
           lineThickness: 1.0,
           dashLength: 6.0,
           dashColor: Colors.black,
@@ -338,9 +337,9 @@ class BusReceiptWidget extends StatelessWidget {
                       ],
                     ),
                     // Passenger Information
-                    ...passengers.asMap().entries.map((entry) {
+                    ...seatdetails.asMap().entries.map((entry) {
                       int index = entry.key;
-                      PassengerInfo passenger = entry.value;
+                      SeatDetails passenger = entry.value;
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -375,7 +374,7 @@ class BusReceiptWidget extends StatelessWidget {
                             fit: FlexFit.tight,
                             child: Text(
                               textAlign: TextAlign.center,
-                              passenger.gender,
+                              passenger.gender!,
                               style: TextStyle(
                                 color: AppColors.neutral900,
                                 fontSize: 14,
@@ -441,14 +440,15 @@ class BusReceiptWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     // QR Code
-                    isReceipt!
-                        ? Center(
-                            child: Icon(
-                              Icons.qr_code,
-                              size: 150,
-                            ),
-                          )
-                        : Column(
+                    // isReceipt!
+                    //     ? Center(
+                    //         child: Icon(
+                    //           Icons.qr_code,
+                    //           size: 150,
+                    //         ),
+                    //       )
+                    //     :
+                         Column(
                             children: [
                               Row(
                                 mainAxisAlignment:
@@ -470,18 +470,18 @@ class BusReceiptWidget extends StatelessWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text('Reservation'),
-                                  Text('₹${reservation.toStringAsFixed(2)}'),
+                                  const Text('BookingTax'),
+                                  Text('₹${bookingtax.toStringAsFixed(2)}'),
                                 ],
                               ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('Rounding'),
-                                  Text('₹${rounding.toStringAsFixed(2)}'),
-                                ],
-                              ),
+                              // Row(
+                              //   mainAxisAlignment:
+                              //       MainAxisAlignment.spaceBetween,
+                              //   children: [
+                              //     const Text('Rounding'),
+                              //     Text('₹${rounding.toStringAsFixed(2)}'),
+                              //   ],
+                              // ),
                               const SizedBox(height: 8.0),
                               Row(
                                 mainAxisAlignment:

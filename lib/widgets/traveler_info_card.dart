@@ -38,9 +38,15 @@ class _TravelerInfoCardState extends State<TravelerInfoCard> {
   }
 List<String> noOfSeats=[];
 listOFSTring(){
+  if(noOfSeats.isNotEmpty)
+  noOfSeats=[];
 widget.seatDetails.map((e){
+  
 return noOfSeats.add(e.seatNo.toString());
 }).toList();
+setState(() {
+  
+});
 }
 
 
@@ -125,11 +131,11 @@ return noOfSeats.add(e.seatNo.toString());
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _seatDetailItem(
-                          "Seat No", noOfSeats.toString()), // Replace with dynamic data
+                          "Seat No", noOfSeats.toString().replaceAll("[", "").replaceAll("]", "")), // Replace with dynamic data
                       const SizedBox(width: 16),
                       _seatDetailItem("Type", widget.tripData.bustype!),
-                      // const SizedBox(width: 16),
-                      // _seatDetailItem("AC/Non-AC", widget.tripData.bustype!),
+                      const SizedBox(width: 16),
+                      _seatDetailItem("AC/Non-AC", widget.tripData.isac!?"AC":"Non-AC"),
                       const SizedBox(width: 16),
                       _seatDetailItem("Qty", widget.seatDetails.length.toString()),
                     ],
@@ -413,6 +419,7 @@ return noOfSeats.add(e.seatNo.toString());
 
   @override
   Widget build(BuildContext context) {
+     listOFSTring();
     // getTripData
     return Container(
       // margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

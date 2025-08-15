@@ -137,18 +137,18 @@ class TripListTile extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    trip.srcName,
+                                   DateFormat.jm().format(trip.departureTime), // trip.srcName,
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       fontWeight: FontWeight.w500,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  Text(
-                                    DateFormat.jm().format(trip.departureTime),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
+                                  // Text(
+                                  //   DateFormat.jm().format(trip.departureTime),
+                                  //   style: theme.textTheme.bodySmall?.copyWith(
+                                  //     color: colorScheme.onSurfaceVariant,
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             ),
@@ -201,18 +201,18 @@ class TripListTile extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    trip.dstName,
+                                    DateFormat.jm().format(trip.arrivalTime),
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       fontWeight: FontWeight.w500,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  Text(
-                                    DateFormat.jm().format(trip.arrivalTime),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
+                                  // Text(
+                                  //   DateFormat.jm().format(trip.arrivalTime),
+                                  //   style: theme.textTheme.bodySmall?.copyWith(
+                                  //     color: colorScheme.onSurfaceVariant,
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             ),

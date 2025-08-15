@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:ridebooking/screens/demoscreen.dart';
 import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
+import 'package:ridebooking/screens/new_bus_seat_layout.dart';
+import 'package:ridebooking/screens/trip_details_screen.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/session.dart';
 
@@ -55,12 +57,13 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   callNextPage() async {
+    // Navigator.push(context, MaterialPageRoute(builder: (context)=>SeatLayoutScreen()));
     String token = await Session().getToken();
-    if (token.isEmpty)
+    if (token.isNotEmpty)
       Navigator.pushReplacementNamed(
 
         context,
-        Routes.loginWithOtpScreen, // Navigate to Login with OTP screen
+        Routes.dashboard, // Navigate to Login with OTP screen
       );
     else {
       Navigator.pushReplacementNamed(context, Routes.loginWithOtpScreen);

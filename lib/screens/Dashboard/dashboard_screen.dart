@@ -39,6 +39,13 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
     super.initState();
     _initializeAnimations();
     _loadUserData();
+    getHopzyToken();
+  }
+
+  String accessTokenHopzy="";
+
+  getHopzyToken()async{
+    accessTokenHopzy = await Session().getHopzyAccessToken();
   }
 
   void _initializeAnimations() {
@@ -222,40 +229,43 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
         ],
       ),
       actions: [
-        // Container(
-        //   margin: EdgeInsets.only(right: isTablet ? 16 : 12),
-        //   padding: EdgeInsets.symmetric(
-        //     horizontal: isTablet ? 16 : 12,
-        //     vertical: isTablet ? 8 : 6,
-        //   ),
-        //   decoration: BoxDecoration(
-        //     color: Colors.white.withOpacity(0.15),
-        //     borderRadius: BorderRadius.circular(20),
-        //     border: Border.all(
-        //       color: Colors.white.withOpacity(0.3),
-        //       width: 1,
-        //     ),
-        //   ),
-        //   child: Row(
-        //     mainAxisSize: MainAxisSize.min,
-        //     children: [
-        //       Icon(
-        //         Icons.account_balance_wallet_rounded,
-        //         color: Colors.white,
-        //         size: isTablet ? 18 : 16,
-        //       ),
-        //       SizedBox(width: isTablet ? 8 : 6),
-        //       Text(
-        //         '₹ 0',
-        //         style: TextStyle(
-        //           color: Colors.white,
-        //           fontWeight: FontWeight.bold,
-        //           fontSize: walletFontSize,
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        // ),
+        accessTokenHopzy==""?Container():
+        InkWell(
+          onTap: (){
+            Navigator.pushNamed(context, Routes.loginWithOtpScreen);
+          },
+          child: Container(
+            margin: EdgeInsets.only(right: isTablet ? 16 : 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: isTablet ? 16 : 12,
+              vertical: isTablet ? 8 : 6,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.neutral900,
+              borderRadius: BorderRadius.circular(20),
+             
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.login,
+                  color: Colors.white,
+                  size: isTablet ? 18 : 16,
+                ),
+                SizedBox(width: isTablet ? 8 : 6),
+                Text(
+                  'Login',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: walletFontSize,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -420,14 +430,14 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
             ),
             _buildModernListTile(
               icon: Icons.account_balance_wallet_outlined,
-              title: 'Personal information',
-              onTap: () => _onDrawerItemTap("MyWallet"),
+              title: 'My Profile',
+              onTap: () => _onDrawerItemTap("My Profile"),
               isTablet: isTablet,
             ),
             _buildModernListTile(
               icon: Icons.loyalty_outlined,
               title: 'Passengers',
-              onTap: () => _onDrawerItemTap("LoyaltyHistory"),
+              onTap: () => _onDrawerItemTap("Passengers"),
               isTablet: isTablet,
             ),
             // _buildModernListTile(

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:ridebooking/bloc/booking_list_bloc/booking_list_bloc.dart';
 import 'package:ridebooking/bloc/booking_list_bloc/booking_list_event.dart';
 import 'package:ridebooking/bloc/booking_list_bloc/booking_list_state.dart';
+import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
 
 class BookingListScreen extends StatelessWidget {
@@ -13,9 +14,20 @@ class BookingListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Bookings'),
-        centerTitle: true,
+        
+        title: const Text('My Bookings',style: TextStyle(
+          color: AppColors.neutral50
+        ),),
+        centerTitle: false,
         elevation: 0,
+        leading: IconButton(
+          onPressed: (){
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back,
+          color: AppColors.neutral50,
+          ),
+        ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
@@ -28,9 +40,11 @@ class BookingListScreen extends StatelessWidget {
             } else if (state is BookingListFailure) {
               ToastMessage().showErrorToast(state.error);
             } else if (state is CancelDetailsLoaded) {
+              final parentContext=context;
               showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
+
+                context: parentContext,
+                builder: (dialogContext) => AlertDialog(
                   title: const Text('Cancel Booking'),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -50,18 +64,19 @@ class BookingListScreen extends StatelessWidget {
                   ),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(dialogContext),
                       child: const Text('No'),
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.pop(context);
-                        context.read<BookingListBloc>().add(
+                       parentContext.read<BookingListBloc>().add(
                           CancelBookingEvent(
-                            state.cancelDetails.seatNo,
+                            state.pnr!,
                             state.cancelDetails.seatNo,
                           ),
                         );
+                        
+                        Navigator.pop(dialogContext);
                       },
                       child: const Text('Yes'),
                     ),
@@ -220,7 +235,7 @@ class BookingCard extends StatelessWidget {
                             ? booking.passengers.first.seatNo
                             : '';
                         context.read<BookingListBloc>().add(
-                          FetchCancelDetailsEvent(booking.pnr, seatNo),
+                          FetchCancelDetailsEvent(booking.pnr, seatNo,booking.ticketId),
                         );
                       }
                     : null, // Disable button if not confirmed

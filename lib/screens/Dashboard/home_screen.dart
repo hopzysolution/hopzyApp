@@ -4,10 +4,14 @@ import 'package:intl/intl.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_bloc.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_event.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_state.dart';
+import 'package:ridebooking/bloc/trip_plan_bloc/trip_planner_bloc.dart';
+import 'package:ridebooking/bloc/trip_plan_bloc/trip_planner_repository.dart';
 import 'package:ridebooking/commonWidgets/custom_search_widget.dart';
 import 'package:ridebooking/models/all_trip_data_model.dart';
+import 'package:ridebooking/screens/trip_planner.dart';
 // import 'package:ridebooking/models/station_model.dart';
 import 'package:ridebooking/utils/route_generate.dart';
+import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
 import 'package:ridebooking/utils/webview_page_screen.dart';
 
@@ -94,6 +98,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    //  saveSelectedSeat();
+  }
+  
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => HomeScreenBloc(),
@@ -138,104 +150,94 @@ class _HomeScreenState extends State<HomeScreen> {
                 : [];
 
             return SingleChildScrollView(
-              child: Container(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.only(top: 2, bottom: 5),
-                      child: Text(
-                        "Highly Trusted Buses",
-                        style: Theme.of(context).textTheme.titleLarge
-                            ?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    CustomSearchWidget(
-                      fromOptions: fromOptions,
-                      toOptions: toOptions,
-                      allAvailabletrips: context
-                          .read<HomeScreenBloc>()
-                          .allAvailabletrips!,
-                      fromController: fromController,
-                      toController: toController,
-                      selectedDate: selectedDate,
-                      onDateSelected: (DateTime date) {
-                        setState(() {
-                          selectedDate = date;
-                        });
-                      },
-                      onSwapTap: () {
-                        final tempText = fromController.text;
-                        fromController.text = toController.text;
-                        toController.text = tempText;
+  padding: const EdgeInsets.all(10.0),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(
+        padding: EdgeInsets.only(top: 10, bottom: 15),
+        child: Text(
+          "Highly Trusted Buses",
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      
+      // Wrap CustomSearchWidget to handle potential sizing issues
+      Container(
+        constraints: BoxConstraints(
+          maxHeight: 300, // Prevent unbounded height
+        ),
+        child: CustomSearchWidget(
+          fromOptions: fromOptions,
+          toOptions: toOptions,
+          allAvailabletrips: context.read<HomeScreenBloc>().allAvailabletrips!,
+          fromController: fromController,
+          toController: toController,
+          selectedDate: selectedDate,
+          onDateSelected: (DateTime date) {
+            setState(() {
+              selectedDate = date;
+            });
+          },
+          onSwapTap: () {
+            final tempText = fromController.text;
+            fromController.text = toController.text;
+            toController.text = tempText;
 
-                        final tempStation = selectedFromStation;
-                        selectedFromStation = selectedToStation;
-                        selectedToStation = tempStation;
-                        setState(() {}); // Refresh dropdowns
+            final tempStation = selectedFromStation;
+            selectedFromStation = selectedToStation;
+            selectedToStation = tempStation;
+            setState(() {}); // Refresh dropdowns
 
-                        print(
-                          "Swapped stations: ${selectedFromStation?.srcname} and ${selectedToStation?.srcname}",
-                        );
-                      },
-                      onSearchTap: () {
-                        // print(
-                        //   "Searching for trips from ${fromController.text} to ${selectedToStation?.srcname} on $selectedDate",
-                        // );
-                        // print(
-                        //   "Searching for trips from ${selectedFromStation!.srcid} to ${selectedToStation?.toJson()} on $selectedDate",
-                        // );
+            print(
+              "Swapped stations: ${selectedFromStation?.srcname} and ${selectedToStation?.srcname}",
+            );
+          },
+          onSearchTap: () {
+            if (selectedFromStation == null || selectedToStation == null) {
+              ToastMessage().showErrorToast(
+                "Please select both stations.",
+              );
+              return;
+            }
 
-                        if (selectedFromStation == null ||
-                            selectedToStation == null) {
-                          ToastMessage().showErrorToast(
-                            "Please select both stations.",
-                          );
-                          return;
-                        }
+            String dateSelected = DateFormat('yyyy-MM-dd').format(selectedDate);
 
-                        String dateSelected = DateFormat(
-                          'yyyy-MM-dd',
-                        ).format(selectedDate);
-
-                        context.read<HomeScreenBloc>().add(
-                          SearchAvailableTripsEvent(
-                            from: selectedFromStation!.srcid!,
-                            to: selectedToStation!.srcid!,
-                            date: dateSelected,
-                          ),
-                        );
-                      },
-                      onFromSelected: (AllAvailabletrips allAvailabletrips) {
-                        selectedFromStation = allAvailabletrips;
-                        setState(() {}); // Rebuild so toOptions updates
-                      },
-                      onToSelected: (AllAvailabletrips station) {
-                        selectedToStation = station;
-                        print(
-                          "Selected To Station: ${selectedToStation?.srcname}",
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 20), // Use this instead of Spacer
-
-                    Container(
-                      height: MediaQuery.of(context).size.height,
-                      child: WebViewPagesScreen(
-                        titleMain: "",
-                        urlToLoad: "https://aitripplanner.hopzy.in/",
-                        bodyTags: "",
-                      ),
-                    ),
-                  ],
-                ),
+            context.read<HomeScreenBloc>().add(
+              SearchAvailableTripsEvent(
+                from: selectedFromStation!.srcid!,
+                to: selectedToStation!.srcid!,
+                date: dateSelected,
               ),
             );
+          },
+          onFromSelected: (AllAvailabletrips allAvailabletrips) {
+            selectedFromStation = allAvailabletrips;
+            setState(() {}); // Rebuild so toOptions updates
+          },
+          onToSelected: (AllAvailabletrips station) {
+            selectedToStation = station;
+            print(
+              "Selected To Station: ${selectedToStation?.srcname}",
+            );
+          },
+        ),
+      ),
+      
+      const SizedBox(height: 5),
+
+      // Remove Expanded and use BlocProvider directly
+      BlocProvider(
+        create: (context) => TripPlannerBloc(repository: TripPlannerRepository()),
+        child: TripPlannerWidget(),
+      ),
+    ],
+  ),
+);
           },
         ),
       ),

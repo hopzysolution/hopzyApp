@@ -71,6 +71,7 @@ import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
+import 'package:ridebooking/models/ticket_details_model.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/repository/ApiRepository.dart';
 import 'package:ridebooking/utils/session.dart';
@@ -79,10 +80,12 @@ import 'package:ridebooking/globels.dart' as globals;
 class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final Availabletrips tripData;
   final String paymentVerified;
+  TicketDetailsModel? ticketDetails;
   String userId="";
   String? pnr;
   BookingBloc(this.tripData, this.paymentVerified) : super(BookingInitial()) {
     on<OnContinueButtonClick>(_onContinueButtonClick);
+    on<ShowTicket>(_showTicketDetails);
 
     // on<OnPaymentVerification>((event, emit) => ApiClient().paymentVerification(event.response!, event, emit),);
     // paymentVerified == "Payment successful." ? confirmTentativeBooking() : "";
@@ -100,14 +103,14 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         "tripid": tripData.tripid,
         "bpoint": event.bpoint!,
         "noofseats": event.noofseats!,
-        "mobileno": await Session().getEmail(), //globals.phoneNo,
-        "email": await Session().getPhoneNo(),// globals.email,
-        "totalfare": event.totalfare! + 50,
+        "mobileno": await Session().getPhoneNo(), //globals.phoneNo,
+        "email": await Session().getEmail(),// globals.email,
+        "totalfare": event.totalfare! + (event.totalfare!*0.05),
         "bookedat": globals.selectedDate,
         "seatInfo": {
           "passengerInfo": event.selectedPassenger!
               .map(
-                (p) => p.toJson()..update('fare', (value) => (value ?? 0) + 50),
+                (p) => p.toJson()..update('fare', (value) => (value ?? 0) + (value*0.05)),
               )
               .toList(),
         },
@@ -159,11 +162,11 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       if (data["status"] != null && data["status"]["success"] == true) {
         //  ApiClient().createOrder(event.totalfare!,"8305933803","aadityagupta778@gmail.com",event,emit);
 
-        print("Pnr===========>>>>>${data["BookingInfo"]["PNR"]}");
-          await Session().setPnr(data["BookingInfo"]["PNR"]);
+        // print("Pnr===========>>>>>${data["BookingInfo"]["PNR"]}");
+        //   await Session().setPnr(data["BookingInfo"]["PNR"]);
 
         // emit(BookingSuccess(success: "Booking Confirm"));
-        emit(ConfirmBooking());
+        // emit(ConfirmBooking(data["BookingInfo"]["PNR"],));
       } else {
         final message = data["status"]?["message"] ?? "Failed to load stations";
         emit(BookingFailure(error: message));
@@ -189,7 +192,7 @@ Future<void> createOrder(int fare,String phoneNo,String email,
 //   "email": email
 //     });
 var formData={
-       "amount": fare+50,
+       "amount": fare+(fare*0.05),
   "phone": phoneNo,
   "email": email
     };
@@ -228,7 +231,7 @@ Future<void> paymentVerification({PaymentSuccessResponse? paymentVerify,String? 
   "razorpay_payment_id": paymentVerify.paymentId,
   "razorpay_signature": paymentVerify.signature,
   "user_id": userId,
-  "amount":int.parse(tripData.fare!)+50
+  "amount":int.parse(tripData.fare!)+(int.parse(tripData.fare!)*0.05)
 };
 
       final response = await ApiRepository.postAPI(ApiConst.paymentVerification, formData,basurl2: ApiConst.baseUrl2);
@@ -271,11 +274,11 @@ Future<void> confirmBooking({Availabletrips? tripData,String? bpoint,Set<SeatMod
         "noofseats": selectedSeats!.length,
         "mobileno": await Session().getPhoneNo(),
         "email": await Session().getEmail(),
-        "totalfare": ( selectedSeats.length * int.parse(tripData.fare.toString())).toInt()+50,
+        "totalfare": ( selectedSeats.length * int.parse(tripData.fare.toString())).toInt()+(selectedSeats.length * int.parse(tripData.fare.toString())*0.05),
         "bookedat": globals.selectedDate, //DateFormat('yyyy-MM-dd').format(DateTime.now()),
         "ticketid":"ticket_${tripData!.routeid}_${tripData.tripid}_${globals.dateForTicket}" ,//"ticket_5906_149424_20250804074906571",
           "passengerInfo": selectedPassenger!
-              .map( (p) => p.toJson()..update('fare', (value) => (value ?? 0) + 50),)
+              .map( (p) => p.toJson()..update('fare', (value) => (value ?? 0) + (value*0.05)),)
               .toList(),
        
         "opid": "VGT"
@@ -283,30 +286,32 @@ Future<void> confirmBooking({Availabletrips? tripData,String? bpoint,Set<SeatMod
 
 final response = await ApiRepository.postAPI(ApiConst.confirmBooking, formData,basurl2: ApiConst.baseUrl2);
 
-// final response = await dio.post(ApiConst.paymentVerification, data: {
-//         "razorpay_order_id": orderId,
-//         "pnr": pnr,
-//         "routeid": tripData.routeid,
-//         "tripid": tripData.tripid,
-//         "bpoint": bpoint,
-//         "noofseats": selectedSeats.length,
-//         "mobileno": "8305933803",
-//         "email": "aadityagupta778@gmail.com",
-//         "totalfare": ( selectedSeats.length * int.parse(tripData.fare.toString())).toInt()+50,
-//         "bookedat": globals.selectedDate, //DateFormat('yyyy-MM-dd').format(DateTime.now()),
-//         "seatInfo": {
-//           "passengerInfo": selectedPassenger
-//               .map((p) => p.toJson())
-//               .toList()
-//         },
-//         "opid": "VGT"
-//       });
-
+ 
         final data = response.data;
 
        print("Response from confirmbooking api ----------->>>> $data");
 
-       return data;
+      //  return data;
+
+if (data["status"] == 1) {
+        //  ApiClient().createOrder(event.totalfare!,"8305933803","aadityagupta778@gmail.com",event,emit);
+
+        print("Pnr====confirm booking api hopzy=======>>>>>${data}");
+          // await Session().setPnr(data["BookingInfo"]["PNR"]);
+
+        // emit(BookingSuccess(success: "Booking Confirm"));
+        emit(ConfirmBooking(selectedPassenger.first.name,data["data"]["pnr"]));
+      } else {
+        final message = data["message"] ?? "Failed to load data";
+        emit(BookingFailure(error: message));
+      }
+
+
+      //   final data = response.data;
+
+      //  print("Response from confirmbooking api ----------->>>> $data");
+
+      //  return data;
 
     } catch (e) {
       print("Error in confirmTentativeBooking: $e");
@@ -315,6 +320,44 @@ final response = await ApiRepository.postAPI(ApiConst.confirmBooking, formData,b
   }
 
 
+Future<void> _showTicketDetails(
+    ShowTicket event,
+    Emitter<BookingState> emit,
+  ) async {
+    emit(BookingLoading());
+    try {
+      
+      var formData={
+        "opid":"VGT",
+        "pnr":event.pnr
+      };
+
+      final response = await ApiRepository.postAPI(
+        ApiConst.ticketDetails.replaceAll("apiagent", event.userName!.replaceAll(" ", "")),
+        formData
+      );
+
+      final data = response.data;
+      
+      print('--- show ticket ====>>>>>>>${data}');
+
+      ticketDetails= TicketDetailsModel.fromJson(data);
+
+      if (data["status"] != null && data["status"]["success"] == true) {
+        print('---abc------create order before call');
+        // pnr=data["BookingInfo"]["PNR"];
+        // await Session().setPnr(data["BookingInfo"]["PNR"]);
+
+        emit(ShowTicketState(ticketDetails!.ticketDetails,event.tripData!,event.dropingPoint));
+      } else {
+        final message = data["status"]?["message"] ?? "Failed to load stations";
+        emit(BookingFailure(error: message));
+      }
+    } catch (e) {
+      print("Error in getTentativeBooking: $e");
+      emit(BookingFailure(error: "Something went wrong. Please try again."));
+    }
+  }
 
 
 

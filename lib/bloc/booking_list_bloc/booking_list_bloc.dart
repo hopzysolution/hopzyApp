@@ -1,10 +1,14 @@
+
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:ridebooking/bloc/booking_list_bloc/booking_list_event.dart';
 import 'package:ridebooking/bloc/booking_list_bloc/booking_list_state.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/repository/ApiRepository.dart';
 
 class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
+  String ticketId="";
   BookingListBloc() : super(BookingListInitial()) {
     on<FetchBookingsEvent>((event, emit) async {
       // await fetchBookingList(emit);
@@ -18,6 +22,8 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
           "pnr": event.pnr,
           "seatno": event.seatNo,
         };
+          ticketId=event.ticketId;
+        //hopzy cancel Api yet to call
 
         var response = await ApiRepository.postAPI(
           "${ApiConst.cancelBooking}",
@@ -25,16 +31,16 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
         );
 
         print("------------------cancel------data)-${response}-");
-        // final data = response.data;
+        final data = response.data;
 
-        if (response["status"]?["success"] == true) {
-        print("------------------cancel------response)-${response}-");
+        if (data["status"]["success"] == true) {
+        print("------------------cancel------response)-${data}-");
 
-          final cancelDetails = CancelDetails.fromJson(response["cancel"]);
-          emit(CancelDetailsLoaded(cancelDetails: cancelDetails));
+          final cancelDetails = CancelDetails.fromJson(data["cancel"]);
+          emit(CancelDetailsLoaded(cancelDetails: cancelDetails,pnr: event.pnr));
         } else {
           final message =
-              response["status"]?["message"] ?? "Failed to fetch cancel details";
+              data["status"]?["message"] ?? "Failed to fetch cancel details";
           emit(BookingListFailure(error: message));
         }
       } catch (e) {
@@ -61,12 +67,15 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
         final data = response.data;
 
         if (data["status"]?["success"] == true) {
+
+         await cancelHopzyBooking(ticketId);
           // Fetch updated bookings after cancellation
           // await fetchBookingList(emit);
-          await fetchBookingList();
           emit(
             BookingCancelledSuccess(message: "Booking cancelled successfully"),
           );
+          await fetchBookingList();
+          
         } else {
           final message =
               data["status"]?["message"] ?? "Failed to cancel booking";
@@ -97,11 +106,48 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
         final bookings = (data["data"]["bookings"] as List)
             .map((json) => Booking.fromJson(json))
             .toList();
+        
         emit(BookingListLoaded(bookings: bookings));
       } else {
         final message = data["message"] ?? "Failed to load bookings";
         emit(BookingListFailure(error: message));
       }
+    } catch (e) {
+      emit(
+        BookingListFailure(error: "Something went wrong. Please try again."),
+      );
+    }
+  }
+
+  cancelHopzyBooking(String ticketId) async {
+    // Future<void> fetchBookingList(Emitter<BookingListState> emit) async {
+    emit(BookingListLoading());
+    try {
+
+      var formData={
+              "ticketid": ticketId,
+              "cancelledAt": DateFormat(
+  'yyyy-MM-dd',
+).format(DateTime.now())
+      };
+
+
+      var response = await ApiRepository.postAPI(
+        "${ApiConst.cancelHopzyBooking}", //?page=1&limit=10",
+        basurl2: ApiConst.baseUrl2,formData
+      );
+      final data = response.data;
+      print("------------------Hopzy cancel booking------data)-${data}-");
+
+      // if (data["status"] == 1 &&
+      //     data["message"] == "Bookings fetched successfully.") {
+        
+
+
+      // } else {
+      //   final message = data["message"] ?? "Failed to load bookings";
+      //   emit(BookingListFailure(error: message));
+      // }
     } catch (e) {
       emit(
         BookingListFailure(error: "Something went wrong. Please try again."),

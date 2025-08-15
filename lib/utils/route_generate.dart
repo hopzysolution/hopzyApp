@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_bloc.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/models/ticket_details_model.dart';
 import 'package:ridebooking/screens/Dashboard/account.dart';
 import 'package:ridebooking/screens/Dashboard/dashboard_screen.dart'
     show DashboardScreen;
@@ -14,6 +15,7 @@ import 'package:ridebooking/screens/auth/otp_verification.dart';
 import 'package:ridebooking/screens/available_trips_screen.dart';
 import 'package:ridebooking/screens/booking_screen.dart';
 import 'package:ridebooking/screens/splash_screen.dart';
+import 'package:ridebooking/screens/trip_details_screen.dart';
 
 class Routes {
   // static const String login = "/login";
@@ -31,6 +33,8 @@ class Routes {
   static const String dashboard = "/dashboard_screen";
   static const String availableTrips = "/available_trips_screen";
   static const String bookingsScreen = "/bookings_screen";
+
+  static const String tripDetailsScreen = "/trip_details_screen";
 
   static Route<dynamic>? onCreateRoute(RouteSettings routeSettings) {
     var arg = routeSettings.arguments;
@@ -102,6 +106,17 @@ class Routes {
         return MaterialPageRoute(
           builder: (context) {
             return BookingListScreen();
+          },
+        );
+
+        case tripDetailsScreen:
+        final args = arg as Map;
+final ticketDetails = args['ticketDetails'];
+final tripData = args['tripData'];
+final dropingPoint = args['dropingPoint'];
+        return MaterialPageRoute(
+          builder: (context) {
+            return TripDetailsScreen(ticketDetails: ticketDetails,tripData: tripData,dropingPoint: dropingPoint);
           },
         );
 

@@ -130,7 +130,7 @@ class ApiRepository {
         // client.options.headers["deviceType"]=Platform.isAndroid? "ANDROID":Platform.isIOS? "IOS":"WEB";
         if(basurl2!=null){
        client.options.headers["User-Agent"]="insomnia/11.2.0";
-        client.options.headers["Authorization"]=token;
+        client.options.headers["Authorization"]="Bearer $token";
 
         }else{
        client.options.headers["User-Agent"]="insomnia/11.2.0";
