@@ -482,11 +482,12 @@ class ApiClient {
   }
 
   // Your existing API methods
-  Future<ApiResponse<T>> requestOtp<T>(String email) async {
+  Future<ApiResponse<T>> requestOtp<T>(String phone) async {
     try {
+      phone = phone.contains("+91") ? phone : "+91$phone";
       final response = await dio.post(
         ApiConst.requesOtp, 
-        data: {'email': email},
+        data: {'phone': phone},
       );
       print("Api response =response.data;// =======>>>>${response.data}");
       
@@ -498,10 +499,28 @@ class ApiClient {
     }
   }
 
-  Future<ApiResponse<T>> verifyOtp<T>(String email, String otp) async {
+  Future<ApiResponse<T>> registerUser<T>(String fName,String lName,String phone) async {
     try {
+      phone = phone.contains("+91") ? phone : "+91$phone";
+      final response = await dio.post(
+        ApiConst.registerUser, 
+        data: {"firstName": fName, "lastName": lName, "phone": phone},
+      );
+      print("Api response =register user// =======>>>>${response.data}");
+      
+      return ApiResponse.success(response.data);
+    } on DioException catch (e) {
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
+      return ApiResponse.error("Unexpected error: $e");
+    }
+  }
+
+  Future<ApiResponse<T>> verifyOtp<T>(String phone, String otp) async {
+    try {
+      phone = phone.contains("+91") ? phone : "+91$phone";
       final response = await dio.post(ApiConst.verifyOtp, data: {
-        'email': email,
+        'phone': phone,
         'otp': otp,
       });
 

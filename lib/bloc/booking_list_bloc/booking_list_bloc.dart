@@ -6,6 +6,7 @@ import 'package:ridebooking/bloc/booking_list_bloc/booking_list_event.dart';
 import 'package:ridebooking/bloc/booking_list_bloc/booking_list_state.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/repository/ApiRepository.dart';
+import 'package:ridebooking/utils/session.dart';
 
 class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
   String ticketId="";
@@ -34,7 +35,7 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
         final data = response.data;
 
         if (data["status"]["success"] == true) {
-        print("------------------cancel------response)-${data}-");
+        // print("------------------cancel------response)-${data}-");
 
           final cancelDetails = CancelDetails.fromJson(data["cancel"]);
           emit(CancelDetailsLoaded(cancelDetails: cancelDetails,pnr: event.pnr));
@@ -44,6 +45,7 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
           emit(BookingListFailure(error: message));
         }
       } catch (e) {
+        print("------------------cancel------error)-${e}-");
         emit(
           BookingListFailure(error: "Something went wrong. Please try again."),
         );
@@ -92,10 +94,11 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
 
   fetchBookingList() async {
     // Future<void> fetchBookingList(Emitter<BookingListState> emit) async {
+    String? phoneNumber = await Session().getPhoneNo();
     emit(BookingListLoading());
     try {
       var response = await ApiRepository.getAPI(
-        "${ApiConst.getUserBookings}", //?page=1&limit=10",
+        ApiConst.getUserBookings.replaceAll("{phoneNumber}",phoneNumber!.replaceAll("+", "")), //?page=1&limit=10",
         basurl2: ApiConst.baseUrl2,
       );
       final data = response.data;

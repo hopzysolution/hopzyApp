@@ -28,8 +28,8 @@ class _OtpVerificationState extends State<OtpVerification>
     with TickerProviderStateMixin {
   // Controllers and Focus Nodes
   final List<TextEditingController> _controllers =
-      List.generate(4, (index) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
+      List.generate(6, (index) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
   
   // Animation Controllers
   late AnimationController _slideController;
@@ -130,7 +130,7 @@ class _OtpVerificationState extends State<OtpVerification>
     if (value.isNotEmpty) {
       HapticFeedback.lightImpact();
       
-      if (index < 3) {
+      if (index < 5) {
         FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
       } else {
         FocusScope.of(context).unfocus();
@@ -151,7 +151,7 @@ class _OtpVerificationState extends State<OtpVerification>
 
   void _verifyOtp() {
     String finalInput = _controllers.map((e) => e.text).join();
-    if (finalInput.length == 4) {
+    if (finalInput.length == 6) {
       setState(() => _isVerifying = true);
       HapticFeedback.mediumImpact();
       
@@ -208,7 +208,7 @@ class _OtpVerificationState extends State<OtpVerification>
     // Focus first field
     _focusNodes[0].requestFocus();
     
-    ToastMessage().showToast("OTP resent to  ${widget.mobileNumber}");
+    ToastMessage().showToast("OTP resent to +91${widget.mobileNumber}");
   }
 
   void _changePhoneNumber() {
@@ -273,8 +273,8 @@ class _OtpVerificationState extends State<OtpVerification>
     return Column(
       children: [
         Text(
-          "Verify Your Email",
-          // "Verify Your Number",
+          // "Verify Your Email",
+          "Verify Your Number",
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             color: AppColors.neutral100,
             fontWeight: FontWeight.bold,
@@ -295,7 +295,7 @@ class _OtpVerificationState extends State<OtpVerification>
         ),
         const SizedBox(height: 20),
         Text(
-          "We've sent a 4-digit verification code to",
+          "We've sent a 6-digit verification code to",
           style: TextTheme.of(context).bodyLarge?.copyWith(
             color: Colors.white.withOpacity(0.8),
             fontWeight: FontWeight.w500,
@@ -339,11 +339,20 @@ class _OtpVerificationState extends State<OtpVerification>
     );
   }
   Widget _buildOtpInputFields() {
-    return AnimatedBuilder(
+  return RawKeyboardListener(
+    focusNode: FocusNode(), // Needed to capture key events
+    onKey: (event) {
+      if (event is RawKeyDownEvent &&
+          event.logicalKey == LogicalKeyboardKey.backspace) {
+        _handleGlobalBackspace();
+      }
+    },
+    child: AnimatedBuilder(
       animation: _shakeAnimation,
       builder: (context, child) {
         return Transform.translate(
-          offset: Offset(_shakeAnimation.value * 10 * (1 - _shakeAnimation.value), 0),
+          offset: Offset(
+              _shakeAnimation.value * 10 * (1 - _shakeAnimation.value), 0),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             decoration: BoxDecoration(
@@ -357,7 +366,7 @@ class _OtpVerificationState extends State<OtpVerification>
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(4, (index) => _buildOtpField(index)),
+                  children: List.generate(6, (index) => _buildOtpField(index)),
                 ),
                 if (_isVerifying) ...[
                   const SizedBox(height: 20),
@@ -371,8 +380,27 @@ class _OtpVerificationState extends State<OtpVerification>
           ),
         );
       },
-    );
+    ),
+  );
+}
+
+
+  void _handleGlobalBackspace() {
+  for (int i = _controllers.length - 1; i >= 0; i--) {
+    if (_controllers[i].text.isNotEmpty) {
+      setState(() {
+        _controllers[i].clear();
+      });
+      _focusNodes[i].requestFocus();
+      break;
+    }
   }
+}
+
+
+
+
+
 
   Widget _buildOtpField(int index) {
     bool hasValue = _controllers[index].text.isNotEmpty;

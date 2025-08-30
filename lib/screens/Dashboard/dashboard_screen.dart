@@ -1,6 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:htmltopdfwidgets/htmltopdfwidgets.dart' as html2pdf;
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:ridebooking/commonWidgets/custom_bottom_nav_bar.dart';
+import 'package:ridebooking/commonWidgets/ticket_pdf_generator.dart';
+import 'package:ridebooking/commonWidgets/ticket_template.dart';
 import 'package:ridebooking/screens/Dashboard/account.dart';
 import 'package:ridebooking/screens/Dashboard/home_screen.dart';
 import 'package:ridebooking/screens/Dashboard/master_list.dart';
@@ -8,7 +16,7 @@ import 'package:ridebooking/screens/Dashboard/tickets.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/session.dart';
-import 'package:ridebooking/screens/webview_pages/webview_pages_screen.dart';
+import 'package:external_path/external_path.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -40,6 +48,17 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
     _initializeAnimations();
     _loadUserData();
     getHopzyToken();
+    storagePermission();
+  }
+  
+    Directory? downloadsDir;
+
+  storagePermission()async{
+if (Platform.isAndroid) {
+  downloadsDir = await getExternalStorageDirectory(); 
+} else {
+  downloadsDir = await getApplicationDocumentsDirectory();
+}
   }
 
   String accessTokenHopzy="";
@@ -112,10 +131,20 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
     }
   }
 
+   Future<void> _logout(BuildContext context) async {
+
+
+    // Remove saved user data / token
+    await Session().clearAllData();
+
+    // Navigate back to login screen and clear history
+    Navigator.pushNamedAndRemoveUntil(context, Routes.loginWithOtpScreen, (route) => false);
+  }
+
   void _onDrawerItemTap(String title) {
     if (title == "MyBookings") {
       Navigator.pushNamed(context, Routes.bookingsScreen);
-    } else {
+    }  else{
     Navigator.pop(context);
     HapticFeedback.selectionClick();
     
@@ -152,6 +181,79 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
       );
     }
   }
+
+//  Future<void> _downloadPdf(BuildContext context) async {
+//   if (Platform.isAndroid) {
+//     if (await Permission.manageExternalStorage.request().isGranted ||
+//         await Permission.storage.request().isGranted) {
+//       await _savePdf(context);
+//     } else {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text("❌ Permission denied")),
+//       );
+//     }
+//   } else {
+//     await _savePdf(context);
+//   }
+// }
+
+// Future<void> _savePdf(BuildContext context) async {
+//   try {
+//     final pdf = pw.Document();
+    
+//     // Use the simplified HTML template
+//     // final String htmlContent = TicketTemplate.generateHtml();
+    
+//     // Configure html2pdf with specific settings for better compatibility
+//     List<pw.Widget> widgets = await html2pdf.HTMLToPdf().convert(
+//       htmlContent,
+//       // You can add configuration options here if supported by your html2pdf package
+//     );
+    
+//     if (widgets.isEmpty) {
+//       throw Exception('Failed to convert HTML to PDF widgets');
+//     }
+    
+//     pdf.addPage(
+//       pw.MultiPage(
+//         pageFormat: html2pdf.PdfPageFormat.a4,
+//         margin: const pw.EdgeInsets.all(20),
+//         maxPages: 200,
+//         build: (context) {
+//           return widgets;
+//         },
+//       ),
+//     );
+    
+//     Uint8List bytes = await pdf.save();
+    
+//     String dirPath;
+//     if (Platform.isAndroid) {
+//       dirPath = await ExternalPath.getExternalStoragePublicDirectory(
+//         ExternalPath.DIRECTORY_DOWNLOAD,
+//       );
+//     } else {
+//       final dir = await getApplicationDocumentsDirectory();
+//       dirPath = dir.path;
+//     }
+    
+//     final fileName = "ticket_${DateTime.now().millisecondsSinceEpoch}.pdf";
+//     final filePath = "$dirPath/$fileName";
+//     final file = File(filePath);
+//     await file.writeAsBytes(bytes);
+    
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(content: Text("✅ PDF saved at: $filePath")),
+//     );
+//   } catch (e) {
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(content: Text("❌ Error generating PDF: $e")),
+//     );
+//   }
+// }
+
+Map<String, dynamic> ticketData = {};
+
 
   @override
   Widget build(BuildContext context) {
@@ -229,7 +331,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
         ],
       ),
       actions: [
-        accessTokenHopzy==""?Container():
+        accessTokenHopzy!=""?Container():
         InkWell(
           onTap: (){
             Navigator.pushNamed(context, Routes.loginWithOtpScreen);
@@ -509,7 +611,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                   color: Colors.redAccent.withOpacity(0.7),
                   size: isTablet ? 22 : 20,
                 ),
-                onTap: () => _onDrawerItemTap("Logout"),
+                onTap: () => _logout(context),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),

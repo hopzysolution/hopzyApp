@@ -100,6 +100,8 @@ class _EnhancedBusInfoBottomSheetState
       bpoint: selectedBoardingPointId!.toString(),
       selectedSeats: widget.selectedSeats!,
       selectedPassenger: finalSelectedPassenger,
+      selectedBoardingPointDetails: selectedBoardingPointDetails,
+      selectedDroppingPointDetails: selectedDroppingPointDetails,
     );
     //   final respo = await ApiClient().paymentVerification(response);
     //   // 👉 Call your trip API or booking confirmation logic here
@@ -445,7 +447,7 @@ class _EnhancedBusInfoBottomSheetState
                         Text("${widget.selectedSeats!.length} seat selected",
                         style: TextTheme.of(context).bodyLarge,
                         ),
-                        Text("₹ ${int.parse(widget.tripData!.fare.toString())*widget.selectedSeats!.length}",
+                        Text("₹ ${int.parse(widget.selectedSeats!.first.fare.toString())*widget.selectedSeats!.length}",
                         style: TextTheme.of(context).titleMedium,
                         
                         ),
@@ -475,10 +477,11 @@ class _EnhancedBusInfoBottomSheetState
                           noofseats: widget.selectedSeats!.length,
                           selectedPassenger: finalSelectedPassenger,
                           totalfare: (widget.selectedSeats!.length *
-                                  int.parse(
-                                    widget.tripData!.fare.toString(),
-                                  ))
-                              .toInt(),
+                                  // int.parse(
+                                    widget.selectedSeats!.first.fare//.toString(),
+                                  // )
+                                  ),
+                              // .toInt(),
                         ),
                       );
                     }
@@ -574,6 +577,7 @@ class _EnhancedBusInfoBottomSheetState
 
   String? _selectedBoardingPoint;
   int? selectedBoardingPointId;
+  BpDetails?  selectedBoardingPointDetails;
   Widget _buildBoardingTab() {
     final bpDetails = widget.tripData?.boardingpoint?.bpDetails;
 
@@ -605,6 +609,7 @@ class _EnhancedBusInfoBottomSheetState
             setState(() {
               _selectedBoardingPoint = selectedValue;
               selectedBoardingPointId = selsctedId;
+              selectedBoardingPointDetails = detail;
               selectedTabIndex = 1;
             });
             print('Selected boarding point: $venue at $boardTime');
@@ -669,7 +674,7 @@ class _EnhancedBusInfoBottomSheetState
   //Droping point
 
   String? _selectedDroppingPoint;
-
+  DpDetails? selectedDroppingPointDetails;
   Widget _buildDroppingTab() {
     final dpDetails = widget.tripData?.droppingpoint?.dpDetails;
 
@@ -699,6 +704,7 @@ class _EnhancedBusInfoBottomSheetState
           onTap: () {
             setState(() {
               _selectedDroppingPoint = selectedValue;
+              selectedDroppingPointDetails = detail;
               selectedTabIndex = 2;
             });
             print('Selected dropping point: $venue at $dropTime');

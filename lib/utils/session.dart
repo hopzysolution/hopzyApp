@@ -187,6 +187,11 @@ Future<void> setPnr(String pnr) async {
   await prefs.setString('pnr', pnr);
 }
 
+  Future<void> clearAllData() async {
+    final prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
+  }
+
 
 
 }

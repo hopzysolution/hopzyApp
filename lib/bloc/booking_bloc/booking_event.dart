@@ -9,8 +9,11 @@ class OnContinueButtonClick extends BookingEvent{
   int? bpoint;
   int? noofseats;
   int? totalfare;
+  BpDetails? selectedBoardingPointDetails;
+  DpDetails? selectedDroppingPointDetails;
   List<Passenger>? selectedPassenger;
-  OnContinueButtonClick({this.bpoint,this.noofseats,this.selectedPassenger,this.totalfare});
+  OnContinueButtonClick({this.bpoint,this.noofseats,this.selectedPassenger,this.totalfare,
+    this.selectedBoardingPointDetails, this.selectedDroppingPointDetails});
 }
 
 class OnPaymentVerification extends BookingEvent{

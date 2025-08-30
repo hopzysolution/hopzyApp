@@ -20,3 +20,14 @@ class OnSignWithGoogle extends LoginWithOtpEvent {
   OnSignWithGoogle({required this.context});
 }
 
+class OnSignupButtonPressed extends LoginWithOtpEvent {
+   String? firstName;
+   String? lastName;
+   String? mobileNumber;
+
+  OnSignupButtonPressed({required this.mobileNumber,
+    required this.firstName,
+    required this.lastName,
+  });
+}
+

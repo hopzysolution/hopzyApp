@@ -1,11 +1,20 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:ridebooking/commonWidgets/bus_receipt_widget.dart';
+import 'package:ridebooking/commonWidgets/ticket_pdf_generator.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/ticket_details_model.dart';
 import 'package:ridebooking/screens/cancellation_refund_policy.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/route_generate.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 class TripDetailsScreen extends StatefulWidget {
   TicketDetails? ticketDetails; 
@@ -35,6 +44,7 @@ String? journeyDate="";
 
   }
 
+  
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +75,7 @@ String? journeyDate="";
                 BusReceiptWidget(
                 phoneNumber: widget.ticketDetails!.custMobNo!, //"+91 9876543210",
                 boardingTime: widget.ticketDetails!.pickupTime!,//"10:00 AM",
-                droppingTime: widget.tripData!.arrtime! ,//widget.ticketDetails!.dropTime! ,//"02:00 PM",
+                droppingTime:DateFormat('hh:mm a').format(DateTime.parse( widget.tripData!.arrtime!)) ,//widget.ticketDetails!.dropTime! ,//"02:00 PM",
                 totalSeats: widget.ticketDetails!.seatDetails!.length.toString(),//"2",
                 seatNumbers: seatNumbers.toString().replaceAll("[", "").replaceAll("]", ""),
                 busType: widget.ticketDetails!.busType!,
@@ -73,12 +83,15 @@ String? journeyDate="";
                 busServiceName: widget.ticketDetails!.operatorName! ,//'Bus Service Name',
                 route: '${widget.ticketDetails!.sourceCityId!} to ${widget.ticketDetails!.pickUpLocationAddress!}',
                 boardingPoint: widget.ticketDetails!.pickupLocation!,
-                droppingPoint: widget.dropingPoint! ,//widget.ticketDetails!.dropLocation!,
+                droppingPoint:  widget.dropingPoint!.split("-").first ,//widget.ticketDetails!.dropLocation!,
                 // ... other parameters
                 seatdetails: widget.ticketDetails!.seatDetails!,
                 onHomePressed: () =>
                     Navigator.pushReplacementNamed(context, Routes.dashboard),
-                onDownloadPressed: () => {/* Download logic */},
+                onDownloadPressed: () {
+                  
+            TicketPdfGenerator().downloadPdf(context, ticketData);
+                },
                 basicFare: (widget.ticketDetails!.bookingFee!- widget.ticketDetails!.bookingStax!).toDouble(),
                 bookingtax: widget.ticketDetails!.bookingStax!.toDouble(),
                 // rounding: -0.80,
@@ -97,4 +110,5 @@ String? journeyDate="";
       ),
     );
   }
+  Map<String, dynamic> ticketData = {};
 }

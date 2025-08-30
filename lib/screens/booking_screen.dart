@@ -45,7 +45,7 @@ class BookingListScreen extends StatelessWidget {
 
                 context: parentContext,
                 builder: (dialogContext) => AlertDialog(
-                  title: const Text('Cancel Booking'),
+                  title:  Text('Cancel Booking'),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,

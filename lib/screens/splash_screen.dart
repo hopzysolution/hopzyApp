@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:ridebooking/screens/auth/otp_verification.dart';
 import 'package:ridebooking/screens/demoscreen.dart';
 import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
 import 'package:ridebooking/screens/new_bus_seat_layout.dart';
@@ -67,6 +68,7 @@ class _SplashScreenState extends State<SplashScreen>
       );
     else {
       Navigator.pushReplacementNamed(context, Routes.loginWithOtpScreen);
+      // Navigator.push(context, MaterialPageRoute(builder: (context)=>OtpVerification()));
     }
   }
 

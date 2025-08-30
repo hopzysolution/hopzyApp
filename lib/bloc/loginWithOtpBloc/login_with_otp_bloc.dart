@@ -15,29 +15,7 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
 
    final api = ApiClient();
   LoginWithOtpBloc() : super(LoginWithOtpInitial()) {
-
-
-    //   on<OnSignWithGoogle>((event, State) async {
-    //   emit(LoginWithOtpInitial());
-    //   Session preferenceHelper = Session();
-    //   String? name = await preferenceHelper.getFullName();
-    //   if (name == null || name.isEmpty) {
-    //     try {
-    //       FirebaseMethods().signInWithGoogle(event.context);
-    //     } catch (e) {
-    //       print("Exception in signInWithGoogle ----> ${e}");
-    //     }
-    //   } else {
-    //     Navigator.pushReplacementNamed(event.context, Routes.homeScreen);
-    //   }
-    // });
-
-
-
-
-
-
-    on<OnLoginButtonPressed>((event, emit) async {
+   on<OnLoginButtonPressed>((event, emit) async {
        print("Request Otp button clicked bloc ");
       mobileNumber = event.mobileNumber;
       // Here you can handle the login logic
@@ -49,9 +27,45 @@ class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
 
 // Request OTP
 
-       ApiResponse response  = await api.requestOtp(event.mobileNumber!);
+       ApiResponse response  = await api.requestOtp(event.mobileNumber!.contains("+91")?event.mobileNumber!:"+91${event.mobileNumber!}");
   // var response =await ApiRepository.postAPI(ApiConst.loginWithOtp, formData);
+       await Session().setPhoneNo(mobileNumber!.contains("+91")?mobileNumber!:"+91${mobileNumber!}");
         if( response==null) {emit(LoginWithOtpFailure(error: "Server error data not found"));}else{
+           print("Api response in bloc ========>>>>${response.data}");
+  // Map<String, dynamic> parsed = json.decode(response.data.toString());
+
+      if (response.data.toString().contains("status")) {
+        if (response.data['status'] == 1) {
+          // Handle successful login
+          emit(LoginWithOtpSuccess(message: response.data['message']));
+        } else {
+          // Handle login failure
+          emit(LoginWithOtpFailure(error: response.data['message']));
+        }
+      } else {
+        // Handle unexpected response format
+        print("error in response format: ${response.toString()}");
+        emit(LoginWithOtpFailure(error: "Unexpected response format--->>>"));
+      }
+
+
+      
+        }
+    });
+
+     on<OnSignupButtonPressed>((event, emit) async {
+       print("Request Otp button clicked bloc ");
+      mobileNumber = event.mobileNumber;
+
+      emit(LoginWithOtpLoading());
+   
+// Request OTP
+       ApiResponse response  = await api.registerUser(event.firstName!,event.lastName!, mobileNumber!.contains("+91")?mobileNumber!:"+91${mobileNumber!}");
+  // var response =await ApiRepository.postAPI(ApiConst.loginWithOtp, formData);
+        await Session().setPhoneNo(mobileNumber!.contains("+91")?mobileNumber!:"+91${mobileNumber!}");
+        if( response==null) {
+          emit(LoginWithOtpFailure(error: "Server error data not found"));
+          }else{
            print("Api response in bloc ========>>>>${response.data}");
   // Map<String, dynamic> parsed = json.decode(response.data.toString());
 

@@ -1,4 +1,5 @@
 
+import 'package:ridebooking/globels.dart' as globals;
 
 class ApiConst {
 
@@ -34,7 +35,8 @@ class ApiConst {
   static const String requesOtp = "api/auth/request-otp";
   static const String refreshTokenApi="api/auth/refresh-token";
   static const String confirmBooking = "api/public/confirm-booking";
-  static const String getUserBookings = "api/private/user/bookings?page=1&limit=10";
+  static const String getUserBookings = "api/private/user/bookings?limit=500&page=1&phone=%2B{phoneNumber}";
+  static const String registerUser = "api/auth/register";
 
   static const String confirmTentative = "ConfirmTentativeBooking/apiagent";
 //ticket details

@@ -468,10 +468,10 @@ class _AddPassengerFormState extends State<_AddPassengerForm>
   }
 
   void _submit() {
-    globals.phoneNo=phoneController.text;
+    globals.phoneNo=phoneController.text.contains("+91")?phoneController.text:"+91${phoneController.text}";
     globals.email=emailController.text;
     Session().setEmail(emailController.text);
-    Session().setPhoneNo(phoneController.text);
+    Session().setPhoneNo(phoneController.text.contains("+91")?phoneController.text:"+91${phoneController.text}");
     if (_formKey.currentState!.validate()) {
       final passenger = Passenger(
         name: nameController.text.trim(),

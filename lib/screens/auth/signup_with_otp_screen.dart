@@ -9,8 +9,9 @@ import 'package:ridebooking/Animations/animated_logo.dart';
 import 'package:ridebooking/commonWidgets/custom_action_button.dart';
 import 'package:ridebooking/commonWidgets/email_text_field.dart';
 import 'package:ridebooking/commonWidgets/mobile_number_field.dart';
+import 'package:ridebooking/commonWidgets/name_field.dart';
+import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
 import 'package:ridebooking/screens/auth/signup_screen.dart';
-import 'package:ridebooking/screens/auth/signup_with_otp_screen.dart';
 import 'package:ridebooking/screens/auth/welcom_widget.dart';
 import 'package:ridebooking/screens/demoscreen.dart';
 import 'package:ridebooking/screens/auth/otp_verification.dart';
@@ -20,14 +21,14 @@ import 'package:ridebooking/utils/app_theme.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
 
-class LoginWithOtpScreen extends StatefulWidget {
-  const LoginWithOtpScreen({super.key});
+class SignupWithOtpScreen extends StatefulWidget {
+  const SignupWithOtpScreen({super.key});
 
   @override
-  State<LoginWithOtpScreen> createState() => _LoginWithOtpScreenState();
+  State<SignupWithOtpScreen> createState() => _SignupWithOtpScreenState();
 }
 
-class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
+class _SignupWithOtpScreenState extends State<SignupWithOtpScreen>
     with TickerProviderStateMixin {
   // Animation Controllers
   late final AnimationController _logoController;
@@ -48,7 +49,11 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
   // Form and Controllers
   final _formKey = GlobalKey<FormState>();
   final _mobileController = TextEditingController();
+  final _serNameController = TextEditingController();
+  final _nameController = TextEditingController();
   final _focusNode = FocusNode();
+  final _firstNameFocusNode = FocusNode();
+  final _lastNameFocusNode = FocusNode();
 
   // UI State
   bool _isFormValid = false;
@@ -128,12 +133,23 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
   }
 
   void _setupControllers() {
+
     _mobileController.addListener(_validateForm);
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
         _validateForm();
       }
     });
+
+     _firstNameFocusNode.addListener(() {
+      if (!_firstNameFocusNode.hasFocus) _validateForm();
+    });
+
+    _lastNameFocusNode.addListener(() {
+      if (!_lastNameFocusNode.hasFocus) _validateForm();
+    });
+
+
   }
 
   void _validateForm() {
@@ -161,7 +177,11 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
     _pulseController.dispose();
     _floatingController.dispose();
     _mobileController.dispose();
+    _serNameController.dispose();
+    _firstNameFocusNode.dispose();
     _focusNode.dispose();
+    _firstNameFocusNode.dispose();
+    _lastNameFocusNode.dispose();
     super.dispose();
   }
 
@@ -550,7 +570,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                     SizedBox(height: isTablet ? 32 : (isSmallScreen ? 20 : 24)),
                   CustomActionButton(
   onPressed:  () => _handleSendOtp(context),//_isFormValid && !_isLoading ? : null,
-  text: 'Send Code to Login',
+  text: 'Send Code to Signup',
   height: buttonHeight,
   backgroundColor: AppColors.primaryBlue ,// _isFormValid && !_isLoading ?: Colors.grey.shade300,
   foregroundColor: _isFormValid && !_isLoading ? Colors.white : Colors.grey.shade500,
@@ -567,10 +587,10 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                         height: isTablet ? 20 : (isSmallScreen ? 12 : 16),
                       ),
                       _buildSignUpLink(isTablet, isSmallScreen),
-                      SizedBox(
-                        height: isTablet ? 16 : (isSmallScreen ? 8 : 12),
-                      ),
-                      _buildFooterText(isTablet, isSmallScreen, context),
+                      // SizedBox(
+                      //   height: isTablet ? 16 : (isSmallScreen ? 8 : 12),
+                      // ),
+                      // _buildFooterText(isTablet, isSmallScreen, context),
 
 
 
@@ -644,8 +664,22 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
   autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         children: [
+
+          NameField(
+            controller: _nameController,
+            focusNode: _firstNameFocusNode,
+            isFormValid: _isFormValid,
+            isTablet: isTablet,
+            isSmallScreen: isSmallScreen,
+            context: context,
+            lable: "First Name",
+          ),
+          SizedBox(height: isTablet ? 16 : (isSmallScreen ? 8 : 12)),
+          NameField(controller: _serNameController, focusNode: _lastNameFocusNode, isTablet: isTablet, isSmallScreen: isSmallScreen, isFormValid: _isFormValid, context: context,lable: "Last Name",),
+          SizedBox(height: isTablet ? 16 : (isSmallScreen ? 8 : 12)),
+          MobileNumberField(controller:_mobileController ,focusNode:_focusNode ,isFormValid:_isFormValid ,isTablet:isTablet,isSmallScreen: isSmallScreen,context:context)
           
-          MobileNumberField(controller:_mobileController ,focusNode:_focusNode ,isFormValid:_isFormValid ,isTablet:isTablet,isSmallScreen: isSmallScreen,context:context)],
+          ],
       ),
     );
   }
@@ -671,11 +705,11 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
           style: TextStyle(fontSize: fontSize, color: Colors.grey.shade700),
           children: [
             TextSpan(
-              text: "Don't have an account? ",
+              text: "Already have an account ",
               style: const TextStyle(fontWeight: FontWeight.w400),
             ),
             TextSpan(
-              text: 'Sign up',
+              text: 'Login',
               style: const TextStyle(
                 color: AppColors.primaryBlue,
                 fontWeight: FontWeight.bold,
@@ -715,9 +749,9 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
 
   void _handleSendOtp(BuildContext context) {
     // Navigator.pushNamed(context, Routes.dashboard);
-     print("send code to login");
+     print("send code to Signup");
      context.read<LoginWithOtpBloc>().add(
-        OnLoginButtonPressed(mobileNumber: _mobileController.text),
+        OnSignupButtonPressed(firstName:  _nameController.text,lastName:  _serNameController.text, mobileNumber: _mobileController.text),
       );
     // if (_formKey.currentState?.validate() ?? false) {
     //   FocusScope.of(context).unfocus();
@@ -743,7 +777,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-             SignupWithOtpScreen(),
+             LoginWithOtpScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);
           const end = Offset.zero;
