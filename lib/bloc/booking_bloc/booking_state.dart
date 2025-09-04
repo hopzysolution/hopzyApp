@@ -1,4 +1,5 @@
 import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/models/booking_details.dart';
 import 'package:ridebooking/models/ticket_details_model.dart';
 
 abstract class BookingState {}
@@ -33,14 +34,16 @@ class RazorpaySuccessState extends BookingState{
 class ConfirmBooking extends BookingState{
   String? pnr;
   String? userName;
-  ConfirmBooking(this.userName,this.pnr);
+  String? ticketId;
+  ConfirmBooking(this.userName,this.pnr,this.ticketId);
 }
 
 class ShowTicketState extends BookingState{
 TicketDetails? ticketDetails;
 Availabletrips? tripData;
 String? dropingPoint;
-ShowTicketState(this.ticketDetails,this.tripData,this.dropingPoint);
+Data? ticketData; 
+ShowTicketState(this.ticketDetails,this.tripData,this.dropingPoint,this.ticketData);
 }
 
 

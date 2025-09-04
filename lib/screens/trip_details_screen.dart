@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:ridebooking/commonWidgets/bus_receipt_widget.dart';
 import 'package:ridebooking/commonWidgets/ticket_pdf_generator.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/models/booking_details.dart';
 import 'package:ridebooking/models/ticket_details_model.dart';
 import 'package:ridebooking/screens/cancellation_refund_policy.dart';
 import 'package:ridebooking/utils/app_colors.dart';
@@ -20,7 +21,8 @@ class TripDetailsScreen extends StatefulWidget {
   TicketDetails? ticketDetails; 
   Availabletrips? tripData;
   String? dropingPoint;
-   TripDetailsScreen({super.key,this.ticketDetails,this.tripData,this.dropingPoint});
+  Data? ticketData;
+   TripDetailsScreen({super.key,this.ticketDetails,this.tripData,this.dropingPoint,this.ticketData});
 
   @override
   State<TripDetailsScreen> createState() => _TripDetailsScreenState();
@@ -90,7 +92,7 @@ String? journeyDate="";
                     Navigator.pushReplacementNamed(context, Routes.dashboard),
                 onDownloadPressed: () {
                   
-            TicketPdfGenerator().downloadPdf(context, ticketData);
+            TicketPdfGenerator().downloadPdf(context, widget.ticketData!,widget.ticketDetails!);
                 },
                 basicFare: (widget.ticketDetails!.bookingFee!- widget.ticketDetails!.bookingStax!).toDouble(),
                 bookingtax: widget.ticketDetails!.bookingStax!.toDouble(),
@@ -110,5 +112,4 @@ String? journeyDate="";
       ),
     );
   }
-  Map<String, dynamic> ticketData = {};
 }

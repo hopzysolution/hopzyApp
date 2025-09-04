@@ -70,6 +70,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_event.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/models/booking_details.dart';
 import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/models/ticket_details_model.dart';
@@ -190,7 +191,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       //     });
       var formData = {
         "amount": fare + (fare * 0.05),
-        "phone": phoneNo.contains("+91")?phoneNo:"+91${phoneNo}",
+        "phone": phoneNo.contains("+91") ? phoneNo : "+91${phoneNo}",
+        "paymentMode": "razorpay",
         "email": email,
       };
       print('---abc---2---create order inside call');
@@ -235,8 +237,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         "razorpay_payment_id": paymentVerify.paymentId,
         "razorpay_signature": paymentVerify.signature,
         "user_id": userId,
-        "amount":
-            int.parse(tripData.fare!) + (int.parse(tripData.fare!) * 0.05),
+        "paymentMode":"razorpay",
+        "amount":int.parse(tripData.fare!) + (int.parse(tripData.fare!) * 0.05),
       };
 
       final response = await ApiRepository.postAPI(
@@ -279,6 +281,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     String? orderId,
     BpDetails? selectedBoardingPointDetails,
     DpDetails? selectedDroppingPointDetails,
+
   }) async {
     try {
       var formData = {
@@ -315,6 +318,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         "seattype": tripData.seattype,
         "from": tripData.src,
         "to": tripData.dst,
+        "paymentMode":"razorpay",
         // "mobileno": await Session().getPhoneNo(),
         // "email": await Session().getEmail(),
         "totalfare":
@@ -355,7 +359,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         // await Session().setPnr(data["BookingInfo"]["PNR"]);
 
         // emit(BookingSuccess(success: "Booking Confirm"));
-        emit(ConfirmBooking(selectedPassenger.first.name, data["data"]["pnr"]));
+        emit(ConfirmBooking(selectedPassenger.first.name, data["data"]["pnr"],"TU${globals.dateForTicket}"));
       } else {
         final message = data["message"] ?? "Failed to load data";
         emit(BookingFailure(error: message));
@@ -378,6 +382,16 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     emit(BookingLoading());
     try {
       var formData = {"opid": "VGT", "pnr": event.pnr};
+
+      
+      var bookingResponse = await ApiRepository.getAPI(
+        ApiConst.bookingTicketDetails.replaceAll("{ticketId}", event.ticketId!),basurl2:ApiConst.baseUrl2,
+      );
+
+      print(" Response from booking details api new ----------->>>> ${bookingResponse.data}");
+      BookingDetails? bookingData = BookingDetails.fromJson(bookingResponse.data);
+
+print(" Response from booking details api new ----------->>>> ${bookingData.message}");
 
       final response = await ApiRepository.postAPI(
         ApiConst.ticketDetails.replaceAll(
@@ -403,6 +417,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
             ticketDetails!.ticketDetails,
             event.tripData!,
             event.dropingPoint,
+            bookingData.data
           ),
         );
       } else {

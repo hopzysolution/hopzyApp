@@ -97,11 +97,15 @@ class Routes {
         );
 
       case availableTrips:
-        final data = arg as List<Availabletrips>?;
-        return MaterialPageRoute(
-          builder: (context) => AvailableTripsScreen(allTrips: data),
-          settings: RouteSettings(arguments: arg),
-        );
+            final args = arg as Map<String, dynamic>;
+
+    return MaterialPageRoute(
+      builder: (context) => AvailableTripsScreen(
+        allTrips: args['allTrips'],
+        from: args['from'],
+        to: args['to'],
+      ),
+    );
       case bookingsScreen:
         return MaterialPageRoute(
           builder: (context) {
@@ -114,9 +118,10 @@ class Routes {
 final ticketDetails = args['ticketDetails'];
 final tripData = args['tripData'];
 final dropingPoint = args['dropingPoint'];
+final ticketData = args['ticketData'];
         return MaterialPageRoute(
           builder: (context) {
-            return TripDetailsScreen(ticketDetails: ticketDetails,tripData: tripData,dropingPoint: dropingPoint);
+            return TripDetailsScreen(ticketDetails: ticketDetails,tripData: tripData,dropingPoint: dropingPoint,ticketData: ticketData,);
           },
         );
 

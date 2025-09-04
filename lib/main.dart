@@ -1,18 +1,17 @@
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
-import 'package:ridebooking/screens/splash_screen.dart';
+import 'package:media_store_plus/media_store_plus.dart';
 import 'package:ridebooking/utils/Api_client.dart';
 import 'package:ridebooking/utils/app_theme.dart';
 import 'package:ridebooking/utils/route_generate.dart';
-import 'screens/seat_selection_screen.dart';
 
 void main() async{
+  
+  WidgetsFlutterBinding.ensureInitialized();
+  await MediaStore.ensureInitialized();
+   MediaStore.appFolder = "Hopzy";
   final apiClient = ApiClient();
   apiClient.init();
-  // WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp(
   //     options: FirebaseOptions(
   //         apiKey: "AIzaSyAu22SEBAHJgM4JVaaptSAau4UOVsMSWlg",

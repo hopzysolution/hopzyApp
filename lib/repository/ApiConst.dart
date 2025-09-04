@@ -44,6 +44,8 @@ class ApiConst {
 
   static const String cancelHopzyBooking="api/private/bookings/cancel";
 
+  static const String bookingTicketDetails="api/public/bookings/{ticketId}";
+
 
 
 }

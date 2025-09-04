@@ -196,7 +196,7 @@ class _EnhancedBusInfoBottomSheetState
           if (state is ConfirmBooking) {
             ToastMessage().showSuccessToast("Booking Confirmed"); //---abc--
             // Future.delayed(Duration(milliseconds: 500));
-            BlocProvider.of<BookingBloc>(context).add(ShowTicket(pnr:  state.pnr,userName: state.userName,tripData:widget.tripData,dropingPoint:_selectedDroppingPoint));
+            BlocProvider.of<BookingBloc>(context).add(ShowTicket(pnr:  state.pnr,userName: state.userName,tripData:widget.tripData,dropingPoint:_selectedDroppingPoint,ticketId: state.ticketId));
                   // Navigator.pushReplacementNamed(context, Routes.dashboard);
           }
           if(state is ShowTicketState){
@@ -207,6 +207,7 @@ class _EnhancedBusInfoBottomSheetState
     'ticketDetails': state.ticketDetails,
     'tripData': state.tripData,
     'dropingPoint': state.dropingPoint,
+    "ticketData": state.ticketData,
   },
 );
           }
@@ -644,7 +645,7 @@ class _EnhancedBusInfoBottomSheetState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              time,
+              description,
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.red,
@@ -652,7 +653,7 @@ class _EnhancedBusInfoBottomSheetState
               ),
             ),
             Text(
-              description,
+              time,
               style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
           ],
@@ -739,7 +740,7 @@ class _EnhancedBusInfoBottomSheetState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              time,
+              description,
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.red,
@@ -747,7 +748,7 @@ class _EnhancedBusInfoBottomSheetState
               ),
             ),
             Text(
-              description,
+              time,
               style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
           ],

@@ -26,6 +26,7 @@ class ShowTicket extends BookingEvent{
   String? userName;
   Availabletrips? tripData;
   String? dropingPoint;
-  ShowTicket({this.pnr,this.userName,this.tripData,this.dropingPoint});
+  String? ticketId;
+  ShowTicket({this.pnr,this.userName,this.tripData,this.dropingPoint,this.ticketId});
 }
 

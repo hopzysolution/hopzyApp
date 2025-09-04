@@ -36,7 +36,7 @@ class CancellationRefundView extends StatelessWidget {
                 return ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(item.description?? ""),
-                  subtitle: Text("Charge: ${item.cancellationcharge}%")
+                  subtitle: Text("Cancellation Charge: ${item.cancellationcharge}%")
                 );
               }).toList(),
             )
@@ -52,8 +52,8 @@ class CancellationRefundView extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Column(
         children: [
-          _buildPolicySection("Cancellation Policy",data:  cancellationPolicy, false),
-          _buildPolicySection("Refund Policy for This Trip",refundData:  cancellationRefundPolicy, true),
+          // _buildPolicySection("Cancellation Policy",data:  cancellationPolicy, false),
+          _buildPolicySection("Cancellation Policy",refundData:  cancellationRefundPolicy, true),
         ],
       ),
     );

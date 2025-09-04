@@ -1,70 +1,144 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:media_store_plus/media_store_plus.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:external_path/external_path.dart';
+import 'package:ridebooking/models/booking_details.dart';
+import 'package:ridebooking/models/passenger_model.dart';
+import 'package:ridebooking/models/ticket_details_model.dart';
 
 class TicketPdfGenerator {
-  
   pw.ImageProvider? logoImage;
-  Future<void> downloadPdf(BuildContext context, Map<String, dynamic> ticketData) async {
-    if (Platform.isAndroid) {
-      if (await Permission.manageExternalStorage.request().isGranted ||
-          await Permission.storage.request().isGranted) {
-         logoImage =   await loadAssetImage("assets/images/Hopzy primary black & blue Pin.png");
-        await _generateAndSavePdf(context, ticketData);
+  Future<void> downloadPdf(
+  BuildContext context,
+  Data ticketData,
+  TicketDetails ticketDetails,
+) async {
+  if (Platform.isAndroid) {
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+
+    // Android 10 and below → request storage permission
+    if (androidInfo.version.sdkInt <= 29) {
+      if (!await Permission.storage.request().isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("❌ Storage permission denied")),
+        );
+        return;
+      }
+    }
+    // Android 11+ → no permission needed
+
+    // Load logo and generate PDF
+    logoImage = await loadAssetImage(
+      "assets/images/Hopzy primary black & blue Pin.png",
+    );
+    await _generateAndSavePdf(context, ticketData, ticketDetails);
+  } else {
+    // iOS / Desktop → no permission needed
+    logoImage = await loadAssetImage(
+      "assets/images/Hopzy primary black & blue Pin.png",
+    );
+    await _generateAndSavePdf(context, ticketData, ticketDetails);
+  }
+}
+
+
+
+// Helper: check permission based on Android version
+Future<bool> _hasStoragePermission() async {
+  if (!Platform.isAndroid) return true;
+
+  final androidInfo = await DeviceInfoPlugin().androidInfo;
+
+  if (androidInfo.version.sdkInt <= 29) {
+    // Android 10 and below → need legacy storage permission
+    return await Permission.storage.request().isGranted;
+  }
+
+  // Android 11+ → MediaStore handles access, no permission needed
+  return true;
+}
+
+
+
+
+// helper: write bytes to temp file
+Future<String> _writePdfToTemp(Uint8List bytes, String fileName) async {
+  final tempDir = await getTemporaryDirectory();
+  final tempFile = File("${tempDir.path}/$fileName");
+  await tempFile.writeAsBytes(bytes);
+  return tempFile.path;
+}
+
+Future<void> _generateAndSavePdf(
+    BuildContext context, Data ticketData, TicketDetails ticketDetails) async {
+  final pdf = pw.Document();
+
+  // Build PDF (unchanged from your code)
+  pdf.addPage(
+    pw.MultiPage(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.all(10),
+      build: (context) => [
+        _buildHeader(ticketData, logoImage),
+        pw.SizedBox(height: 15),
+        _buildPnrWidget(ticketData),
+        pw.SizedBox(height: 20),
+        _buildTripInformation(ticketData),
+        pw.SizedBox(height: 20),
+        _buildPassengerDetails(ticketData),
+        pw.SizedBox(height: 20),
+        _buildPaymentInformation(ticketData),
+        pw.SizedBox(height: 20),
+        _buildCancellationPolicy(ticketData, ticketDetails),
+        pw.SizedBox(height: 20),
+        _buildFooter(),
+      ],
+    ),
+  );
+
+  Uint8List bytes = await pdf.save();
+  final fileName = "ticket_${DateTime.now().millisecondsSinceEpoch}.pdf";
+
+  if (Platform.isAndroid) {
+    if (await _hasStoragePermission()) {
+      final ms = MediaStore();
+
+      // 1. Write PDF bytes into temp file
+      final tempFilePath = await _writePdfToTemp(bytes, fileName);
+
+      // 2. Save into Downloads folder using MediaStore
+      final saveInfo = await ms.saveFile(
+        tempFilePath: tempFilePath,
+        dirType: DirType.download,
+        dirName: DirName.download,
+      );
+
+      if (saveInfo != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("✅ PDF saved in Downloads as $fileName")),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("❌ Permission denied")),
+          const SnackBar(content: Text("❌ Failed to save PDF")),
         );
       }
     } else {
-      await _generateAndSavePdf(context, ticketData);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("❌ Storage permission denied")),
+      );
     }
-  }
-
-  Future<void> _generateAndSavePdf(BuildContext context, Map<String, dynamic> ticketData) async {
-    final pdf = pw.Document();
-
-    pdf.addPage(
-      pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(10),
-        build: (context) => [
-          _buildHeader(ticketData,logoImage),
-          pw.SizedBox(height: 15),
-          _buildPnrWidget(ticketData),
-          pw.SizedBox(height: 20),
-          _buildTripInformation(ticketData),
-          pw.SizedBox(height: 20),
-          _buildPassengerDetails(ticketData),
-          pw.SizedBox(height: 20),
-          _buildPaymentInformation(ticketData),
-          pw.SizedBox(height: 20),
-          _buildCancellationPolicy(ticketData),
-          pw.SizedBox(height: 20),
-          _buildFooter(),
-        ],
-      ),
-    );
-
-    Uint8List bytes = await pdf.save();
-
-    String dirPath;
-    if (Platform.isAndroid) {
-      dirPath = await ExternalPath.getExternalStoragePublicDirectory(
-          ExternalPath.DIRECTORY_DOWNLOAD);
-    } else {
-      final dir = await getApplicationDocumentsDirectory();
-      dirPath = dir.path;
-    }
-
-    final filePath = "$dirPath/ticket_${DateTime.now().millisecondsSinceEpoch}.pdf";
+  } else {
+    // iOS or desktop
+    final dir = await getApplicationDocumentsDirectory();
+    final filePath = "${dir.path}/$fileName";
     final file = File(filePath);
     await file.writeAsBytes(bytes);
 
@@ -72,8 +146,65 @@ class TicketPdfGenerator {
       SnackBar(content: Text("✅ PDF saved at: $filePath")),
     );
   }
+}
 
-    static Future<pw.ImageProvider?> loadAssetImage(String path) async {
+
+
+
+  // Future<void> _generateAndSavePdf(
+  //   BuildContext context,
+  //   Data ticketData,
+  //   TicketDetails ticketDetails,
+  // ) async {
+  //   final pdf = pw.Document();
+
+  //   pdf.addPage(
+  //     pw.MultiPage(
+  //       pageFormat: PdfPageFormat.a4,
+  //       margin: const pw.EdgeInsets.all(10),
+  //       build: (context) => [
+  //         _buildHeader(ticketData, logoImage),
+  //         pw.SizedBox(height: 15),
+  //         _buildPnrWidget(ticketData),
+  //         pw.SizedBox(height: 20),
+  //         _buildTripInformation(ticketData),
+  //         pw.SizedBox(height: 20),
+  //         _buildPassengerDetails(ticketData),
+  //         pw.SizedBox(height: 20),
+  //         _buildPaymentInformation(ticketData),
+  //         pw.SizedBox(height: 20),
+  //         _buildCancellationPolicy(ticketData, ticketDetails),
+  //         pw.SizedBox(height: 20),
+  //         _buildFooter(),
+  //       ],
+  //     ),
+  //   );
+
+  //   Uint8List bytes = await pdf.save();
+
+  //   String dirPath;
+  //   if (Platform.isAndroid) {
+  //     dirPath = await ExternalPath.getExternalStoragePublicDirectory(
+  //       ExternalPath.DIRECTORY_DOWNLOAD,
+  //     );
+  //   } else {
+  //     final dir = await getApplicationDocumentsDirectory();
+  //     dirPath = dir.path;
+  //   }
+
+  //   final filePath =
+  //       "$dirPath/ticket_${DateTime.now().millisecondsSinceEpoch}.pdf";
+  //   final file = File(filePath);
+  //   await file.writeAsBytes(bytes);
+
+  //   ScaffoldMessenger.of(
+  //     context,
+  //   ).showSnackBar(SnackBar(content: Text("✅ PDF saved at: $filePath")));
+  // }
+
+
+
+  static Future<pw.ImageProvider?> loadAssetImage(String path) async {
     try {
       final ByteData imageData = await rootBundle.load(path);
       final Uint8List imageBytes = imageData.buffer.asUint8List();
@@ -85,7 +216,7 @@ class TicketPdfGenerator {
   }
 }
 
-  pw.Widget _buildHeader(Map<String, dynamic> data, pw.ImageProvider? logoImage) {
+pw.Widget _buildHeader(Data data, pw.ImageProvider? logoImage) {
   return pw.Container(
     width: double.infinity,
     // padding: const pw.EdgeInsets.all(10),
@@ -101,10 +232,7 @@ class TicketPdfGenerator {
           pw.Container(
             width: 150,
             height: 70,
-            child: pw.Image(
-              logoImage,
-              fit: pw.BoxFit.contain,
-            ),
+            child: pw.Image(logoImage, fit: pw.BoxFit.contain),
           ),
           pw.SizedBox(width: 20),
         ] else ...[
@@ -133,7 +261,7 @@ class TicketPdfGenerator {
             mainAxisAlignment: pw.MainAxisAlignment.center,
             children: [
               pw.Text(
-               "HOPZY Solutions Pvt Ltd",// data['operatorName'] ?? 'Bus Operator',
+                "HOPZY Solutions Pvt Ltd", // data['operatorName'] ?? 'Bus Operator',
                 style: pw.TextStyle(
                   fontSize: 18,
                   fontWeight: pw.FontWeight.bold,
@@ -141,40 +269,31 @@ class TicketPdfGenerator {
               ),
               pw.SizedBox(height: 5),
               pw.Text(
-               "Operator Contact Helpline : +91-XXXXXXXXXX",// 'Bus Ticket - ${data['ticketStatus'] ?? 'Confirmed'}',
-                style: pw.TextStyle(
-                  fontSize: 12,
-                  color: PdfColors.grey700,
-                ),
+                "Operator Contact Helpline : +91-XXXXXXXXXX", // 'Bus Ticket - ${data['ticketStatus'] ?? 'Confirmed'}',
+                style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
               ),
               pw.SizedBox(height: 5),
-               pw.Text(
-               "Hopzy Support Emailid : support@hopzy.com",// 'Bus Ticket - ${data['ticketStatus'] ?? 'Confirmed'}',
-                style: pw.TextStyle(
-                  fontSize: 12,
-                  color: PdfColors.grey700,
-                ),
+              pw.Text(
+                "Hopzy Support Emailid : support@hopzy.com", // 'Bus Ticket - ${data['ticketStatus'] ?? 'Confirmed'}',
+                style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
               ),
               pw.SizedBox(height: 5),
-               pw.Text(
-               "Hopzy Support Helpline : +91-YYYYYYYYYY",// 'Bus Ticket - ${data['ticketStatus'] ?? 'Confirmed'}',
-                style: pw.TextStyle(
-                  fontSize: 12,
-                  color: PdfColors.grey700,
-                ),
+              pw.Text(
+                "Hopzy Support Helpline : +91-YYYYYYYYYY", // 'Bus Ticket - ${data['ticketStatus'] ?? 'Confirmed'}',
+                style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
               ),
               // pw.SizedBox(height: 5),
               // pw.Row(
               //   children: [
               //     pw.Expanded(
               //       child: pw.Text(
-              //         'PNR: ${data['pnr'] ?? ''}', 
+              //         'PNR: ${data['pnr'] ?? ''}',
               //         style: const pw.TextStyle(fontSize: 11),
               //       ),
               //     ),
               //     pw.Expanded(
               //       child: pw.Text(
-              //         'Ticket ID: ${data['ticketId'] ?? ''}', 
+              //         'Ticket ID: ${data['ticketId'] ?? ''}',
               //         style: const pw.TextStyle(fontSize: 11),
               //       ),
               //     ),
@@ -188,7 +307,7 @@ class TicketPdfGenerator {
   );
 }
 
-pw.Widget _buildTripInformation(Map<String, dynamic> data) {
+pw.Widget _buildTripInformation(Data data) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
@@ -199,12 +318,12 @@ pw.Widget _buildTripInformation(Map<String, dynamic> data) {
       pw.SizedBox(height: 8),
 
       _buildTableN([
-        ['Operator Name', data['operatorName'] ?? ''],
-        ['TIN', data['tin'] ?? ''],
-        ['From / Source', data['from'] ?? ''],
-        ['To / Destination', data['to'] ?? ''],
-        ['Booked At', data['bookedAt'] ?? ''],
-        ['Bus Type', data['busType'] ?? ''],
+        ['Operator Name', data.operatorName ?? ''],
+        ['TIN', data.ticketId ?? ''],
+        ['From / Source', data.from ?? ''],
+        ['To / Destination', data.to ?? ''],
+        ['Booked At', data.bookedAt ?? ''],
+        ['Bus Type', data.bustype ?? ''],
       ]),
 
       pw.SizedBox(height: 16),
@@ -216,10 +335,10 @@ pw.Widget _buildTripInformation(Map<String, dynamic> data) {
       pw.SizedBox(height: 8),
 
       _buildTableN([
-        ['Boarding Point Name', data['boardingVenue'] ?? ''],
-        ['Boarding Address', data['boardingAddress'] ?? ''],
-        ['Boarding Time', data['boardingTime'] ?? ''],
-        ['Boarding Contact', data['boardingContact'] ?? ''],
+        ['Boarding Point Name', data.boardingPoint!.name ?? ''],
+        ['Boarding Address', data.boardingPoint!.name ?? ''],
+        ['Boarding Time', data.boardingPoint!.time ?? ''],
+        ['Boarding Contact', "56892347856"], //data['boardingContact'] ?? ''],
       ]),
 
       pw.SizedBox(height: 16),
@@ -231,10 +350,10 @@ pw.Widget _buildTripInformation(Map<String, dynamic> data) {
       pw.SizedBox(height: 8),
 
       _buildTableN([
-        ['Dropping Point Name', data['droppingVenue'] ?? ''],
-        ['Dropping Address', data['droppingAddress'] ?? ''],
-        ['Dropping Time', data['droppingTime'] ?? ''],
-        ['Dropping Contact', data['droppingContact'] ?? ''],
+        ['Dropping Point Name', data.droppingPoint!.name ?? ''],
+        ['Dropping Address', data.droppingPoint!.name ?? ''],
+        ['Dropping Time', data.droppingPoint!.time ?? ''],
+        ['Dropping Contact', "4568935968"], //data['droppingContact'] ?? ''],
       ]),
     ],
   );
@@ -253,10 +372,7 @@ pw.Widget _buildTableN(List<List<String>> rows) {
         children: row.map((cell) {
           return pw.Padding(
             padding: const pw.EdgeInsets.all(6),
-            child: pw.Text(
-              cell,
-              style: pw.TextStyle(fontSize: 12),
-            ),
+            child: pw.Text(cell, style: pw.TextStyle(fontSize: 12)),
           );
         }).toList(),
       );
@@ -264,8 +380,16 @@ pw.Widget _buildTableN(List<List<String>> rows) {
   );
 }
 
-pw.Widget _buildPassengerDetails(Map<String, dynamic> data) {
-  List<String> headers = ['#', 'Name', 'Gender', 'Age', 'Seat', 'Fare', 'Seat Status'];
+pw.Widget _buildPassengerDetails(Data data) {
+  List<String> headers = [
+    '#',
+    'Name',
+    'Gender',
+    'Age',
+    'Seat',
+    'Fare',
+    'Seat Status',
+  ];
 
   // Build table rows
   List<pw.TableRow> rows = [];
@@ -279,10 +403,7 @@ pw.Widget _buildPassengerDetails(Map<String, dynamic> data) {
           padding: const pw.EdgeInsets.all(6),
           child: pw.Text(
             header,
-            style: pw.TextStyle(
-              fontSize: 12,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
           ),
         );
       }).toList(),
@@ -290,8 +411,8 @@ pw.Widget _buildPassengerDetails(Map<String, dynamic> data) {
   );
 
   // Passenger rows
-  if (data['passengers'] != null) {
-    List<dynamic> passengers = data['passengers'];
+  if (data.passengers != null) {
+    List<Passengers> passengers = data.passengers! ?? [];
     for (int i = 0; i < passengers.length; i++) {
       var passenger = passengers[i];
       rows.add(
@@ -303,27 +424,29 @@ pw.Widget _buildPassengerDetails(Map<String, dynamic> data) {
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(6),
-              child: pw.Text(passenger['name'] ?? ''),
+              child: pw.Text(passenger.name ?? ''),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(6),
-              child: pw.Text(passenger['gender'] ?? ''),
+              child: pw.Text(passenger.gender ?? ''),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(6),
-              child: pw.Text(passenger['age']?.toString() ?? ''),
+              child: pw.Text(passenger.age?.toString() ?? ''),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(6),
-              child: pw.Text(passenger['seat'] ?? ''),
+              child: pw.Text(passenger.seatNo ?? ''),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(6),
-              child: pw.Text(passenger['fare'] ?? ''),
+              child: pw.Text(
+                "${data.payment!.currency} ${passenger.fare.toString()}" ?? '',
+              ),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(6),
-              child: pw.Text(passenger['seatStatus'] ?? ''),
+              child: pw.Text(passenger.status ?? ''),
             ),
           ],
         ),
@@ -356,7 +479,7 @@ pw.Widget _buildPassengerDetails(Map<String, dynamic> data) {
   );
 }
 
-pw.Widget _buildCancellationPolicy(Map<String, dynamic> data) {
+pw.Widget _buildCancellationPolicy(Data data, TicketDetails ticketDetails) {
   List<String> headers = ['#', 'Description', 'Refund', 'Charge'];
   List<pw.TableRow> rows = [];
 
@@ -377,8 +500,8 @@ pw.Widget _buildCancellationPolicy(Map<String, dynamic> data) {
   );
 
   // Data rows
-  if (data['cancellationPolicy'] != null) {
-    List<dynamic> policies = data['cancellationPolicy'];
+  if (ticketDetails.cancellationPolicy != null) {
+    List<CancellationPolicy> policies = ticketDetails.cancellationPolicy ?? [];
     for (int i = 0; i < policies.length; i++) {
       var policy = policies[i];
       rows.add(
@@ -390,15 +513,15 @@ pw.Widget _buildCancellationPolicy(Map<String, dynamic> data) {
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(6),
-              child: pw.Text(policy['description'] ?? ''),
+              child: pw.Text(policy.description ?? ''),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(6),
-              child: pw.Text(policy['refund'] ?? ''),
+              child: pw.Text(policy.refundpercent ?? ''),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(6),
-              child: pw.Text(policy['charge'] ?? ''),
+              child: pw.Text(policy.cancellationcharge ?? ''),
             ),
           ],
         ),
@@ -435,15 +558,15 @@ pw.Widget _buildCancellationPolicy(Map<String, dynamic> data) {
         style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
       ),
       pw.SizedBox(height: 6),
-      if (data['terms'] != null)
+      if (termsAndConditions != null)
         pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: List<pw.Widget>.generate(
-            data['terms'].length,
+            termsAndConditions.length,
             (index) => pw.Padding(
               padding: const pw.EdgeInsets.symmetric(vertical: 2),
               child: pw.Text(
-                "${index + 1}. ${data['terms'][index]}",
+                "${index + 1}. ${termsAndConditions[index]}",
                 style: pw.TextStyle(fontSize: 12),
               ),
             ),
@@ -453,7 +576,13 @@ pw.Widget _buildCancellationPolicy(Map<String, dynamic> data) {
   );
 }
 
-  pw.Widget _buildPaymentInformation(Map<String, dynamic> data) {
+List<String> termsAndConditions = [
+  "Tickets once booked cannot be transferred.",
+  "Please carry a valid ID proof during the boarding.",
+  "Operator is not responsible for delays due to traffic.",
+];
+
+pw.Widget _buildPaymentInformation(Data data) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
@@ -464,69 +593,69 @@ pw.Widget _buildCancellationPolicy(Map<String, dynamic> data) {
       pw.SizedBox(height: 8),
 
       _buildTableN([
-        ['Status', data['paymentStatus'] ?? ''],
-        ['Payment ID', data['paymentId'] ?? ''],
-        ['Amount Paid', data['amountPaid'] ?? ''],
+        ['Status', data.payment!.status ?? ''],
+        ['Payment ID', data.payment!.razorpayPaymentId ?? ''],
+        ['Amount Paid', "${data.payment!.currency} ${data.totalFare}" ?? ''],
       ]),
     ],
   );
 }
 
-  pw.Widget _buildTable(List<List<String>> data, {bool hasHeader = true}) {
-    return pw.Table(
+pw.Widget _buildTable(List<List<String>> data, {bool hasHeader = true}) {
+  return pw.Table(
+    border: pw.TableBorder.all(color: PdfColors.black),
+    children: data.asMap().entries.map((entry) {
+      int index = entry.key;
+      List<String> row = entry.value;
+      bool isHeader = hasHeader && index == 0;
 
-      border: pw.TableBorder.all(color: PdfColors.black),
-      children: data.asMap().entries.map((entry) {
-        int index = entry.key;
-        List<String> row = entry.value;
-        bool isHeader = hasHeader && index == 0;
-        
-        return pw.TableRow(
-
-          decoration: isHeader
-              ? const pw.BoxDecoration(color: PdfColors.blue200)
-              : null,
-          children: row.map((cell) {
-            return pw.Container(
-              padding: const pw.EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-              child: pw.Text(
-                cell,
-                style: pw.TextStyle(
-                  color:isHeader? PdfColors.white: PdfColors.black,
-                  fontSize: 9,
-                  fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
-                ),
-                textAlign: pw.TextAlign.center,
+      return pw.TableRow(
+        decoration: isHeader
+            ? const pw.BoxDecoration(color: PdfColors.blue200)
+            : null,
+        children: row.map((cell) {
+          return pw.Container(
+            padding: const pw.EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+            child: pw.Text(
+              cell,
+              style: pw.TextStyle(
+                color: isHeader ? PdfColors.white : PdfColors.black,
+                fontSize: 9,
+                fontWeight: isHeader
+                    ? pw.FontWeight.bold
+                    : pw.FontWeight.normal,
               ),
-            );
-          }).toList(),
-        );
-      }).toList(),
-    );
-  }
+              textAlign: pw.TextAlign.center,
+            ),
+          );
+        }).toList(),
+      );
+    }).toList(),
+  );
+}
 
-  pw.Widget _buildFooter() {
-    return pw.Container(
-      width: double.infinity,
-      // padding: const pw.EdgeInsets.all(15),
-      // decoration: const pw.BoxDecoration(color: PdfColors.blue200),
-      child: pw.Text(
-        'Powered by Hopzy Solutions Pvt Ltd © 2025',
-        style: const pw.TextStyle(fontSize: 10,color: PdfColors.white),
-        textAlign: pw.TextAlign.center,
-      ),
-    );
-  }
+pw.Widget _buildFooter() {
+  return pw.Container(
+    width: double.infinity,
+    // padding: const pw.EdgeInsets.all(15),
+    // decoration: const pw.BoxDecoration(color: PdfColors.blue200),
+    child: pw.Text(
+      'Powered by Hopzy Solutions Pvt Ltd © 2025',
+      style: const pw.TextStyle(fontSize: 10, color: PdfColors.white),
+      textAlign: pw.TextAlign.center,
+    ),
+  );
+}
 
-   pw.Widget _buildPnrWidget(Map<String, dynamic> data) {
-    return pw.Container(
-      width: double.infinity,
-      padding: const pw.EdgeInsets.all(15),
-      decoration: const pw.BoxDecoration(color: PdfColors.blue200),
-      child: pw.Text(
-        "PNR: ${data[""]??""} | Departure: ${data["departreTime"]??""}",
-        style: const pw.TextStyle(fontSize: 10,color: PdfColors.white),
-        textAlign: pw.TextAlign.center,
-      ),
-    );
-  }
+pw.Widget _buildPnrWidget(Data data) {
+  return pw.Container(
+    width: double.infinity,
+    padding: const pw.EdgeInsets.all(15),
+    decoration: const pw.BoxDecoration(color: PdfColors.blue200),
+    child: pw.Text(
+      "PNR: ${data.pnr ?? ""} | Departure: ${data.boardingPoint!.time ?? ""}",
+      style: const pw.TextStyle(fontSize: 10, color: PdfColors.white),
+      textAlign: pw.TextAlign.center,
+    ),
+  );
+}

@@ -11,9 +11,7 @@ import 'package:ridebooking/models/all_trip_data_model.dart';
 import 'package:ridebooking/screens/trip_planner.dart';
 // import 'package:ridebooking/models/station_model.dart';
 import 'package:ridebooking/utils/route_generate.dart';
-import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
-import 'package:ridebooking/utils/webview_page_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -118,7 +116,10 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.pushNamed(
               context,
               Routes.availableTrips,
-              arguments: state.allTrips,
+              arguments: {'allTrips': state.allTrips,
+                          'from': selectedFromStation!.srcid!,
+                          'to': selectedToStation!.srcid!,
+                          },
             );
           }
         },
