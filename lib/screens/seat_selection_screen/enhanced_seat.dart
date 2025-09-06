@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_bloc.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_event.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
+import 'package:ridebooking/commonWidgets/gst_form_widget.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
@@ -158,6 +159,7 @@ class _EnhancedBusInfoBottomSheetState
   // }
 
   List<Passenger>? finalSelectedPassenger;
+  // GstDetails? gstDetails
 
   @override
   Widget build(BuildContext context) {
@@ -408,6 +410,8 @@ class _EnhancedBusInfoBottomSheetState
 
                             // Tab content
                             _buildTabContent(context, widget.tripData!),
+
+                            
 
                             SizedBox(height: 20),
                           ],
@@ -789,7 +793,13 @@ class _EnhancedBusInfoBottomSheetState
   //   );
   // }
 
+
+
+
+
   Widget _buildPassengersTab(BuildContext context, Availabletrips tripsData) {
+   
+    print("Amenities list ---->>>>> ${tripsData.amenities}");
     return SingleChildScrollView(
       // padding: const EdgeInsets.all(12),
       child: Column(
@@ -815,11 +825,23 @@ class _EnhancedBusInfoBottomSheetState
               });
             },
           ),
+          SizedBox(height: 16),
+          GstFormWidget(
+    hasGST: hasGST,
+    onGSTChanged: (val) {
+      setState(() => hasGST = val);
+    },
+    onSubmit: (details) {
+      print("GST Details Submitted: ${details.gstNumber}, ${details.businessName}, ${details.businessAddress}, ${details.businessEmail}");
+      // You can now send details to backend
+    },
+  )
         ],
       ),
     );
   }
 
+    bool hasGST = false;
   Widget _buildHighlightItem(IconData icon, String text) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8),

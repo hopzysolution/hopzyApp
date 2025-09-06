@@ -8,10 +8,10 @@ import 'package:ridebooking/utils/app_colors.dart';
 enum SeatStatus {
   available,
   booked,
-  // femaleOnly,
-  // maleOnly,
-  femaleBooked,
-  maleBooked,
+  femaleOnly,
+  maleOnly,
+  // femaleBooked,
+  // maleBooked,
   unavailable,
 }
 
@@ -94,18 +94,18 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
 
   SeatStatus _getSeatStatusFromString(String status) {
     switch (status.toLowerCase()) {
-      case 'available':
+      case 'A':
         return SeatStatus.available;
-      case 'booked':
+      case 'BK':
         return SeatStatus.booked;
-      // case 'female_only':
-      //   return SeatStatus.femaleOnly;
-      // case 'male_only':
-      //   return SeatStatus.maleOnly;
-      case 'femalebooked':
-        return SeatStatus.femaleBooked;
-      case 'malebooked':
-        return SeatStatus.maleBooked;
+      case 'F':
+        return SeatStatus.femaleOnly;
+      case 'M':
+        return SeatStatus.maleOnly;
+      // case 'femalebooked':
+      //   return SeatStatus.femaleBooked;
+      // case 'malebooked':
+      //   return SeatStatus.maleBooked;
       default:
         return SeatStatus.unavailable;
     }
@@ -144,10 +144,10 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
   }
 
   bool _canSelectSeat(String status) {
-    return status == "A";
-    // ||
-    //     status == SeatStatus.femaleOnly ||
-    //     status == SeatStatus.maleOnly;
+    return status == "A"
+    ||
+        status == "F"||
+        status == "M";
   }
 
   // Widget _buildSeat(SeatInfo? seatData, int rowIndex, int colIndex) {
@@ -354,7 +354,13 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
     String berthType,
   ) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      //  decoration: BoxDecoration(
+      //       borderRadius: BorderRadius.circular(8),
+      //       border: Border.all(
+      //         width: 2,
+      //         color:AppColors.neutral700), //AppColors.neutral400),
+      //     ),
+      padding: const EdgeInsets.only(top: 4,left: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -424,6 +430,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
               if (isSelected) {
                 // Remove the specific seat that matches the seatNo
                 selectedSeats.removeWhere(
+
                   (selectedSeat) => selectedSeat.seatNo == seatNo,
                 );
               } else {
@@ -445,12 +452,14 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
         },
         child: Container(
           margin: const EdgeInsets.all(2),
-          constraints: BoxConstraints(
-            minHeight: 50,
-            maxHeight: 95,
-            minWidth: 95,
-            maxWidth: 250,
-          ),
+          // constraints: BoxConstraints(
+          //   minHeight: 50,
+          //   maxHeight: 95,
+          //   minWidth: 95,
+          //   maxWidth: 250,
+          // ),
+          height: seat.seattype=="sleeper"? 45: 45,
+          width: seat.seattype=="sleeper"? 140: 95,
           decoration: BoxDecoration(
             color: isSelected ? AppColors.accent : getSeatColor(status),
             borderRadius: BorderRadius.circular(6),
@@ -664,7 +673,6 @@ Widget upperBirthView() {
       // Expanded container for seat layout
       Expanded(
         child: Container(
-          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: AppColors.neutral400.withOpacity(0.2),
             borderRadius: BorderRadius.circular(8),
@@ -712,17 +720,23 @@ Widget lowerBirthView() {
       // Expanded container for seat layout
       Expanded(
         child: Container(
-          padding: const EdgeInsets.all(12),
+          // padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: AppColors.neutral400.withOpacity(0.2),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.neutral400),
+            border: Border.all(
+              width: 1,
+              color:AppColors.neutral400),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Container(height: MediaQuery.of(context).size.width*0.5, child: getWheelView()), // keep gap if needed
+              Container(
+          padding: const EdgeInsets.only(top:8,left: 6),
+                height: MediaQuery.of(context).size.width*0.53, child: getWheelView()), // keep gap if needed
+              const SizedBox(width: 5),
               Expanded(
+                flex: 1,
                 child: _buildBerthLayout(
                   lowerSeats,
                   maxRows!,

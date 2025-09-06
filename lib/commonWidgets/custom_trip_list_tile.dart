@@ -2,42 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ridebooking/models/trip_model.dart';
 import 'package:ridebooking/utils/app_colors.dart';
-import 'package:ridebooking/utils/app_sizes.dart';
 
 class TripListTile extends StatelessWidget {
   final TripModel trip;
   final VoidCallback? onTap;
 
-  const TripListTile({
-    super.key, 
-    required this.trip,
-    this.onTap,
-  });
+  const TripListTile({super.key, required this.trip, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     // Calculate seat availability percentage
-    final availabilityPercentage = int.parse(trip.availableSeats)  / int.parse(trip.totalSeats) ;
+    final availabilityPercentage =
+        int.parse(trip.availableSeats) / int.parse(trip.totalSeats);
     final isLowAvailability = availabilityPercentage < 0.3;
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       elevation: 2,
       shadowColor: colorScheme.shadow.withOpacity(0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: colorScheme.outline.withOpacity(0.3),
-          width: 2,
-        ),
+        side: BorderSide(color: colorScheme.outline.withOpacity(0.3), width: 2),
       ),
       child: InkWell(
-        onTap: onTap ?? () {
-          // Handle booking or detail navigation
-        },
+        onTap:
+            onTap ??
+            () {
+              // Handle booking or detail navigation
+            },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -59,39 +54,41 @@ class TripListTile extends StatelessWidget {
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
-                       Row(
-                         children: [
-                           Text(
-                            _calculateDuration(trip.departureTime, trip.arrivalTime),
+                      Row(
+                        children: [
+                          Text(
+                            _calculateDuration(
+                              trip.departureTime,
+                              trip.arrivalTime,
+                            ),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
-                            ),
-                            Text(" • "
-                            ,
+                          ),
+                          Text(
+                            " • ",
                             style: theme.textTheme.titleMedium?.copyWith(
                               color: AppColors.neutral400,
-                              
+
                               // fontSize: AppSizes.md,
                               fontWeight: FontWeight.w500,
                             ),
-                            
+                          ),
+                          Text(
+                            "${trip.availableSeats} Seats", //${trip.totalSeats} available',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: isLowAvailability
+                                  ? colorScheme.error
+                                  : colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
                             ),
-                             Text(
-                        "${trip.availableSeats} Seats",//${trip.totalSeats} available',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isLowAvailability 
-                            ? colorScheme.error 
-                            : colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
+                          ),
+                        ],
                       ),
-                         ],
-                       ),
                     ],
                   ),
-                  if (trip.price != null)//price
+                  if (trip.price != null) //price
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -112,9 +109,9 @@ class TripListTile extends StatelessWidget {
                     ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Route information
               Row(
                 children: [
@@ -137,26 +134,23 @@ class TripListTile extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                   DateFormat.jm().format(trip.departureTime), // trip.srcName,
+                                    DateFormat.jm().format(
+                                      trip.departureTime,
+                                    ), // trip.srcName,
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       fontWeight: FontWeight.w500,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  // Text(
-                                  //   DateFormat.jm().format(trip.departureTime),
-                                  //   style: theme.textTheme.bodySmall?.copyWith(
-                                  //     color: colorScheme.onSurfaceVariant,
-                                  //   ),
-                                  // ),
+                                  
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 8),
-                        
+
                         // Journey line
                         Row(
                           children: [
@@ -182,9 +176,9 @@ class TripListTile extends StatelessWidget {
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 8),
-                        
+
                         Row(
                           children: [
                             Container(
@@ -207,12 +201,7 @@ class TripListTile extends StatelessWidget {
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  // Text(
-                                  //   DateFormat.jm().format(trip.arrivalTime),
-                                  //   style: theme.textTheme.bodySmall?.copyWith(
-                                  //     color: colorScheme.onSurfaceVariant,
-                                  //   ),
-                                  // ),
+                                  
                                 ],
                               ),
                             ),
@@ -221,151 +210,94 @@ class TripListTile extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
-                  // Duration and arrow
-                  // Column(
-                  //   children: [
-                  //     Icon(
-                  //       Icons.access_time,
-                  //       size: 16,
-                  //       color: colorScheme.onSurfaceVariant,
-                  //     ),
-                  //     const SizedBox(height: 4),
-                  //     Text(
-                  //       _calculateDuration(trip.departureTime, trip.arrivalTime),
-                  //       style: theme.textTheme.bodySmall?.copyWith(
-                  //         color: colorScheme.onSurfaceVariant,
-                  //         fontWeight: FontWeight.w500,
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
                 ],
               ),
-              
-              const SizedBox(height: 16),
-              
-              // Bus details and seat availability
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+              const SizedBox(height: 5
+              ),
+
+              Wrap(
+                spacing: 6, // horizontal gap
+                runSpacing: 6, // vertical gap (between lines)
                 children: [
                   // Bus type chip
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.directions_bus,
-                          size: 14,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          trip.busType,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
+                  _buildChip(
+                    icon: Icons.directions_bus,
+                    label: trip.busType,
+                    colorScheme: colorScheme,
+                    theme: theme,
                   ),
-                  
-                  // Seat availability
-                  // Row(
-                  //   children: [
-                  //     Icon(
-                  //       Icons.event_seat,
-                  //       size: 16,
-                  //       color: isLowAvailability 
-                  //         ? colorScheme.error 
-                  //         : colorScheme.onSurfaceVariant,
-                  //     ),
-                  //     const SizedBox(width: 4),
-                  //     Text(
-                  //       '${trip.availableSeats}/${trip.totalSeats} available',
-                  //       style: theme.textTheme.bodySmall?.copyWith(
-                  //         color: isLowAvailability 
-                  //           ? colorScheme.error 
-                  //           : colorScheme.onSurfaceVariant,
-                  //         fontWeight: FontWeight.w500,
-                  //       ),
-                  //     ),
-                  //     if (isLowAvailability) ...[
-                  //       const SizedBox(width: 8),
-                  //       Container(
-                  //         padding: const EdgeInsets.symmetric(
-                  //           horizontal: 6,
-                  //           vertical: 2,
-                  //         ),
-                  //         decoration: BoxDecoration(
-                  //           color: colorScheme.errorContainer,
-                  //           borderRadius: BorderRadius.circular(4),
-                  //         ),
-                  //         child: Text(
-                  //           'Filling Fast',
-                  //           style: theme.textTheme.labelSmall?.copyWith(
-                  //             color: colorScheme.onErrorContainer,
-                  //             fontWeight: FontWeight.w600,
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ],
-                  // ),
+
+                  // Boarding / Droping point
+                  _buildChip(
+                    icon: Icons.location_on,
+                    label: "Boarding / Droping Points",
+                    colorScheme: colorScheme,
+                    theme: theme,
+                  ),
+
+                  // Amenities (Example)
+                  _buildChip(
+                    icon: Icons.chair, // or custom icon
+                    label: "Amenities",
+                    colorScheme: colorScheme,
+                    theme: theme,
+                  ),
+
+                  //Cancellation Policy
+                  _buildChip(
+                    icon: Icons.cancel_sharp, // or custom icon
+                    label: "Cancellation Policies",
+                    colorScheme: colorScheme,
+                    theme: theme,
+                  ),
                 ],
               ),
-              
-              // Additional features (if available)
-              // if (trip.features?.isNotEmpty == true) ...[
-              //   const SizedBox(height: 12),
-              //   Wrap(
-              //     spacing: 6,
-              //     runSpacing: 4,
-              //     children: trip.features!.take(3).map((feature) {
-              //       return Container(
-              //         padding: const EdgeInsets.symmetric(
-              //           horizontal: 6,
-              //           vertical: 2,
-              //         ),
-              //         decoration: BoxDecoration(
-              //           color: colorScheme.secondaryContainer.withOpacity(0.5),
-              //           borderRadius: BorderRadius.circular(4),
-              //         ),
-              //         child: Text(
-              //           feature,
-              //           style: theme.textTheme.labelSmall?.copyWith(
-              //             color: colorScheme.onSecondaryContainer,
-              //           ),
-              //         ),
-              //       );
-              //     }).toList(),
-              //   ),
-              // ],
             ],
           ),
         ),
       ),
     );
   }
-  
+
   String _calculateDuration(DateTime departure, DateTime arrival) {
     final duration = arrival.difference(departure);
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
-    
+
     if (hours > 0) {
       return minutes > 0 ? '${hours}h ${minutes}m' : '${hours}h';
     } else {
       return '${minutes}m';
     }
+  }
+
+  Widget _buildChip({
+    required IconData icon,
+    required String label,
+    required ColorScheme colorScheme,
+    required ThemeData theme,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

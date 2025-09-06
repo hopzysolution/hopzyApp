@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:ridebooking/commonWidgets/amenities_list.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/utils/app_colors.dart';
@@ -51,6 +52,7 @@ setState(() {
 
 
   void _showDetails(BuildContext context) {
+     List<String> amenitiesList=widget.tripData.amenities!.split(",");
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -109,7 +111,8 @@ setState(() {
 
                 // Traveler name
                 Text(
-                  "Vagaai Travels", // Replace with your dynamic traveler name
+                 widget.tripData.operatorname!
+                 , //"Vagaai Travels", // Replace with your dynamic traveler name
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -117,7 +120,7 @@ setState(() {
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
 
                 // Seat details row
                 Container(
@@ -137,141 +140,144 @@ setState(() {
                       const SizedBox(width: 16),
                       _seatDetailItem("AC/Non-AC", widget.tripData.isac!?"AC":"Non-AC"),
                       const SizedBox(width: 16),
-                      _seatDetailItem("Qty", widget.seatDetails.length.toString()),
+                      _seatDetailItem("Count", widget.seatDetails.length.toString()),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
 
                 // Boarding and Dropping section
                 Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // Boarding section
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            children: [
-                              Container(
-                                width: 12,
-                                height: 12,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.primaryBlue,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              Container(
-                                width: 2,
-                                height: 40,
-                                color: Colors.grey[300],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Boarding Points",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primaryBlue,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  widget.boardingPoint, // Your dynamic boarding point
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  widget.boardingInfo, // Your dynamic boarding info
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+  padding: const EdgeInsets.all(16),
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(12),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.1),
+        spreadRadius: 1,
+        blurRadius: 4,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  ),
+  child: Column(
+    children: [
+      // Boarding section
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryBlue,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Container(
+                width: 2,
+                height: 40,
+                color: AppColors.neutral400,
+              ),
+            ],
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Boarding Points",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryBlue,
+                  height: 1.1, // tighter line spacing
+                ),
+              ),
+            widget.boardingPoint!=""?  Text(
+                widget.boardingPoint,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  height: 1.1, // reduces gap from above text
+                ),
+              ):SizedBox(height: 5,),
+              Text(
+                widget.boardingInfo,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  height: 1.2,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
 
-                      // Dropping section
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            children: [
-                              Container(
-                                width: 12,
-                                height: 12,
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Dropping Points",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  widget.droppingPoint, // Your dynamic dropping point
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  widget.droppingInfo, // Your dynamic dropping info
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+      const SizedBox(height: 4),
+
+      // Dropping section
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Dropping Points",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red,
+                    height: 1.1, // tighter spacing
                   ),
                 ),
+              widget.droppingPoint!=""?  Text(
+                  widget.droppingPoint,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    height: 1,
+                  ),
+                ):SizedBox(height: 5,),
+                Text(
+                  "${widget.droppingInfo} hello",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    height: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
 
                 // Divider
                 Divider(
@@ -293,13 +299,7 @@ setState(() {
                 // const SizedBox(height: 8),
 
                 // // Number of seats
-                Text(
-                  "${widget.tripData.amenities}.", // Dynamic seat count
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
+                AmenitiesList(amenities: amenitiesList)
 
                 // const SizedBox(height: 12),
 
