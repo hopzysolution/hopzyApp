@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:ridebooking/screens/auth/otp_verification.dart';
-import 'package:ridebooking/screens/demoscreen.dart';
-import 'package:ridebooking/screens/auth/login_with_otp_screen.dart';
-import 'package:ridebooking/screens/new_bus_seat_layout.dart';
-import 'package:ridebooking/screens/trip_details_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ridebooking/bloc/splash_screen_bloc/splash_screen_bloc.dart';
+import 'package:ridebooking/bloc/splash_screen_bloc/splash_screen_state.dart';
+import 'package:ridebooking/shimmerView/bus_search_shimmer.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/session.dart';
 
@@ -68,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen>
       );
     else {
       Navigator.pushReplacementNamed(context, Routes.loginWithOtpScreen);
-      // Navigator.push(context, MaterialPageRoute(builder: (context)=>OtpVerification()));
+      // Navigator.push(context, MaterialPageRoute(builder: (context)=>BusSearchShimmer()));
     }
   }
 
@@ -85,7 +83,13 @@ class _SplashScreenState extends State<SplashScreen>
       builder: (context, child) {
         return Scaffold(
           backgroundColor: _backgroundColorAnimation.value,
-          body: Center(
+          body: 
+          BlocProvider(
+            create: (context)=>SplashScreenBloc(),
+          child: BlocBuilder<SplashScreenBloc,SplashScreenState>(
+            builder: (context,State){
+              return  
+              Center(
             child: Transform.scale(
               scale: _scaleAnimation.value,
               child: Image.asset(
@@ -94,7 +98,11 @@ class _SplashScreenState extends State<SplashScreen>
                 height: 180,
               ),
             ),
-          ),
+          );
+        
+          }),
+          )
+         
         );
       },
       child: const SizedBox(),

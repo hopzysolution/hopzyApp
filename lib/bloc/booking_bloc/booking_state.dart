@@ -1,5 +1,6 @@
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/booking_details.dart';
+import 'package:ridebooking/models/create_order_data_model.dart' hide Data;
 import 'package:ridebooking/models/ticket_details_model.dart';
 
 abstract class BookingState {}
@@ -29,6 +30,11 @@ class BookingSuccess extends BookingState {
 class RazorpaySuccessState extends BookingState{
   String? razorpay_order_id;
   RazorpaySuccessState({this.razorpay_order_id});
+}
+
+class PayUSuccessState extends BookingState{
+  CreateOrderDataModel? createOrderDataModel;
+  PayUSuccessState({this.createOrderDataModel});
 }
 
 class ConfirmBooking extends BookingState{

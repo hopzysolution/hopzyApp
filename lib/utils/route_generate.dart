@@ -104,6 +104,7 @@ class Routes {
         allTrips: args['allTrips'],
         from: args['from'],
         to: args['to'],
+        opId: args['opid']
       ),
     );
       case bookingsScreen:

@@ -57,7 +57,7 @@ class SeatLayoutBloc extends Bloc<SeatLayoutEvent, SeatLayoutState> {
           "tripid": trip!.tripid,
           "srcorder": trip!.srcorder,
           "dstorder": trip!.dstorder,
-          "opid": trip!.operatorid,//"VGT"
+          "opid": "VGT",//trip!.operatorid,//"VGT"
         };
 
         var response = await ApiRepository.postAPI(ApiConst.getSeatLayout, formData);

@@ -300,8 +300,8 @@ class Passenger {
 class CancelDetails {
   final String seatNo;
   final int ticketFare;
-  final int cancellationCharge;
-  final int refundAmount;
+  final double cancellationCharge;
+  final double refundAmount;
 
   CancelDetails({
     required this.seatNo,

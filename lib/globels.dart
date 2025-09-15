@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:ridebooking/models/operator_list_model.dart';
 
 String selectedDate = DateFormat(
   'yyyy-MM-dd',
@@ -10,3 +11,5 @@ String dateForTicket=now.toIso8601String().replaceAll(RegExp(r'[-:.TZ]'), '');
 
 String phoneNo= "8305933803";
 String email="aadityagupta778@gmail.com";
+
+OperatorListModel operatorListModel = OperatorListModel();

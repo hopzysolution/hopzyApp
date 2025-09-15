@@ -50,13 +50,13 @@ class BookingListScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('PNR: ${state.cancelDetails.seatNo}'),
-                      Text('Ticket Fare: ₹${state.cancelDetails.ticketFare}'),
+                      Text('PNR : ${state.pnr}'),
+                      Text('Ticket Fare : ₹${state.cancelDetails.ticketFare}'),
                       Text(
-                        'Cancellation Charge: ₹${state.cancelDetails.cancellationCharge}',
+                        'Cancellation Charge : ₹${state.cancelDetails.cancellationCharge}',
                       ),
                       Text(
-                        'Refund Amount: ₹${state.cancelDetails.refundAmount}',
+                        'Refund Amount : ₹${state.cancelDetails.refundAmount}',
                       ),
                       const SizedBox(height: 8),
                       const Text('Do you want to proceed with cancellation?'),

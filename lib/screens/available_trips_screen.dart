@@ -17,7 +17,8 @@ class AvailableTripsScreen extends StatefulWidget {
   List<Availabletrips>? allTrips;
   String? from;
   String? to;
-   AvailableTripsScreen({super.key,required this.allTrips,this.from,this.to});
+  String? opId;
+  AvailableTripsScreen({super.key,required this.allTrips,this.from,this.to,this.opId});
 
   @override
   State<AvailableTripsScreen> createState() => _AvailableTripsScreenState();
@@ -32,6 +33,7 @@ class _AvailableTripsScreenState extends State<AvailableTripsScreen> {
         allTrips: widget.allTrips,
         from: widget.from,
         to: widget.to,
+        opId:widget.opId
       ),
     );
   }
@@ -41,11 +43,13 @@ class _AvailableTripsContent extends StatefulWidget {
   final List<Availabletrips>? allTrips;
   final String? from;
   final String? to;
+  final String? opId;
 
   const _AvailableTripsContent({
     required this.allTrips,
     this.from,
     this.to,
+    this.opId
   });
 
   @override

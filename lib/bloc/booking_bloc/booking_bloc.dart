@@ -71,6 +71,7 @@ import 'package:ridebooking/bloc/booking_bloc/booking_event.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/booking_details.dart';
+import 'package:ridebooking/models/create_order_data_model.dart';
 import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/models/ticket_details_model.dart';
@@ -118,7 +119,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
               .toList(),
         },
 
-        "opid": "VGT",
+        "opid": event.opId
+        ,//"VGT",
       };
 
       final response = await ApiRepository.postAPI(
@@ -178,7 +180,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       emit(BookingFailure(error: "Something went wrong. Please try again."));
     }
   }
-
+CreateOrderDataModel? createOrderDataModel;
   Future<void> createOrder(int fare, String phoneNo, String email) async {
     print('---abc----1--create order inside call');
 
@@ -190,9 +192,9 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       //   "email": email
       //     });
       var formData = {
-        "amount": fare + (fare * 0.05),
+        "amount": (fare + (fare * 0.05)).toInt(),
         "phone": phoneNo.contains("+91") ? phoneNo : "+91${phoneNo}",
-        "paymentMode": "razorpay",
+        "paymentMode": "payu",//"razorpay",
         "email": email,
       };
       print('---abc---2---create order inside call');
@@ -208,11 +210,14 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
       print("Response from createorder api====>>>> $data");
 
+      createOrderDataModel = CreateOrderDataModel.fromJson(data) ;      
+
       if (data["status"] == 1) {
-        userId = data["data"]["user_id"];
-        print("user_id = ${userId} order_id = ${data["data"]["order_id"]}");
+        // userId = data["data"]["user_id"];
+        // print("user_id = ${userId} order_id = ${data["data"]["order_id"]}");
         Future.delayed(Duration(microseconds: 500));
-        emit(RazorpaySuccessState(razorpay_order_id: data["data"]["order_id"]));
+        // emit(RazorpaySuccessState(razorpay_order_id: data["data"]["order_id"]));
+        emit(PayUSuccessState(createOrderDataModel: createOrderDataModel));
       } else {
         final message = data["status"]?["message"] ?? "Failed to load stations";
         emit(BookingFailure(error: message));

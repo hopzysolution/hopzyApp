@@ -10,6 +10,7 @@ import 'package:ridebooking/commonWidgets/gst_form_widget.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
+import 'package:ridebooking/screens/payu_money.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
@@ -152,6 +153,11 @@ class _EnhancedBusInfoBottomSheetState
     }
   }
 
+
+
+
+  //
+
   List<Availabletrips>? tripsData;
   // saveSelectedSeat()async{
   //   await Session.saveAllSelectedSeats(widget.selectedSeats!);
@@ -172,18 +178,34 @@ class _EnhancedBusInfoBottomSheetState
           if (state is BookingFailure) {
             ToastMessage().showErrorToast(state.error);
           }
-          if (state is RazorpaySuccessState) {
+          // if (state is RazorpaySuccessState) {
+          //   print(
+          //     'RazorpaySuccessState received with order_id: ${state.razorpay_order_id}',
+          //   ); // Debug log
+
+          //   // Calculate total fare
+          //   int totalFare =
+          //       widget.selectedSeats!.length *
+          //       int.parse(widget.tripData!.fare.toString());
+
+          //   // Call the checkout function with proper parameters
+          //   _openRazorpayCheckout(totalFare, state.razorpay_order_id!);
+          // }
+
+          if(state is PayUSuccessState){
             print(
-              'RazorpaySuccessState received with order_id: ${state.razorpay_order_id}',
+              'PayUSuccessState received with order_id: ${state.createOrderDataModel?.data?.payUData?.key}',
             ); // Debug log
 
-            // Calculate total fare
-            int totalFare =
-                widget.selectedSeats!.length *
-                int.parse(widget.tripData!.fare.toString());
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>
+
+            PayUPaymentScreen(
+              // bookingBloc: BlocProvider.of<BookingBloc>(context),
+              createOrderDataModel: state.createOrderDataModel,
+            )));
 
             // Call the checkout function with proper parameters
-            _openRazorpayCheckout(totalFare, state.razorpay_order_id!);
+            // _openPayUCheckout(totalFare, state.createOrderDataModel?.data?.payUData?.txnid);
           }
 
           if (state is BookingSuccess) {
@@ -478,6 +500,7 @@ class _EnhancedBusInfoBottomSheetState
                         widget.selectedSeats != null) {
                       BlocProvider.of<BookingBloc>(context).add(
                         OnContinueButtonClick(
+                          opId: widget.tripData!.operatorid,
                           bpoint: selectedBoardingPointId,
                           noofseats: widget.selectedSeats!.length,
                           selectedPassenger: finalSelectedPassenger,

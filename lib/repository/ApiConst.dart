@@ -6,9 +6,15 @@ class ApiConst {
   // Base URL for the API
   static String baseUrl = "https://ops.vaagaibus.com/api/";
 
-  static String baseUrl2="https://prodapi.hopzy.in/";
+  // static String baseUrl = "https://api.vaagaibus.in/api/";
+
+  
+
+  static String baseUrl2= "https://stagingapi.hopzy.in/";//"https://prodapi.hopzy.in/";
 
   static const String accessToken= "MTIxYzMyYzExNWMxMTNjOTljMTEyYzEwOGM5NWMxMDdjOTljMzJjNTZjMzJjOTVjMTEwYzEwM2M5NWMxMDFjOTljMTA4YzExNGMzMmM0MmMzMmMxMTBjOTVjMTEzYzExM2MxMTdjMTA5YzExMmM5OGMzMmM1NmMzMmM0N2M0OGM0OWMzMmMxMjNjNjQ";
+
+  // static const String accessToken = "MTE1YzI2YzEwOWMxMDdjOTNjMTA2YzEwMmM4OWMxMDFjOTNjMjZjNTBjMjRjMjZjOTZjMTAzYzEwNGMxMTRjMTEzYzEwN2MxMDBjMjZjMzZjMjZjMTA0Yzg5YzEwN2MxMDdjMTExYzEwM2MxMDZjOTJjMjZjNTBjMjZjNjRjMTAzYzc1YzEwM2M0MmMxMDRjMTA4YzQ5YzI2YzExN2M3MA==";
 
   //login with otp
   static const String loginWithOtp = " ";
@@ -16,6 +22,10 @@ class ApiConst {
   //verify otp
 
   // static const String getStations = "GetStations/apiagent";
+
+  //getOperatorList 
+  static const String getOperatorList = "GetOperatorList/hopzy";
+  
 
   static const String getAllAvailableTrips = "GetAllAvailableTripsOnADay/apiagent";
 
@@ -45,6 +55,9 @@ class ApiConst {
   static const String cancelHopzyBooking="api/private/bookings/cancel";
 
   static const String bookingTicketDetails="api/public/bookings/{ticketId}";
+
+
+//
 
 
 

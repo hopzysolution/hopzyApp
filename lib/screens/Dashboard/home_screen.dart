@@ -9,6 +9,7 @@ import 'package:ridebooking/bloc/trip_plan_bloc/trip_planner_repository.dart';
 import 'package:ridebooking/commonWidgets/custom_search_widget.dart';
 import 'package:ridebooking/models/all_trip_data_model.dart';
 import 'package:ridebooking/screens/trip_planner.dart';
+import 'package:ridebooking/shimmerView/bus_search_shimmer.dart';
 // import 'package:ridebooking/models/station_model.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
@@ -29,19 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   AllAvailabletrips? selectedFromStation;
   AllAvailabletrips? selectedToStation;
 
-  // List<AllAvailabletrips> getFromOptions2(List<AllAvailabletrips> trips) {
-  //   final Map<String, Map<String, String>> unique = {};
-  //   for (var trip in trips) {
-  //     if (!unique.containsKey(trip.srcid)) {
-  //       unique[trip.srcid ?? ""] = {
-  //         'label': trip.srcname ?? "",
-  //         'value': trip.srcid ?? "",
-  //         'routeid': trip.routeid ?? "",
-  //       };
-  //     }
-  //   }
-  //   return unique.values.toList();
-  // }
+ 
 
   List<AllAvailabletrips> getFromOptions(List<AllAvailabletrips> trips) {
     final Map<String, AllAvailabletrips> unique = {};
@@ -56,6 +45,26 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     return unique.values.toList();
   }
+
+
+//   List<AllAvailabletrips> getFromOptions(List<AllAvailabletrips> trips) {
+//   final Map<String, AllAvailabletrips> unique = {};
+
+//   for (var trip in trips) {
+//     if (trip.srcid != null && !unique.containsKey(trip.srcid)) {
+//       unique[trip.srcid!] = AllAvailabletrips(
+//         srcname: trip.srcname ?? "",
+//         srcid: trip.srcid!,
+//         routeid: trip.routeid,
+//       );
+//     }
+//   }
+
+//   return unique.values.toList();
+// }
+
+
+
 
   List<AllAvailabletrips> getToOptions({
     required List<AllAvailabletrips> trips,
@@ -119,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
               arguments: {'allTrips': state.allTrips,
                           'from': selectedFromStation!.srcid!,
                           'to': selectedToStation!.srcid!,
+                          'opid':selectedToStation!.operatorid
                           },
             );
           }
@@ -126,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: BlocBuilder<HomeScreenBloc, HomeScreenState>(
           builder: (context, state) {
             if (state is HomeScreenLoading || state is HomeScreenInitial) {
-              return const Center(child: CircularProgressIndicator());
+              return BusSearchShimmer(); //const Center(child: CircularProgressIndicator());
             }
 
             // if (state is HomeScreenFailure) {
@@ -213,6 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 from: selectedFromStation!.srcid!,
                 to: selectedToStation!.srcid!,
                 date: dateSelected,
+                
               ),
             );
           },

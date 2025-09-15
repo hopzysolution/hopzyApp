@@ -23,13 +23,24 @@
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<!-- Add Razorpay-related URL schemes -->
-	<key>LSApplicationQueriesSchemes</key>
+	<!-- <key>LSApplicationQueriesSchemes</key>
 	<array>
   	<string>upi</string>
   	<string>phonepe</string>
   	<string>paytm</string>
   	<string>googlepay</string>
-	</array>
+	</array> -->
+
+	<key>LSApplicationQueriesSchemes</key>
+    <array>
+    <string>payu</string>
+    <string>phonepe</string>
+    <string>tez</string>
+    <string>bhim</string>
+  	<string>paytm</string>
+  	<string>googlepay</string>
+    </array>
+
 
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

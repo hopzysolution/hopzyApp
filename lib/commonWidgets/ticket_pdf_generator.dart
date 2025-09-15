@@ -441,7 +441,7 @@ pw.Widget _buildPassengerDetails(Data data) {
             pw.Padding(
               padding: const pw.EdgeInsets.all(6),
               child: pw.Text(
-                "${data.payment!.currency} ${passenger.fare.toString()}" ?? '',
+                "${data.payment!=null?data.payment!.currency:"₹"} ${passenger.fare.toString()}" ?? '',
               ),
             ),
             pw.Padding(
@@ -593,9 +593,9 @@ pw.Widget _buildPaymentInformation(Data data) {
       pw.SizedBox(height: 8),
 
       _buildTableN([
-        ['Status', data.payment!.status ?? ''],
-        ['Payment ID', data.payment!.razorpayPaymentId ?? ''],
-        ['Amount Paid', "${data.payment!.currency} ${data.totalFare}" ?? ''],
+        ['Status', data.payment==null?"":data.payment!.status ?? ''],
+        ['Payment ID', data.payment==null?"":data.payment!.razorpayPaymentId ?? ''],
+        ['Amount Paid', "${data.payment==null?"₹":data.payment!.currency} ${data.totalFare}" ?? ''],
       ]),
     ],
   );

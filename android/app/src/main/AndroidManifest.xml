@@ -1,7 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.hopzy.ridebooking">
 
     <!-- 🔹 Permissions -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <!-- Networking -->
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -30,7 +32,10 @@
         android:name="${applicationName}"
         android:label="Hopzy"
         android:icon="@mipmap/launcher_icon"
-        android:theme="@style/LaunchTheme">
+        android:theme="@style/LaunchTheme"
+        android:usesCleartextTraffic="true"
+        tools:replace="android:label,android:theme"
+        >
 
         <activity
             android:name=".MainActivity"
@@ -54,17 +59,107 @@
             </intent-filter>
         </activity>
 
+        <!-- 🔹 PayU CheckoutPro Activity (REQUIRED) -->
+        <activity
+            android:name="in.payu.payu_checkoutpro_flutter.PayUCheckoutProFlutterActivity"
+            android:exported="true"
+            android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTop">
+            
+            <!-- Intent filter for PayU deep links -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="payu" />
+            </intent-filter>
+        </activity>
+
+        <!-- 🔹 PayU WebView Activity (REQUIRED for payment flow) -->
+        <activity
+            android:name="in.payu.payu_checkoutpro_flutter.PayUWebViewActivity"
+            android:exported="false"
+            android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:hardwareAccelerated="true" />
+
         <!-- Flutter plugin loader -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
 
-    <!-- Queries section for Android 11+ visibility -->
+    <!-- 🔹 Queries section for Android 11+ visibility and PayU integration -->
     <queries>
+        <!-- Text processing -->
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT" />
             <data android:mimeType="text/plain" />
+        </intent>
+        
+        <!-- PayU related app queries -->
+        <package android:name="in.amazon.mshop.android.shopping" />
+        <package android:name="com.phonepe.app" />
+        <package android:name="com.google.android.apps.nfc.payment" />
+        <package android:name="com.paytm.mobile" />
+        <package android:name="net.one97.paytm" />
+        <package android:name="com.mobikwik_new" />
+        <package android:name="com.freecharge.android" />
+        <package android:name="in.org.npci.upiapp" />
+        <package android:name="com.whatsapp.payments" />
+        
+        <!-- Browser queries for payment redirects -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http" />
+        </intent>
+        
+        <!-- UPI payment apps -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:scheme="upi" />
+        </intent>
+        
+        <!-- PayU specific schemes -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:scheme="payu" />
+        </intent>
+        
+        <!-- Banking apps commonly used in India -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:scheme="bhim" />
+        </intent>
+        
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:scheme="phonepe" />
+        </intent>
+        
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:scheme="paytm" />
+        </intent>
+        
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:scheme="gpay" />
         </intent>
     </queries>
 </manifest>
