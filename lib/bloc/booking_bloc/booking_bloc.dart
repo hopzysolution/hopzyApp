@@ -337,7 +337,7 @@ CreateOrderDataModel? createOrderDataModel;
     GstDetails? gstDetails,
   }) async {
     try {
-      var formData = {
+      var formData = gstDetails!=null? {
         // "razorpay_order_id": orderId,
         "cancellationpolicy":tripData!.cancellationpolicy,
         "paymentMode": profileDataModel!.data!.wallet!<=0? "payu":profileDataModel!.data!.wallet!>=(int.parse(tripData!.fare!) + (int.parse(tripData.fare!) * 0.05)).toInt()?"wallet":"mixed",
@@ -410,7 +410,80 @@ CreateOrderDataModel? createOrderDataModel;
             .toList(),
 
         "opid": tripData.operatorid,
-        gstDetails??
+         "gstDetails": gstDetails
+      }:{
+        // "razorpay_order_id": orderId,
+        "cancellationpolicy":tripData!.cancellationpolicy,
+        "paymentMode": profileDataModel!.data!.wallet!<=0? "payu":profileDataModel!.data!.wallet!>=(int.parse(tripData!.fare!) + (int.parse(tripData.fare!) * 0.05)).toInt()?"wallet":"mixed",
+        "txnid": createOrderDataModel!.data!.payUData!.txnid,
+        "operatorpnr": pnr,
+        "routeid": tripData!.routeid,
+        "tripid": tripData.tripid,
+        "bpoint": bpoint,
+        "noofseats": selectedSeats!.length,
+        "boarding_point": {
+          "id": selectedBoardingPointDetails!.id,
+          "name": selectedBoardingPointDetails.address,
+          "time": selectedBoardingPointDetails.boardtime != null
+              ? DateFormat('hh:mm a  dd MMM yyyy').format(
+                  DateTime.parse(
+                    selectedBoardingPointDetails.boardtime.toString(),
+                  ),
+                )
+              : '--:--',
+          "address": selectedBoardingPointDetails.address,
+          "contactno": selectedBoardingPointDetails.contactno,
+          //  "timedelay": selectedBoardingPointDetails.timedelay,
+            "tripid": selectedBoardingPointDetails.id,
+             "venue": selectedBoardingPointDetails.venue,
+        },
+        "dropping_point": {
+          "id": selectedDroppingPointDetails!.id,
+          "name": selectedDroppingPointDetails.address,
+          "time": selectedDroppingPointDetails.droptime != null
+              ? DateFormat('hh:mm a  dd MMM yyyy').format(
+                  DateTime.parse(
+                    selectedDroppingPointDetails.droptime.toString(),
+                  ),
+                )
+              : '--:--',
+          "address": selectedDroppingPointDetails.address,
+          "contactno": selectedDroppingPointDetails.contactno,
+          // "timedelay": selectedDroppingPointDetails.timedelay,
+          "tripid": selectedDroppingPointDetails.id,
+          "venue": selectedDroppingPointDetails.venue,
+        },
+        "operatorName": tripData.operatorname,
+        "bustype": tripData.bustype,
+        "seattype": tripData.seattype,
+        "from": tripData.src,
+        "to": tripData.dst,
+        "phone": await Session().getPhoneNo(),
+        "email": await Session().getEmail(),
+        "totalfare":profileDataModel!.data!.user== null?
+        (selectedSeats.length>1?
+            ((selectedSeats.length * int.parse(tripData.fare.toString()))
+                .toInt() //conditon change karni hai
+            ):
+            ((int.parse(tripData.fare.toString()))
+                .toInt() -
+            (int.parse(tripData.fare.toString()) * 0.05)))
+            :((selectedSeats.length * int.parse(tripData.fare.toString()))
+                .toInt() +
+            (selectedSeats.length * int.parse(tripData.fare.toString()) * 0.05))-profileDataModel!.data!.wallet!,
+        "bookedat": globals
+            .selectedDate, //DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        "ticketid":
+            "TU${globals.dateForTicket}", //"ticket_5906_149424_20250804074906571",
+        "passengerInfo": selectedPassenger!
+            .map(
+              (p) =>
+                  p.toJson()
+                    ..update('fare', (value) => (value ?? 0) + (value * 0.05)),
+            )
+            .toList(),
+
+        "opid": tripData.operatorid,
          "gstDetails": gstDetails
       };
 
