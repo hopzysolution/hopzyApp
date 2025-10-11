@@ -1,5 +1,3 @@
-
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:ridebooking/bloc/booking_list_bloc/booking_list_event.dart';
@@ -9,103 +7,151 @@ import 'package:ridebooking/repository/ApiRepository.dart';
 import 'package:ridebooking/utils/session.dart';
 
 class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
-  String ticketId="";
+  String ticketId = "";
+  String ticketCode = "";
+  String provider = "";
+  double cca = 0;
+  String ctpc = "";
+  String pnr = "";
+  List<String> seatCodeList = [];
+  List<String> passengerIds = [];
+  
   BookingListBloc() : super(BookingListInitial()) {
     on<FetchBookingsEvent>((event, emit) async {
-      // await fetchBookingList(emit);
+      await fetchBookingList();
     });
 
     on<FetchCancelDetailsEvent>((event, emit) async {
       emit(BookingListLoading());
       try {
-        var formData = {
-          "opid": "VGT",
-          "pnr": event.pnr,
-          "seatno": event.seatNo,
-        };
-          ticketId=event.ticketId;
-        //hopzy cancel Api yet to call
+        // Store booking details for later use
+        final booking = event.booking;
+        ticketId = booking.ticketId;
+        ticketCode = booking.ticketCode ?? "";
+        provider = booking.provider ?? "";
+        pnr = booking.pnr;
+        
+        // Collect seat codes and passenger IDs
+        seatCodeList = booking.passengers
+            .map((p) => p.seatCode)
+            .where((code) => code.isNotEmpty)
+            .toList();
+        passengerIds = booking.passengers.map((p) => p.id).toList();
 
-        var response = await ApiRepository.postAPI(
-          "${ApiConst.cancelBooking}",
-          formData,
+        // Step 1: Call cancel booking API to get cancellation details
+        var cancelPayload = {
+          "ticketCode": ticketCode,
+          "provider": provider,
+        };
+
+        var cancelResponse = await ApiRepository.postAPI(
+          ApiConst.cancelBooking,
+          cancelPayload,
+          basurl2: ApiConst.baseUrl2,
         );
 
-        print("------------------cancel------data)-${response}-");
-        final data = response.data;
-
-        if (data["status"]["success"] == true) {
-        // print("------------------cancel------response)-${data}-");
-
-          final cancelDetails = CancelDetails.fromJson(data["cancel"]);
-          emit(CancelDetailsLoaded(cancelDetails: cancelDetails,pnr: event.pnr));
+        print("------------------cancel booking response: ${cancelResponse.data}");
+        
+        if (cancelResponse.data["status"] == 1) {
+          final data = cancelResponse.data["data"];
+          
+          // Extract cancellation charge and policy code
+          cca = (data["cca"] ?? 0).toDouble();
+          ctpc = data["ctpc"] ?? "";
+          
+          // Extract ticket details for display
+          final ticketDetails = data["data"]["ticketDetails"] as List;
+          if (ticketDetails.isNotEmpty) {
+            final firstTicket = ticketDetails[0];
+            
+            final cancelDetails = CancelDetails(
+              seatNo: event.seatNo,
+              ticketFare: (firstTicket["seatFare"] ?? 0).toInt(),
+              cancellationCharge: (firstTicket["cancellationCharges"] ?? 0).toDouble(),
+              refundAmount: (firstTicket["refundAmount"] ?? 0).toDouble(),
+            );
+            
+            emit(CancelDetailsLoaded(
+              cancelDetails: cancelDetails,
+              pnr: pnr,
+              booking: booking,
+            ));
+          } else {
+            emit(BookingListFailure(error: "No ticket details found"));
+          }
         } else {
-          final message =
-              data["status"]?["message"] ?? "Failed to fetch cancel details";
+          final message = cancelResponse.data["message"] ?? "Failed to fetch cancel details";
           emit(BookingListFailure(error: message));
         }
       } catch (e) {
-        print("------------------cancel------error)-${e}-");
-        emit(
-          BookingListFailure(error: "Something went wrong. Please try again."),
-        );
+        print("------------------cancel error: $e");
+        emit(BookingListFailure(error: "Something went wrong. Please try again."));
       }
     });
 
     on<CancelBookingEvent>((event, emit) async {
       emit(BookingListLoading());
       try {
-        var formData = {
-          "opid": "VGT",
-          "pnr": event.pnr,
-          "seatno": event.seatNo,
+        // Step 2: Confirm cancellation with the bus operator
+        var confirmCancelPayload = {
+          "seatCodeList": seatCodeList,
+          "ticketCode": ticketCode,
+          "cca": cca,
+          "ctpc": ctpc,
+          "pnr": pnr,
+          "provider": provider,
         };
 
-        var response = await ApiRepository.postAPI(
-          "${ApiConst.confirmCancelBooking}",
-          formData,
+        var confirmResponse = await ApiRepository.postAPI(
+          ApiConst.confirmCancelBooking,
+          confirmCancelPayload,
+          basurl2: ApiConst.baseUrl2,
         );
 
-        final data = response.data;
+        print("------------------confirm cancel response: ${confirmResponse.data}");
 
-        if (data["status"]?["success"] == true) {
-
-         await cancelHopzyBooking(ticketId);
-          // Fetch updated bookings after cancellation
-          // await fetchBookingList(emit);
-          emit(
-            BookingCancelledSuccess(message: "Booking cancelled successfully"),
-          );
-          await fetchBookingList();
+        if (confirmResponse.data["status"] == 1) {
+          final confirmData = confirmResponse.data["data"]["data"];
+          final totalRefundAmount = confirmData["totalRefundAmount"] ?? 0;
+          final cancellationCharge = confirmData["cancellationCharge"] ?? 0;
           
+          // Step 3: Update booking status in Hopzy system
+          await cancelHopzyBooking(
+            ticketId,
+            passengerIds,
+            totalRefundAmount.toDouble(),
+            cancellationCharge.toDouble(),
+          );
+          
+          emit(BookingCancelledSuccess(message: "Booking cancelled successfully"));
+          
+          // Refresh the booking list
+          await fetchBookingList();
         } else {
-          final message =
-              data["status"]?["message"] ?? "Failed to cancel booking";
+          final message = confirmResponse.data["message"] ?? "Failed to cancel booking";
           emit(BookingListFailure(error: message));
         }
       } catch (e) {
-        emit(
-          BookingListFailure(error: "Something went wrong. Please try again."),
-        );
+        print("------------------cancel booking error: $e");
+        emit(BookingListFailure(error: "Something went wrong. Please try again."));
       }
     });
+    
     fetchBookingList();
   }
 
-  fetchBookingList() async {
-    // Future<void> fetchBookingList(Emitter<BookingListState> emit) async {
+  Future<void> fetchBookingList() async {
     String? phoneNumber = await Session().getPhoneNo();
     emit(BookingListLoading());
     try {
       var response = await ApiRepository.getAPI(
-        ApiConst.getUserBookings.replaceAll("{phoneNumber}",phoneNumber!.replaceAll("+", "")), //?page=1&limit=10",
+        ApiConst.getUserBookings, //.replaceAll("{phoneNumber}", phoneNumber!.replaceAll("+", "")),
         basurl2: ApiConst.baseUrl2,
       );
       final data = response.data;
-      print("------------------get user booking------data)-${data}-");
+      print("------------------get user bookings data: ${data}");
 
-      if (data["status"] == 1 &&
-          data["message"] == "Bookings fetched successfully.") {
+      if (data["status"] == 1 && data["message"] == "Bookings fetched successfully.") {
         final bookings = (data["data"]["bookings"] as List)
             .map((json) => Booking.fromJson(json))
             .toList();
@@ -116,75 +162,91 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
         emit(BookingListFailure(error: message));
       }
     } catch (e) {
-      emit(
-        BookingListFailure(error: "Something went wrong. Please try again."),
-      );
+      print("------------------fetch bookings error: $e");
+      emit(BookingListFailure(error: "Something went wrong. Please try again."));
     }
   }
 
-  cancelHopzyBooking(String ticketId) async {
-    // Future<void> fetchBookingList(Emitter<BookingListState> emit) async {
-    emit(BookingListLoading());
+  Future<void> cancelHopzyBooking(
+    String ticketId,
+    List<String> passengerIds,
+    double refundAmount,
+    double cancellationCharges,
+  ) async {
     try {
-
-      var formData={
-              "ticketid": ticketId,
-              "cancelledAt": DateFormat(
-  'yyyy-MM-dd',
-).format(DateTime.now())
+      // Calculate refund percentage (approximation)
+      double totalFare = refundAmount + cancellationCharges;
+      double refundPercentage = (refundAmount / totalFare * 100).roundToDouble();
+      
+      var formData = {
+        "ticketid": ticketId,
+        "passengers": passengerIds,
+        "cancelledAt": DateFormat('dd/MM/yyyy').format(DateTime.now()),
+        "refundPercentage": refundPercentage.toInt(),
+        "refundAmount": refundAmount.toInt(),
+        "cancellationCharges": cancellationCharges.toInt(),
+        "mode": "wallet", // You might want to make this configurable
       };
 
-
       var response = await ApiRepository.postAPI(
-        "${ApiConst.cancelHopzyBooking}", //?page=1&limit=10",
-        basurl2: ApiConst.baseUrl2,formData
+        ApiConst.cancelHopzyBooking,
+        formData,
+        basurl2: ApiConst.baseUrl2,
       );
-      final data = response.data;
-      print("------------------Hopzy cancel booking------data)-${data}-");
-
-      // if (data["status"] == 1 &&
-      //     data["message"] == "Bookings fetched successfully.") {
-        
-
-
-      // } else {
-      //   final message = data["message"] ?? "Failed to load bookings";
-      //   emit(BookingListFailure(error: message));
-      // }
+      
+      print("------------------Hopzy cancel booking response: ${response.data}");
     } catch (e) {
-      emit(
-        BookingListFailure(error: "Something went wrong. Please try again."),
-      );
+      print("------------------Hopzy cancel error: $e");
+      // Don't emit error here as the main cancellation was successful
     }
   }
 }
 
+// Updated Booking model to include new fields
 class Booking {
   final String id;
   final String ticketId;
+  final String? ticketCode;
+  final String? provider;
   final String pnr;
-  final String routeId;
-  final String tripId;
-  final String boardingPoint;
+  final String? operatorpnr;
+  final String? routeId;
+  final String? tripId;
+  final Map<String, dynamic>? boardingPoint;
+  final Map<String, dynamic>? droppingPoint;
+  final String? from;
+  final String? to;
+  final String? bustype;
+  final String? seattype;
   final int numberOfSeats;
   final int totalFare;
   final String bookedAt;
   final String status;
-  final User user;
-  final Payment payment;
-  final List<Passenger> passengers;
+  final String? cancelledAt;
+  final CancelUser user;
+  final CancelPayment payment;
+  final List<CancelPassenger> passengers;
 
   Booking({
     required this.id,
     required this.ticketId,
+    this.ticketCode,
+    this.provider,
     required this.pnr,
-    required this.routeId,
-    required this.tripId,
-    required this.boardingPoint,
+    this.operatorpnr,
+    this.routeId,
+    this.tripId,
+    this.boardingPoint,
+    this.droppingPoint,
+    this.from,
+    this.to,
+    this.bustype,
+    this.seattype,
     required this.numberOfSeats,
     required this.totalFare,
     required this.bookedAt,
     required this.status,
+    this.cancelledAt,
     required this.user,
     required this.payment,
     required this.passengers,
@@ -194,33 +256,49 @@ class Booking {
     return Booking(
       id: json['_id'] ?? '',
       ticketId: json['ticketId'] ?? '',
+      ticketCode: json['ticketCode'],
+      provider: json['provider'],
       pnr: json['pnr'] ?? '',
-      routeId: json['routeId'] ?? '',
-      tripId: json['tripId'] ?? '',
-      boardingPoint: json['boardingPoint'] ?? '',
+      operatorpnr: json['operatorpnr'],
+      routeId: json['routeId'],
+      tripId: json['tripId'],
+      boardingPoint: json['boarding_point'],
+      droppingPoint: json['dropping_point'],
+      from: json['from'],
+      to: json['to'],
+      bustype: json['bustype'],
+      seattype: json['seattype'],
       numberOfSeats: json['numberOfSeats'] ?? 0,
       totalFare: json['totalFare'] ?? 0,
       bookedAt: json['bookedAt'] ?? '',
       status: json['status'] ?? '',
-      user: User.fromJson(json['user'] ?? {}),
-      payment: Payment.fromJson(json['payment'] ?? {}),
-      passengers:
-          (json['passengers'] as List<dynamic>?)
-              ?.map((e) => Passenger.fromJson(e))
+      cancelledAt: json['cancelledAt'],
+      user: CancelUser.fromJson(json['user'] ?? {}),
+      payment: CancelPayment.fromJson(json['payment'] ?? {}),
+      passengers: (json['passengers'] as List<dynamic>?)
+              ?.map((e) => CancelPassenger.fromJson(e))
               .toList() ??
           [],
     );
   }
+  
+  // Helper method to get boarding point name
+  String get boardingPointName {
+    if (boardingPoint != null && boardingPoint!['name'] != null) {
+      return boardingPoint!['name'];
+    }
+    return 'N/A';
+  }
 }
 
-class User {
+class CancelUser {
   final String id;
   final String firstName;
   final String lastName;
   final String email;
   final String phone;
 
-  User({
+  CancelUser({
     required this.id,
     required this.firstName,
     required this.lastName,
@@ -228,8 +306,8 @@ class User {
     required this.phone,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
+  factory CancelUser.fromJson(Map<String, dynamic> json) {
+    return CancelUser(
       id: json['_id'] ?? '',
       firstName: json['firstName'] ?? '',
       lastName: json['lastName'] ?? '',
@@ -239,60 +317,75 @@ class User {
   }
 }
 
-class Payment {
+class CancelPayment {
   final String id;
-  final String razorpayOrderId;
+  final String? razorpayOrderId;
+  final String? razorpayCancelPaymentId;
+  final String? payuTxnId;
+  final int? payuAmount;
   final int amount;
   final String currency;
   final String status;
-  final String razorpayPaymentId;
 
-  Payment({
+  CancelPayment({
     required this.id,
-    required this.razorpayOrderId,
+    this.razorpayOrderId,
+    this.razorpayCancelPaymentId,
+    this.payuTxnId,
+    this.payuAmount,
     required this.amount,
     required this.currency,
     required this.status,
-    required this.razorpayPaymentId,
   });
 
-  factory Payment.fromJson(Map<String, dynamic> json) {
-    return Payment(
+  factory CancelPayment.fromJson(Map<String, dynamic> json) {
+    return CancelPayment(
       id: json['_id'] ?? '',
-      razorpayOrderId: json['razorpayOrderId'] ?? '',
-      amount: json['amount'] ?? 0,
-      currency: json['currency'] ?? '',
+      razorpayOrderId: json['razorpayOrderId'],
+      razorpayCancelPaymentId: json['razorpayCancelPaymentId'],
+      payuTxnId: json['payuTxnId'],
+      payuAmount: json['payuAmount'],
+      amount: json['amount'] ?? json['payuAmount'] ?? 0,
+      currency: json['currency'] ?? 'INR',
       status: json['status'] ?? '',
-      razorpayPaymentId: json['razorpayPaymentId'] ?? '',
     );
   }
 }
 
-class Passenger {
+class CancelPassenger {
   final String id;
   final String booking;
+  final String name;
   final String gender;
+  final String seatCode;
   final String seatNo;
   final int age;
   final int fare;
+  final String status;
 
-  Passenger({
+  CancelPassenger({
     required this.id,
     required this.booking,
+    required this.name,
     required this.gender,
+    required this.seatCode,
     required this.seatNo,
     required this.age,
     required this.fare,
+    required this.status,
   });
 
-  factory Passenger.fromJson(Map<String, dynamic> json) {
-    return Passenger(
+  factory CancelPassenger.fromJson(Map<String, dynamic> json) {
+    return CancelPassenger(
       id: json['_id'] ?? '',
       booking: json['booking'] ?? '',
+      name: json['Name'] ?? json['name'] ?? '',
       gender: json['gender'] ?? '',
+      seatCode: json['seatCode'] ?? '',
       seatNo: json['seatNo'] ?? '',
       age: json['age'] ?? 0,
       fare: json['fare'] ?? 0,
+      status: json['status'] ?? '',
     );
   }
 }
@@ -314,8 +407,8 @@ class CancelDetails {
     return CancelDetails(
       seatNo: json['seatNo'] ?? '',
       ticketFare: json['ticketfare'] ?? 0,
-      cancellationCharge: json['cancellationcharge'] ?? 0,
-      refundAmount: json['refundamount'] ?? 0,
+      cancellationCharge: (json['cancellationcharge'] ?? 0).toDouble(),
+      refundAmount: (json['refundamount'] ?? 0).toDouble(),
     );
   }
 }

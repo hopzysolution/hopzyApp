@@ -14,18 +14,19 @@ class BookingListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        
-        title: const Text('My Bookings',style: TextStyle(
-          color: AppColors.neutral50
-        ),),
+        title: const Text(
+          'My Bookings',
+          style: TextStyle(color: AppColors.neutral50),
+        ),
         centerTitle: false,
         elevation: 0,
         leading: IconButton(
-          onPressed: (){
+          onPressed: () {
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back,
-          color: AppColors.neutral50,
+          icon: const Icon(
+            Icons.arrow_back,
+            color: AppColors.neutral50,
           ),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -40,26 +41,30 @@ class BookingListScreen extends StatelessWidget {
             } else if (state is BookingListFailure) {
               ToastMessage().showErrorToast(state.error);
             } else if (state is CancelDetailsLoaded) {
-              final parentContext=context;
+              final parentContext = context;
               showDialog(
-
                 context: parentContext,
                 builder: (dialogContext) => AlertDialog(
-                  title:  Text('Cancel Booking'),
+                  title: const Text('Cancel Booking'),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('PNR : ${state.pnr}'),
-                      Text('Ticket Fare : ₹${state.cancelDetails.ticketFare}'),
-                      Text(
-                        'Cancellation Charge : ₹${state.cancelDetails.cancellationCharge}',
-                      ),
-                      Text(
-                        'Refund Amount : ₹${state.cancelDetails.refundAmount}',
-                      ),
+                      Text('PNR: ${state.pnr}'),
                       const SizedBox(height: 8),
-                      const Text('Do you want to proceed with cancellation?'),
+                      Text('Ticket Fare: ₹${state.cancelDetails.ticketFare}'),
+                      Text(
+                        'Cancellation Charge: ₹${state.cancelDetails.cancellationCharge.toStringAsFixed(2)}',
+                      ),
+                      Text(
+                        'Refund Amount: ₹${state.cancelDetails.refundAmount.toStringAsFixed(2)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Do you want to proceed with cancellation?',
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
                     ],
                   ),
                   actions: [
@@ -69,16 +74,18 @@ class BookingListScreen extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                       parentContext.read<BookingListBloc>().add(
-                          CancelBookingEvent(
-                            state.pnr!,
-                            state.cancelDetails.seatNo,
-                          ),
-                        );
-                        
+                        parentContext.read<BookingListBloc>().add(
+                              CancelBookingEvent(
+                                state.pnr!,
+                                state.cancelDetails.seatNo,
+                              ),
+                            );
                         Navigator.pop(dialogContext);
                       },
-                      child: const Text('Yes'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                      child: const Text('Yes, Cancel'),
                     ),
                   ],
                 ),
@@ -97,28 +104,40 @@ class BookingListScreen extends StatelessWidget {
                   ),
                 );
               }
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: state.bookings.length,
-                itemBuilder: (context, index) {
-                  final booking = state.bookings[index];
-                  return BookingCard(booking: booking);
+              return RefreshIndicator(
+                onRefresh: () async {
+                  context.read<BookingListBloc>().add(FetchBookingsEvent());
                 },
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: state.bookings.length,
+                  itemBuilder: (context, index) {
+                    final booking = state.bookings[index];
+                    return BookingCard(booking: booking);
+                  },
+                ),
               );
             } else if (state is BookingListFailure) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(height: 16),
                     Text(
                       state.error,
-                      style: const TextStyle(fontSize: 18, color: Colors.grey),
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => context.read<BookingListBloc>().add(
-                        FetchBookingsEvent(),
-                      ),
+                            FetchBookingsEvent(),
+                          ),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -144,33 +163,59 @@ class BookingCard extends StatelessWidget {
     final formattedDate = DateFormat('MMM d, yyyy').format(date);
     final formattedTime = DateFormat('h:mm a').format(date);
 
+    // Get boarding point name safely
+    final boardingPointName = booking.boardingPointName;
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header with Ticket ID and Status
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    '#${booking.ticketId}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '#${booking.ticketId}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (booking.pnr.isNotEmpty)
+                        Text(
+                          'PNR: ${booking.pnr}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 Container(
-                  margin: const EdgeInsets.only(left: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: booking.status == 'confirmed'
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Text(
                     booking.status.toUpperCase(),
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       color: booking.status == 'confirmed'
                           ? Colors.green
                           : Colors.red,
@@ -180,81 +225,173 @@ class BookingCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+            
+            // Route Information
+            if (booking.from != null && booking.to != null) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          booking.from!,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          boardingPointName,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          booking.to!,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (booking.droppingPoint?['name'] != null)
+                          Text(
+                            booking.droppingPoint!['name'],
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+            
+            // Booking Details
             Row(
               children: [
                 const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
                 const SizedBox(width: 8),
                 Text(
                   '$formattedDate at $formattedTime',
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 14),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.location_pin, size: 16, color: Colors.grey),
-                const SizedBox(width: 8),
-                Text(
-                  'Boarding: ${booking.boardingPoint}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
+            
+            if (booking.bustype != null) ...[
+              Row(
+                children: [
+                  const Icon(Icons.directions_bus, size: 16, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      booking.bustype!,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+            
             Row(
               children: [
                 const Icon(Icons.event_seat, size: 16, color: Colors.grey),
                 const SizedBox(width: 8),
                 Text(
                   'Seats: ${booking.passengers.map((p) => p.seatNo).join(', ')}',
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 14),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
+            
             Row(
               children: [
                 const Icon(Icons.monetization_on, size: 16, color: Colors.grey),
                 const SizedBox(width: 8),
                 Text(
                   'Total Fare: ₹${booking.totalFare}',
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: OutlinedButton(
-                onPressed: booking.status == 'confirmed'
-                    ? () {
-                        // Assuming only one passenger per booking for simplicity
-                        final seatNo = booking.passengers.isNotEmpty
-                            ? booking.passengers.first.seatNo
-                            : '';
-                        context.read<BookingListBloc>().add(
-                          FetchCancelDetailsEvent(booking.pnr, seatNo,booking.ticketId),
-                        );
-                      }
-                    : null, // Disable button if not confirmed
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Theme.of(context).colorScheme.error),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            
+            // Cancelled Date if applicable
+            if (booking.status == 'cancelled' && booking.cancelledAt != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.cancel, size: 16, color: Colors.red),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Cancelled on: ${DateFormat('MMM d, yyyy').format(DateTime.parse(booking.cancelledAt!))}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.red,
+                    ),
                   ),
-                ),
-                child: Text(
-                  'Cancel Booking',
-                  style: TextStyle(
-                    color: booking.status == 'confirmed'
-                        ? Theme.of(context).colorScheme.error
-                        : Colors.grey,
+                ],
+              ),
+            ],
+            
+            const SizedBox(height: 12),
+            
+            // Cancel Button
+            if (booking.status == 'confirmed')
+              Align(
+                alignment: Alignment.centerRight,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    // Get the first passenger's seat number
+                    final seatNo = booking.passengers.isNotEmpty
+                        ? booking.passengers.first.seatNo
+                        : '';
+                    
+                    context.read<BookingListBloc>().add(
+                          FetchCancelDetailsEvent(
+                            booking.pnr,
+                            seatNo,
+                            booking.ticketId,
+                            booking, // Pass the complete booking object
+                          ),
+                        );
+                  },
+                  icon: const Icon(Icons.cancel_outlined, size: 18),
+                  label: const Text('Cancel Booking'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                    side: BorderSide(color: Theme.of(context).colorScheme.error),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

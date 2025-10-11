@@ -18,15 +18,20 @@ class BookingListFailure extends BookingListState {
   BookingListFailure({required this.error});
 }
 
+class CancelDetailsLoaded extends BookingListState {
+  final CancelDetails cancelDetails;
+  final String? pnr;
+  final Booking? booking; // Add booking object to pass data forward
+
+  CancelDetailsLoaded({
+    required this.cancelDetails, 
+    this.pnr,
+    this.booking,
+  });
+}
+
 class BookingCancelledSuccess extends BookingListState {
   final String message;
 
   BookingCancelledSuccess({required this.message});
-}
-
-class CancelDetailsLoaded extends BookingListState {
-  String? pnr;
-  final CancelDetails cancelDetails;
-
-  CancelDetailsLoaded({required this.cancelDetails,this.pnr});
 }

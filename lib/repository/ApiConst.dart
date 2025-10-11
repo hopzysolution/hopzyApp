@@ -38,8 +38,9 @@ class ApiConst {
 
   static const String getTentativeBooking ="api/public/tentativeBooking";
 
-  static const String cancelBooking = "Cancel/apiagent";
-  static const String confirmCancelBooking = "ConfirmCancel/apiagent";
+  static const String cancelBooking = "api/public/cancelBooking";
+  static const String confirmCancelBooking = "api/public/confirmCancelBooking";//"ConfirmCancel/apiagent";
+  static const String cancelHopzyBooking="api/private/bookings/cancel";
 
   static const String createOrder = "api/public/create-order";
   static const String paymentVerification = "api/public/payu/success";//"api/public/verify-payment";
@@ -47,14 +48,13 @@ class ApiConst {
   static const String requesOtp = "api/auth/request-otp";
   static const String refreshTokenApi="api/auth/refresh-token";
   static const String confirmBooking = "api/public/confirm-booking";
-  static const String getUserBookings = "api/private/user/bookings?limit=500&page=1&phone=%2B{phoneNumber}";
+  static const String getUserBookings = "api/private/user/bookings?limit=500&page=1";//&phone=%2B{phoneNumber}";
   static const String registerUser = "api/auth/register";
 
   static const String confirmTentative = "api/public/confirmBookingFromTentative";
 //ticket details
   static const String ticketDetails ="GetTicketAllInfo/apiagent";
 
-  static const String cancelHopzyBooking="api/private/bookings/cancel";
 
   static const String bookingTicketDetails="api/public/bookings/{ticketId}";
 

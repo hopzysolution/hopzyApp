@@ -505,7 +505,11 @@ class _EnhancedBusInfoBottomSheetState
                             SizedBox(height: 20),
 
                             // Tab content
-                            _buildTabContent(context, widget.tripData!),
+                            _buildTabContent(
+                              context,
+                              widget.tripData!,
+                              BlocProvider.of(context),
+                            ),
 
                             SizedBox(height: 20),
                           ],
@@ -712,14 +716,18 @@ class _EnhancedBusInfoBottomSheetState
     );
   }
 
-  Widget _buildTabContent(BuildContext context, Trips tripData) {
+  Widget _buildTabContent(
+    BuildContext context,
+    Trips tripData,
+    BookingBloc bloc,
+  ) {
     switch (selectedTabIndex) {
       case 0: // Rate & Reviews
         return _buildBoardingTab();
       case 1: // Bus route
         return _buildDroppingTab();
       case 2: // Boarding
-        return _buildPassengersTab(context, tripData);
+        return _buildPassengersTab(context, tripData, bloc);
       case 3: // Dropping
         return _buildBusRouteTab();
       case 4: // Passengers
@@ -1008,7 +1016,7 @@ String _formatBoardingTime(String? time) {
   //   );
   // }
 
-  Widget _buildPassengersTab(BuildContext context, Trips tripsData) {
+  Widget _buildPassengersTab(BuildContext context, Trips tripsData, BookingBloc bloc,) {
     print("Amenities list ---->>>>> ${tripsData.amenities}");
 
     return SingleChildScrollView(
@@ -1030,6 +1038,7 @@ String _formatBoardingTime(String? time) {
           // ContactDetailsCard(),
           SizedBox(height: 16),
           PassengerCard(
+            bookingBloc: bloc,
             tripsData: tripsData,
             selectedSeats: widget.selectedSeats,
             selectedPassengerss: (List<Passenger> finalPassengerList) {

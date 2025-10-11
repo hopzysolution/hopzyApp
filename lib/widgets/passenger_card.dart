@@ -2,6 +2,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:ridebooking/bloc/booking_bloc/booking_bloc.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
@@ -12,10 +13,11 @@ import 'package:ridebooking/globels.dart' as globals;
 
 class PassengerCard extends StatefulWidget {
   Trips? tripsData;
+  BookingBloc? bookingBloc;
   Set<SeatModell>? selectedSeats;
    void Function(List<Passenger>)? selectedPassengerss;
 
-   PassengerCard({super.key,this.selectedSeats,this.selectedPassengerss,this.tripsData});
+   PassengerCard({super.key, this.bookingBloc, this.selectedSeats,this.selectedPassengerss,this.tripsData});
 
   @override
   State<PassengerCard> createState() => _PassengerCardState();
@@ -61,6 +63,7 @@ class _PassengerCardState extends State<PassengerCard>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _AddPassengerForm(
+        bookingBloc: widget.bookingBloc,
         tripsData: widget.tripsData,
         onPassengerAdded: (passenger) async {
           await Session.savePassenger(passenger);
@@ -431,9 +434,10 @@ class _PassengerCardState extends State<PassengerCard>
 
 class _AddPassengerForm extends StatefulWidget {
   Trips? tripsData;
+  BookingBloc? bookingBloc;
   final Function(Passenger) onPassengerAdded;
 
-   _AddPassengerForm({required this.onPassengerAdded,this.tripsData});
+   _AddPassengerForm({required this.bookingBloc, required this.onPassengerAdded,this.tripsData});
 
   @override
   State<_AddPassengerForm> createState() => _AddPassengerFormState();
@@ -603,6 +607,11 @@ class _AddPassengerFormState extends State<_AddPassengerForm>
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  onChanged: (value) {
+                    if (value.length>9) {
+                      widget.bookingBloc?.getProfile(phoneNumb: value);
+                    }
+                  },
                   keyboardType: TextInputType.phone,
                   controller: phoneController,
                   decoration: InputDecoration(

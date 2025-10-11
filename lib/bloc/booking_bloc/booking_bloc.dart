@@ -48,9 +48,13 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     DpDetails? selectedDroppingPointDetails;
 
 
-     Future<void> getProfile() async {
+     Future<void> getProfile({String? phoneNumb=null}) async {
     try {
-      phone = await Session().getPhoneNo();
+      if (phoneNumb == null) {
+        phone = await Session().getPhoneNo();
+      } else {
+        phone = phoneNumb;
+      }
       print("phone number in get profile--------->>>>>$phone");
 
      if(phone!=null) {
