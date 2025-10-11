@@ -1,186 +1,153 @@
-class GetAvailableTrips {
-  Status? status;
-  List<Availabletrips>? availabletrips;
+class Availabletripdata {
+  int? status;
+  String? message;
+  Data? data;
 
-  GetAvailableTrips({this.status, this.availabletrips});
+  Availabletripdata({this.status, this.message, this.data});
 
-  GetAvailableTrips.fromJson(Map<String, dynamic> json) {
-    status =
-        json['status'] != null ? new Status.fromJson(json['status']) : null;
-    if (json['availabletrips'] != null) {
-      availabletrips = <Availabletrips>[];
-      json['availabletrips'].forEach((v) {
-        availabletrips!.add(new Availabletrips.fromJson(v));
+  Availabletripdata.fromJson(Map<String, dynamic> json) {
+    status = json['status'];
+    message = json['message'];
+    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['status'] = this.status;
+    data['message'] = this.message;
+    if (this.data != null) {
+      data['data'] = this.data!.toJson();
+    }
+    return data;
+  }
+}
+
+class Data {
+  int? totalTrips;
+  List<Trips>? trips;
+
+  Data({this.totalTrips, this.trips});
+
+  Data.fromJson(Map<String, dynamic> json) {
+    totalTrips = json['totalTrips'];
+    if (json['trips'] != null) {
+      trips = <Trips>[];
+      json['trips'].forEach((v) {
+        trips!.add(new Trips.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.status != null) {
-      data['status'] = this.status!.toJson();
-    }
-    if (this.availabletrips != null) {
-      data['availabletrips'] =
-          this.availabletrips!.map((v) => v.toJson()).toList();
+    data['totalTrips'] = this.totalTrips;
+    if (this.trips != null) {
+      data['trips'] = this.trips!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
-class Status {
-  bool? success;
-  String? message;
-  Profiledata? profiledata;
-  int? code;
-
-  Status({this.success, this.message, this.profiledata, this.code});
-
-  Status.fromJson(Map<String, dynamic> json) {
-    success = json['success'];
-    message = json['message'];
-    profiledata = json['profiledata'] != null
-        ? new Profiledata.fromJson(json['profiledata'])
-        : null;
-    code = json['code'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['message'] = this.message;
-    if (this.profiledata != null) {
-      data['profiledata'] = this.profiledata!.toJson();
-    }
-    data['code'] = this.code;
-    return data;
-  }
-}
-
-class Profiledata {
-  String? balance;
-  String? mode;
-  String? name;
-  String? allowopsids;
-
-  Profiledata({this.balance, this.mode, this.name, this.allowopsids});
-
-  Profiledata.fromJson(Map<String, dynamic> json) {
-    balance = json['balance'];
-    mode = json['mode'];
-    name = json['name'];
-    allowopsids = json['allowopsids'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['balance'] = this.balance;
-    data['mode'] = this.mode;
-    data['name'] = this.name;
-    data['allowopsids'] = this.allowopsids;
-    return data;
-  }
-}
-
-class Availabletrips {
+class Trips {
+  String? provider;
   String? operatorid;
   String? operatorname;
+  String? srcId;
+  String? dstId;
+  String? src;
+  String? dst;
   String? routeid;
+  String? tripDate;
+  String? travelTime;
   String? tripid;
-  String? tripidV2;
   String? subtripid;
+  String? scheduleCode;
   String? bustype;
   String? totalseats;
   String? availseats;
-  String? ispinksr;
-  bool? isAvailReschedule;
-  int? reschedulePolicy;
-  int? rescheduleFare;
   String? fare;
-  int? servicetax;
-  bool? isac;
+  ServiceTax? servicetax;
   String? seattype;
-  int? convenienceChargePercent;
-  String? src;
-  String? srcorder;
-  String? dst;
-  String? dstorder;
   String? deptime;
   String? arrtime;
   String? vehiclenumber;
   String? amenities;
   String? schnote;
-  String? isenbldsocialdistancing;
   String? blockingtype;
   Boardingpoint? boardingpoint;
   Droppingpoint? droppingpoint;
   String? cancellationrefrncetime;
   Cancellationpolicy? cancellationpolicy;
+  String? traveltime;
 
-  Availabletrips(
-      {this.operatorid,
+  Trips(
+      {this.provider,
+      this.operatorid,
       this.operatorname,
+      this.srcId,
+      this.dstId,
+      this.src,
+      this.dst,
       this.routeid,
+      this.tripDate,
+      this.travelTime,
       this.tripid,
-      this.tripidV2,
       this.subtripid,
+      this.scheduleCode,
       this.bustype,
       this.totalseats,
       this.availseats,
-      this.ispinksr,
-      this.isAvailReschedule,
-      this.reschedulePolicy,
-      this.rescheduleFare,
       this.fare,
       this.servicetax,
-      this.isac,
       this.seattype,
-      this.convenienceChargePercent,
-      this.src,
-      this.srcorder,
-      this.dst,
-      this.dstorder,
       this.deptime,
       this.arrtime,
       this.vehiclenumber,
       this.amenities,
       this.schnote,
-      this.isenbldsocialdistancing,
       this.blockingtype,
       this.boardingpoint,
       this.droppingpoint,
       this.cancellationrefrncetime,
-      this.cancellationpolicy});
+      this.cancellationpolicy,
+      this.traveltime});
 
-  Availabletrips.fromJson(Map<String, dynamic> json) {
-    operatorid = json['operatorid'];
+  Trips.fromJson(Map<String, dynamic> json) {
+    provider = json['provider'];
+    operatorid = json['operatorid'].toString();
     operatorname = json['operatorname'];
-    routeid = json['routeid'];
-    tripid = json['tripid'];
-    tripidV2 = json['tripid_v2'];
-    subtripid = json['subtripid'];
-    bustype = json['bustype'];
-    totalseats = json['totalseats'];
-    availseats = json['availseats'];
-    ispinksr = json['ispinksr'];
-    isAvailReschedule = json['isAvailReschedule'];
-    reschedulePolicy = json['reschedulePolicy'];
-    rescheduleFare = json['rescheduleFare'];
-    fare = json['fare'];
-    servicetax = json['servicetax'];
-    isac = json['isac'];
-    seattype = json['seattype'];
-    convenienceChargePercent = json['convenienceChargePercent'];
+    srcId = json['srcId'].toString();
+    dstId = json['dstId'].toString();
     src = json['src'];
-    srcorder = json['srcorder'];
     dst = json['dst'];
-    dstorder = json['dstorder'];
+    routeid = json['routeid'].toString();
+    tripDate = json['tripDate'];
+    travelTime = json['travelTime'];
+    tripid = json['tripid'].toString();
+    subtripid = json['subtripid'];
+    scheduleCode = json['scheduleCode'].toString();
+    bustype = json['bustype'];
+    totalseats = json['totalseats'].toString();
+    availseats = json['availseats'].toString();
+    fare = json['fare'].toString();
+    
+        final st = json['servicetax'];
+    if (st != null) {
+      if (st is int) {
+        servicetax = ServiceTax(value: st.toDouble());
+      } else if (st is Map<String, dynamic>) {
+        servicetax = ServiceTax.fromJson(st);
+      }
+    }
+ 
+    
+
+    seattype = json['seattype'];
     deptime = json['deptime'];
     arrtime = json['arrtime'];
     vehiclenumber = json['vehiclenumber'];
     amenities = json['amenities'];
     schnote = json['schnote'];
-    isenbldsocialdistancing = json['isenbldsocialdistancing'];
     blockingtype = json['blockingtype'];
     boardingpoint = json['boardingpoint'] != null
         ? new Boardingpoint.fromJson(json['boardingpoint'])
@@ -188,42 +155,41 @@ class Availabletrips {
     droppingpoint = json['droppingpoint'] != null
         ? new Droppingpoint.fromJson(json['droppingpoint'])
         : null;
-    cancellationrefrncetime = json['cancellationrefrncetime'];
+    cancellationrefrncetime = json['cancellationrefrncetime'].toString();
     cancellationpolicy = json['cancellationpolicy'] != null
         ? new Cancellationpolicy.fromJson(json['cancellationpolicy'])
         : null;
+    traveltime = json['traveltime'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['provider'] = this.provider;
     data['operatorid'] = this.operatorid;
     data['operatorname'] = this.operatorname;
+    data['srcId'] = this.srcId;
+    data['dstId'] = this.dstId;
+    data['src'] = this.src;
+    data['dst'] = this.dst;
     data['routeid'] = this.routeid;
+    data['tripDate'] = this.tripDate;
+    data['travelTime'] = this.travelTime;
     data['tripid'] = this.tripid;
-    data['tripid_v2'] = this.tripidV2;
     data['subtripid'] = this.subtripid;
+    data['scheduleCode'] = this.scheduleCode;
     data['bustype'] = this.bustype;
     data['totalseats'] = this.totalseats;
     data['availseats'] = this.availseats;
-    data['ispinksr'] = this.ispinksr;
-    data['isAvailReschedule'] = this.isAvailReschedule;
-    data['reschedulePolicy'] = this.reschedulePolicy;
-    data['rescheduleFare'] = this.rescheduleFare;
     data['fare'] = this.fare;
-    data['servicetax'] = this.servicetax;
-    data['isac'] = this.isac;
+     if (servicetax != null) {
+      data['servicetax'] = servicetax!.toJson();
+    }
     data['seattype'] = this.seattype;
-    data['convenienceChargePercent'] = this.convenienceChargePercent;
-    data['src'] = this.src;
-    data['srcorder'] = this.srcorder;
-    data['dst'] = this.dst;
-    data['dstorder'] = this.dstorder;
     data['deptime'] = this.deptime;
     data['arrtime'] = this.arrtime;
     data['vehiclenumber'] = this.vehiclenumber;
     data['amenities'] = this.amenities;
     data['schnote'] = this.schnote;
-    data['isenbldsocialdistancing'] = this.isenbldsocialdistancing;
     data['blockingtype'] = this.blockingtype;
     if (this.boardingpoint != null) {
       data['boardingpoint'] = this.boardingpoint!.toJson();
@@ -235,6 +201,7 @@ class Availabletrips {
     if (this.cancellationpolicy != null) {
       data['cancellationpolicy'] = this.cancellationpolicy!.toJson();
     }
+    data['traveltime'] = this.traveltime;
     return data;
   }
 }
@@ -265,64 +232,36 @@ class Boardingpoint {
 class BpDetails {
   String? id;
   String? venue;
-  String? glbid;
   String? stnname;
   String? address;
   String? contactno;
   String? boardtime;
-  String? td;
-  String? status;
-  String? stationid;
-  String? tripid;
-  String? sid;
-  String? timedelay;
 
   BpDetails(
       {this.id,
       this.venue,
-      this.glbid,
       this.stnname,
       this.address,
       this.contactno,
-      this.boardtime,
-      this.td,
-      this.status,
-      this.stationid,
-      this.tripid,
-      this.sid,
-      this.timedelay});
+      this.boardtime});
 
   BpDetails.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     venue = json['venue'];
-    glbid = json['glbid'];
     stnname = json['stnname'];
     address = json['address'];
     contactno = json['contactno'];
     boardtime = json['boardtime'];
-    td = json['td'];
-    status = json['status'];
-    stationid = json['stationid'];
-    tripid = json['tripid'];
-    sid = json['sid'];
-    timedelay = json['timedelay'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['venue'] = this.venue;
-    data['glbid'] = this.glbid;
     data['stnname'] = this.stnname;
     data['address'] = this.address;
     data['contactno'] = this.contactno;
     data['boardtime'] = this.boardtime;
-    data['td'] = this.td;
-    data['status'] = this.status;
-    data['stationid'] = this.stationid;
-    data['tripid'] = this.tripid;
-    data['sid'] = this.sid;
-    data['timedelay'] = this.timedelay;
     return data;
   }
 }
@@ -353,72 +292,36 @@ class Droppingpoint {
 class DpDetails {
   String? id;
   String? venue;
+  String? stnname;
   String? address;
   String? contactno;
-  String? stationname;
-  String? td;
-  String? status;
-  String? stationid;
-  String? tripid;
-  String? sid;
-  String? glbid;
-  String? bpoffice;
-  String? pkupvan;
   String? droptime;
-  String? timedelay;
 
   DpDetails(
       {this.id,
       this.venue,
+      this.stnname,
       this.address,
       this.contactno,
-      this.stationname,
-      this.td,
-      this.status,
-      this.stationid,
-      this.tripid,
-      this.sid,
-      this.glbid,
-      this.bpoffice,
-      this.pkupvan,
-      this.droptime,
-      this.timedelay});
+      this.droptime});
 
   DpDetails.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     venue = json['venue'];
+    stnname = json['stnname'];
     address = json['address'];
     contactno = json['contactno'];
-    stationname = json['stationname'];
-    td = json['td'];
-    status = json['status'];
-    stationid = json['stationid'];
-    tripid = json['tripid'];
-    sid = json['sid'];
-    glbid = json['glbid'];
-    bpoffice = json['bpoffice'];
-    pkupvan = json['pkupvan'];
     droptime = json['droptime'];
-    timedelay = json['timedelay'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['venue'] = this.venue;
+    data['stnname'] = this.stnname;
     data['address'] = this.address;
     data['contactno'] = this.contactno;
-    data['stationname'] = this.stationname;
-    data['td'] = this.td;
-    data['status'] = this.status;
-    data['stationid'] = this.stationid;
-    data['tripid'] = this.tripid;
-    data['sid'] = this.sid;
-    data['glbid'] = this.glbid;
-    data['bpoffice'] = this.bpoffice;
-    data['pkupvan'] = this.pkupvan;
     data['droptime'] = this.droptime;
-    data['timedelay'] = this.timedelay;
     return data;
   }
 }
@@ -471,6 +374,50 @@ class Terms {
     data['description'] = this.description;
     data['refundpercentage'] = this.refundpercentage;
     data['cancellationpercentage'] = this.cancellationpercentage;
+    return data;
+  }
+}
+
+class ServiceTax {
+  double? value; // simple case when API sends "0"
+  double? cgstValue;
+  double? sgstValue;
+  double? ugstValue;
+  double? igstValue;
+  String? tradeName;
+  String? gstin;
+
+  ServiceTax({
+    this.value,
+    this.cgstValue,
+    this.sgstValue,
+    this.ugstValue,
+    this.igstValue,
+    this.tradeName,
+    this.gstin,
+  });
+
+  ServiceTax.fromJson(Map<String, dynamic> json) {
+    cgstValue = (json['cgstValue'] as num?)?.toDouble();
+    sgstValue = (json['sgstValue'] as num?)?.toDouble();
+    ugstValue = (json['ugstValue'] as num?)?.toDouble();
+    igstValue = (json['igstValue'] as num?)?.toDouble();
+    tradeName = json['tradeName'];
+    gstin = json['gstin'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    if (value != null) {
+      data['value'] = value;
+    } else {
+      data['cgstValue'] = cgstValue;
+      data['sgstValue'] = sgstValue;
+      data['ugstValue'] = ugstValue;
+      data['igstValue'] = igstValue;
+      data['tradeName'] = tradeName;
+      data['gstin'] = gstin;
+    }
     return data;
   }
 }

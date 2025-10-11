@@ -1,9 +1,12 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_event.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_state.dart';
 import 'package:ridebooking/models/all_trip_data_model.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/models/operator_list_model.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/repository/ApiRepository.dart';
 import 'package:ridebooking/utils/session.dart';
@@ -11,7 +14,7 @@ import 'package:ridebooking/globels.dart' as globals;
 
 class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
   List<AllAvailabletrips>? allAvailabletrips;
-  List<Availabletrips> allTrips = [];
+  List<Trips> allTrips = [];
   HomeScreenBloc() : super(HomeScreenInitial()) {
     on<SearchAvailableTripsEvent>((event, emit) async {
       emit(HomeScreenLoading());
@@ -23,7 +26,11 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       //   formData,
       // );
 
-      getAvailableTrips(event.from,event.to,globals.selectedDate);
+      getAvailableTrips(
+        event.src.cityIds!.whereType<String>().toList(),
+        event.dst.cityIds!.whereType<String>().toList(),
+        globals.selectedDate,
+      );
 
       // final data = response.data; // ✅ Extract actual response map
 
@@ -46,53 +53,53 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       //   );
       // }
     });
-    getAllAvailableTripsOnADay();
+    getStations();
   }
 
-  List<Availabletrips> availableaatripsList = [];
+  List<Trips> availableaatripsList = [];
 
+  StationListModel? stationListModel;
 
   Future<void> getAvailableTrips(
-  String from,
-  String to,
+  List<String> from,
+  List<String> to,
   String selectedDate,
 ) async {
   emit(HomeScreenLoading());
 
   try {
     // Prepare futures for all operator calls
-    final futures = globals.operatorListModel.operatorlist!.map((opid) {
+   
       final formData = {
         "src": from,
         "dst": to,
         "tripdate": selectedDate,
-        "opid": "VGT",//opid.code,
       };
 
-      return ApiRepository.postAPI(ApiConst.getAvailableTrips, formData)
-          .catchError((e) {
-        print("Error for operator $opid: $e");
-        return null; // avoid breaking the loop
-      });
-    }).toList();
+      // print("Response from getAvailableTrips: ${formData}");
 
-    // Run all requests in parallel
-    final responses = await Future.wait(futures);
+      print("test for typecast---------->>>>0");
 
-    // Combine results
-    List<Availabletrips> allTrips = [];
-    for (var response in responses) {
-      if (response == null) continue;
+
+      final response = await ApiRepository.postAPI(ApiConst.getAvailableTrips, formData, basurl2: ApiConst.baseUrl2);
+          
+        print("test for typecast---------->>>>1");
+      debugPrint("Response from getAvailableTrips: ${response.toString()}");
+
+   
       final data = response.data;
-      if (data["status"]?["success"] == true) {
-        final parsed = GetAvailableTrips.fromJson(data);
-        allTrips.addAll(parsed.availabletrips ?? []);
-      }
-    }
+        print("test for typecast---------->>>>2");
+        final parsed = Availabletripdata.fromJson(data);
+        print("test for typecast---------->>>>3");
+        allTrips.addAll(parsed.data!.trips!);
+        print("test for typecast---------->>>>4");
+      
 
     if (allTrips.isNotEmpty) {
-      Session().saveTripsToSession(allTrips);
+      print("test for typecast---------->>>>5");
+      // Session().saveTripsToSession(allTrips);
       emit(AllTripSuccessState(allTrips: allTrips));
+      print("test for typecast---------->>>>6");
     } else {
       emit(HomeScreenFailure(error: "No trips found"));
     }
@@ -144,8 +151,35 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
 
 
 
+//     getAllAvailableTripsOnADay() async{
 
-void getAllAvailableTripsOnADay() async {
+
+// var response = await ApiRepository.getAPI(
+//         "api/public/stations", //?page=1&limit=10",
+//         basurl2: ApiConst.baseUrl2,
+//       );
+//       final data = response.data;
+//       print("------------------get user booking------data)-${data}-");
+
+// if (response.statusCode == 200) {
+
+//  stationListModel = StationListModel.fromJson(response.data);
+//  globals.stationListModel = stationListModel!;
+// //  emit(Spla)
+
+//   debugPrint("Data to see -------------->>>>${stationListModel!.data!.dstCount}");
+// }
+// else {
+//   print(response.statusMessage);
+// }
+
+//   }
+
+
+
+
+
+void getStations() async {
   emit(HomeScreenLoading());
 
   print(
@@ -157,41 +191,22 @@ void getAllAvailableTripsOnADay() async {
     // Clear previous trips before fetching new ones
     allAvailabletrips = [];
 
-    final List<Future> futures = [];
 
-    for (var operator in globals.operatorListModel.operatorlist ?? []) {
-      if (operator.code != null && operator.code!.contains("VT")) {
-        var formData = {
-          "tripdate": DateFormat('yyyy-MM-dd').format(
-            DateTime.now().add(const Duration(days: 1)),
-          ),
-          "opid": "VGT",//operator.code,
-        };
-
-        // Add async task to list
-        futures.add(ApiRepository.postAPI(
-          ApiConst.getAllAvailableTripsOnADay,
-          formData,
-        ));
-      }
-    }
+   
 
     // Run all requests in parallel
-    final responses = await Future.wait(futures);
+    final responses = await ApiRepository.getAPI(
+        "api/public/stations?search=chenn&type=dst&page=1&limit=10", //?page=1&limit=10",
+        basurl2: ApiConst.baseUrl2,
+      );
+     
+      stationListModel = StationListModel.fromJson(responses.data);
+ globals.stationListModel = stationListModel!;
 
-    for (var response in responses) {
-      var data = response.data;
-      if (data["status"] != null && data["status"]["success"] == true) {
-        AllTripDataModel allTripDataModel = AllTripDataModel.fromJson(data);
-        allAvailabletrips!.addAll(allTripDataModel.availabletrips ?? []);
-      }
-    }
-
-    if (allAvailabletrips!.isNotEmpty) {
-      print("allAvailabletrips --------->>>>${allAvailabletrips!.length}");
-      emit(HomeScreenLoaded(allAvailabletrips: allAvailabletrips));
+    if (stationListModel != null && stationListModel!.data != null) {
+      emit(HomeScreenLoaded (stationListModel: stationListModel!.data!.cities));
     } else {
-      emit(HomeScreenFailure(error: "No trips found"));
+      emit(HomeScreenFailure(error: "No stations found"));
     }
   } catch (e) {
     print("Error in getAllAvailableTripsOnADay: $e");

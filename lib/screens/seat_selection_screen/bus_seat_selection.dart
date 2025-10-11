@@ -18,7 +18,7 @@ enum SeatStatus {
 class BusSeatSelectionScreen extends StatefulWidget {
   final BusData busData; // API data containing seat layout
   final void Function(Set<SeatModell>) onSeatsSelected;
-  final Layout seatLayout;
+  final Data seatLayout;
 
   const BusSeatSelectionScreen({
     Key? key,

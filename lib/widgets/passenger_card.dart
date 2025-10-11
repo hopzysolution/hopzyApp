@@ -1,5 +1,8 @@
 
+
+
 import 'package:flutter/material.dart';
+import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/passenger_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/utils/app_colors.dart';
@@ -8,10 +11,11 @@ import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/globels.dart' as globals;
 
 class PassengerCard extends StatefulWidget {
+  Trips? tripsData;
   Set<SeatModell>? selectedSeats;
    void Function(List<Passenger>)? selectedPassengerss;
 
-   PassengerCard({super.key,this.selectedSeats,this.selectedPassengerss});
+   PassengerCard({super.key,this.selectedSeats,this.selectedPassengerss,this.tripsData});
 
   @override
   State<PassengerCard> createState() => _PassengerCardState();
@@ -57,6 +61,7 @@ class _PassengerCardState extends State<PassengerCard>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _AddPassengerForm(
+        tripsData: widget.tripsData,
         onPassengerAdded: (passenger) async {
           await Session.savePassenger(passenger);
           _loadPassengers();
@@ -425,9 +430,10 @@ class _PassengerCardState extends State<PassengerCard>
 }
 
 class _AddPassengerForm extends StatefulWidget {
+  Trips? tripsData;
   final Function(Passenger) onPassengerAdded;
 
-  const _AddPassengerForm({required this.onPassengerAdded});
+   _AddPassengerForm({required this.onPassengerAdded,this.tripsData});
 
   @override
   State<_AddPassengerForm> createState() => _AddPassengerFormState();
@@ -472,11 +478,14 @@ class _AddPassengerFormState extends State<_AddPassengerForm>
     globals.email=emailController.text;
     Session().setEmail(emailController.text);
     Session().setPhoneNo(phoneController.text.contains("+91")?phoneController.text:"+91${phoneController.text}");
+    //----------------------------------------need to change---------------------------j
     if (_formKey.currentState!.validate()) {
       final passenger = Passenger(
         name: nameController.text.trim(),
         age: int.parse(ageController.text.trim()),
         gender: gender,
+        
+        // widget.tripsData!.provider=="ezeeinfo"? seatCode: widget.tripsData!.,
       );
       widget.onPassengerAdded(passenger);
     }

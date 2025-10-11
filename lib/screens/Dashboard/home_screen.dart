@@ -4,15 +4,17 @@ import 'package:intl/intl.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_bloc.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_event.dart';
 import 'package:ridebooking/bloc/homeScreenBloc/home_screen_state.dart';
+import 'package:ridebooking/bloc/station_bloc/all_station_bloc.dart';
 import 'package:ridebooking/bloc/trip_plan_bloc/trip_planner_bloc.dart';
 import 'package:ridebooking/bloc/trip_plan_bloc/trip_planner_repository.dart';
 import 'package:ridebooking/commonWidgets/custom_search_widget.dart';
 import 'package:ridebooking/models/all_trip_data_model.dart';
+import 'package:ridebooking/models/operator_list_model.dart';
 import 'package:ridebooking/screens/trip_planner.dart';
 import 'package:ridebooking/shimmerView/bus_search_shimmer.dart';
-// import 'package:ridebooking/models/station_model.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
+import 'package:ridebooking/globels.dart' as globals;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,8 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   DateTime selectedDate = DateTime.now(); //DateTime.now();
 
-  AllAvailabletrips? selectedFromStation;
-  AllAvailabletrips? selectedToStation;
+  City? selectedFromStation;
+  City? selectedToStation;
 
  
 
@@ -122,15 +124,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ToastMessage().showErrorToast(state.error);
           }
           if (state is AllTripSuccessState) {
+
             Navigator.pushNamed(
               context,
               Routes.availableTrips,
               arguments: {'allTrips': state.allTrips,
-                          'from': selectedFromStation!.srcid!,
-                          'to': selectedToStation!.srcid!,
-                          'opid':selectedToStation!.operatorid
+                          'from': selectedFromStation!,
+                          'to': selectedToStation!,
+                          'opid':"VGT"//selectedToStation!.operatorid
                           },
             );
+
           }
         },
         child: BlocBuilder<HomeScreenBloc, HomeScreenState>(
@@ -138,6 +142,8 @@ class _HomeScreenState extends State<HomeScreen> {
             if (state is HomeScreenLoading || state is HomeScreenInitial) {
               return BusSearchShimmer(); //const Center(child: CircularProgressIndicator());
             }
+
+
 
             // if (state is HomeScreenFailure) {
             //   return Center(
@@ -148,17 +154,17 @@ class _HomeScreenState extends State<HomeScreen> {
             //   );
             // }
 
-            final List<AllAvailabletrips> fromOptions = getFromOptions(
-              context.read<HomeScreenBloc>().allAvailabletrips!,
-            );
+            // final List<AllAvailabletrips> fromOptions = getFromOptions(
+            //   context.read<HomeScreenBloc>().allAvailabletrips!,
+            // );
 
-            final List<AllAvailabletrips> toOptions =
-                selectedFromStation != null
-                ? getToOptions(
-                    trips: context.read<HomeScreenBloc>().allAvailabletrips!,
-                    fromOption: selectedFromStation!, //selectedFromOption!,
-                  )
-                : [];
+            // final List<AllAvailabletrips> toOptions =
+            //     selectedFromStation != null
+            //     ? getToOptions(
+            //         trips: context.read<HomeScreenBloc>().allAvailabletrips!,
+            //         fromOption: selectedFromStation!, //selectedFromOption!,
+            //       )
+            //     : [];
 
             return SingleChildScrollView(
   padding: const EdgeInsets.all(10.0),
@@ -183,61 +189,55 @@ class _HomeScreenState extends State<HomeScreen> {
           maxHeight: 300, // Prevent unbounded height
         ),
         child: CustomSearchWidget(
-          fromOptions: fromOptions,
-          toOptions: toOptions,
-          allAvailabletrips: context.read<HomeScreenBloc>().allAvailabletrips!,
-          fromController: fromController,
-          toController: toController,
-          selectedDate: selectedDate,
-          onDateSelected: (DateTime date) {
-            setState(() {
-              selectedDate = date;
-            });
-          },
-          onSwapTap: () {
-            final tempText = fromController.text;
-            fromController.text = toController.text;
-            toController.text = tempText;
-
-            final tempStation = selectedFromStation;
-            selectedFromStation = selectedToStation;
-            selectedToStation = tempStation;
-            setState(() {}); // Refresh dropdowns
-
-            print(
-              "Swapped stations: ${selectedFromStation?.srcname} and ${selectedToStation?.srcname}",
-            );
-          },
-          onSearchTap: () {
-            if (selectedFromStation == null || selectedToStation == null) {
-              ToastMessage().showErrorToast(
-                "Please select both stations.",
+            fromController: fromController,
+            toController: toController,
+            selectedDate: selectedDate,
+            onDateSelected: (DateTime date) {
+              setState(() {
+                selectedDate = date;
+              });
+            },
+            onSwapTap: () {
+              final tempText = fromController.text;
+              fromController.text = toController.text;
+              toController.text = tempText;
+        
+              final tempStation = selectedFromStation;
+              selectedFromStation = selectedToStation;
+              selectedToStation = tempStation;
+              setState(() {});
+            },
+            onSearchTap: () {
+              if (selectedFromStation == null || selectedToStation == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please select both stations.'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+        
+              String dateSelected = DateFormat('yyyy-MM-dd').format(selectedDate);
+              context.read<HomeScreenBloc>().add(
+                SearchAvailableTripsEvent(
+                  src: selectedFromStation!,
+                  dst: selectedToStation!,
+                  date: dateSelected,
+                ),
               );
-              return;
-            }
-
-            String dateSelected = DateFormat('yyyy-MM-dd').format(selectedDate);
-
-            context.read<HomeScreenBloc>().add(
-              SearchAvailableTripsEvent(
-                from: selectedFromStation!.srcid!,
-                to: selectedToStation!.srcid!,
-                date: dateSelected,
-                
-              ),
-            );
-          },
-          onFromSelected: (AllAvailabletrips allAvailabletrips) {
-            selectedFromStation = allAvailabletrips;
-            setState(() {}); // Rebuild so toOptions updates
-          },
-          onToSelected: (AllAvailabletrips station) {
-            selectedToStation = station;
-            print(
-              "Selected To Station: ${selectedToStation?.srcname}",
-            );
-          },
-        ),
+            },
+            onFromSelected: (City station) {
+              selectedFromStation = station;
+              setState(() {});
+            },
+            onToSelected: (City station) {
+              selectedToStation = station;
+              setState(() {});
+            },
+          ),
+        
+      
       ),
       
       const SizedBox(height: 5),

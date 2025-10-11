@@ -1,26 +1,20 @@
-import 'dart:convert';
-
 import 'package:bloc/bloc.dart';
-import 'package:flutter/material.dart';
 import 'package:ridebooking/bloc/loginWithOtpBloc/login_with_otp_event.dart';
 import 'package:ridebooking/bloc/loginWithOtpBloc/login_with_otp_state.dart';
-import 'package:ridebooking/repository/ApiConst.dart';
-import 'package:ridebooking/repository/ApiRepository.dart';
-import 'package:ridebooking/services/firebase_methods.dart';
 import 'package:ridebooking/utils/Api_client.dart';
-import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/session.dart';
+
 class LoginWithOtpBloc extends Bloc<LoginWithOtpEvent,LoginWithOtpState> {
   String? mobileNumber;
 
    final api = ApiClient();
   LoginWithOtpBloc() : super(LoginWithOtpInitial()) {
    on<OnLoginButtonPressed>((event, emit) async {
+
        print("Request Otp button clicked bloc ");
       mobileNumber = event.mobileNumber;
-      // Here you can handle the login logic
-      // For example, call an API to verify the mobile number
-      // and emit the appropriate state based on the response.
+
+
       emit(LoginWithOtpLoading());
       
                   

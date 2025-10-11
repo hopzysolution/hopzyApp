@@ -31,6 +31,10 @@ class Data {
   int? walletUsed;
   int? payuAmount;
   bool? loggedIn;
+  bool? welcomeCouponApplied;
+  int? welcomeDiscount;
+  String? serviceProvider;
+  Hashes? hashes;
 
   Data(
       {this.gateway,
@@ -40,7 +44,11 @@ class Data {
       this.totalAmount,
       this.walletUsed,
       this.payuAmount,
-      this.loggedIn});
+      this.loggedIn,
+      this.welcomeCouponApplied,
+      this.welcomeDiscount,
+      this.serviceProvider,
+      this.hashes});
 
   Data.fromJson(Map<String, dynamic> json) {
     gateway = json['gateway'];
@@ -53,6 +61,11 @@ class Data {
     walletUsed = json['walletUsed'];
     payuAmount = json['payuAmount'];
     loggedIn = json['loggedIn'];
+    welcomeCouponApplied = json['welcomeCouponApplied'];
+    welcomeDiscount = json['welcomeDiscount'];
+    serviceProvider = json['service_provider'];
+    hashes =
+        json['hashes'] != null ? new Hashes.fromJson(json['hashes']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -67,6 +80,12 @@ class Data {
     data['walletUsed'] = this.walletUsed;
     data['payuAmount'] = this.payuAmount;
     data['loggedIn'] = this.loggedIn;
+    data['welcomeCouponApplied'] = this.welcomeCouponApplied;
+    data['welcomeDiscount'] = this.welcomeDiscount;
+    data['service_provider'] = this.serviceProvider;
+    if (this.hashes != null) {
+      data['hashes'] = this.hashes!.toJson();
+    }
     return data;
   }
 }
@@ -82,6 +101,11 @@ class PayUData {
   String? surl;
   String? furl;
   String? hash;
+  String? udf1;
+  String? udf2;
+  String? udf3;
+  String? udf4;
+  String? udf5;
 
   PayUData(
       {this.key,
@@ -93,7 +117,12 @@ class PayUData {
       this.phone,
       this.surl,
       this.furl,
-      this.hash});
+      this.hash,
+      this.udf1,
+      this.udf2,
+      this.udf3,
+      this.udf4,
+      this.udf5});
 
   PayUData.fromJson(Map<String, dynamic> json) {
     key = json['key'];
@@ -106,6 +135,11 @@ class PayUData {
     surl = json['surl'];
     furl = json['furl'];
     hash = json['hash'];
+    udf1 = json['udf1'];
+    udf2 = json['udf2'];
+    udf3 = json['udf3'];
+    udf4 = json['udf4'];
+    udf5 = json['udf5'];
   }
 
   Map<String, dynamic> toJson() {
@@ -120,6 +154,38 @@ class PayUData {
     data['surl'] = this.surl;
     data['furl'] = this.furl;
     data['hash'] = this.hash;
+    data['udf1'] = this.udf1;
+    data['udf2'] = this.udf2;
+    data['udf3'] = this.udf3;
+    data['udf4'] = this.udf4;
+    data['udf5'] = this.udf5;
+    return data;
+  }
+}
+
+class Hashes {
+  String? payment;
+  String? vasForMobileSdk;
+  String? paymentRelatedDetailsForMobileSdk;
+
+  Hashes(
+      {this.payment,
+      this.vasForMobileSdk,
+      this.paymentRelatedDetailsForMobileSdk});
+
+  Hashes.fromJson(Map<String, dynamic> json) {
+    payment = json['payment'];
+    vasForMobileSdk = json['vas_for_mobile_sdk'];
+    paymentRelatedDetailsForMobileSdk =
+        json['payment_related_details_for_mobile_sdk'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['payment'] = this.payment;
+    data['vas_for_mobile_sdk'] = this.vasForMobileSdk;
+    data['payment_related_details_for_mobile_sdk'] =
+        this.paymentRelatedDetailsForMobileSdk;
     return data;
   }
 }

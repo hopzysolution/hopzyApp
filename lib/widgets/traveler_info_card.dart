@@ -11,7 +11,7 @@ class TravelerInfoCard extends StatefulWidget {
   final String boardingPoint;
   final String droppingInfo;
   final String droppingPoint;
-  final Availabletrips tripData;
+  final Trips tripData;
   final Set<SeatModell> seatDetails;
 
   const TravelerInfoCard({
@@ -138,7 +138,7 @@ setState(() {
                       const SizedBox(width: 16),
                       _seatDetailItem("Type", widget.tripData.bustype!),
                       const SizedBox(width: 16),
-                      _seatDetailItem("AC/Non-AC", widget.tripData.isac!?"AC":"Non-AC"),
+                      _seatDetailItem("AC/Non-AC", widget.tripData.schnote!.contains("AC")?"AC":"Non-AC"),
                       const SizedBox(width: 16),
                       _seatDetailItem("Count", widget.seatDetails.length.toString()),
                     ],

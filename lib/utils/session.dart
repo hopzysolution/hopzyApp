@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/passenger_model.dart';
+import 'package:ridebooking/models/profile_data_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Session {
@@ -11,6 +12,57 @@ class Session {
   static String dateOfPlace = "dateOfPlace";
   static String gender = "gender";  
   static String userImageKey = "userImageKey";
+   static const String _keyPhoneNo = 'phone_no';
+  static const String _keyProfileData = 'profile_data';
+  static const String _keyAllSeats = 'all_seats';
+  static const String _keyWalletBalance = 'wallet_balance';
+  static const String _keyUserName = 'user_name';
+  static const String _keyUserEmail = 'user_email';
+
+
+  // Save complete ProfileDataModel
+  static Future<void> saveProfileData(ProfileDataModel profileDataModel) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Convert the model to JSON string
+      String jsonString = jsonEncode(profileDataModel.toJson());
+      
+      // Save to SharedPreferences
+      await prefs.setString(_keyProfileData, jsonString);
+      
+     
+      
+      print("Profile data saved successfully");
+    } catch (e) {
+      print("Error saving profile data: $e");
+    }
+  }
+
+  // Get complete ProfileDataModel
+  static Future<ProfileDataModel?> getProfileData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Get JSON string from SharedPreferences
+      String? jsonString = prefs.getString(_keyProfileData);
+      
+      if (jsonString != null && jsonString.isNotEmpty) {
+        // Convert JSON string back to model
+        Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+        ProfileDataModel profileDataModel = ProfileDataModel.fromJson(jsonMap);
+        
+        print("Profile data retrieved successfully-------->>>");
+        return profileDataModel;
+      } else {
+        print("No profile data found in session");
+        return null;
+      }
+    } catch (e) {
+      print("Error getting profile data: $e");
+      return null;
+    }
+  }
 
  Future<String> getFullName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -97,19 +149,19 @@ Future<void> setEmail(String email) async {
   await prefs.setString('email', email);
 }
 
-Future<void> saveTripsToSession(List<Availabletrips> trips) async {
+Future<void> saveTripsToSession(List<Trips> trips) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   List<String> tripList = trips.map((trip) => jsonEncode(trip.toJson())).toList();
   await prefs.setStringList('available_trips', tripList);
 }
 
-Future<List<Availabletrips>> getTripsFromSession() async {
+Future<List<Trips>> getTripsFromSession() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   List<String>? tripList = prefs.getStringList('available_trips');
 
   if (tripList != null) {
     return tripList
-        .map((tripString) => Availabletrips.fromJson(jsonDecode(tripString)))
+        .map((tripString) => Trips.fromJson(jsonDecode(tripString)))
         .toList();
   } else {
     return [];

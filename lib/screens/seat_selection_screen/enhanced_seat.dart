@@ -9,10 +9,12 @@ import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
 import 'package:ridebooking/commonWidgets/gst_form_widget.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/passenger_model.dart';
+import 'package:ridebooking/models/profile_data_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/screens/payu_money.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/route_generate.dart';
+import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ridebooking/widgets/passenger_card.dart';
@@ -40,7 +42,8 @@ class BusInfo {
 }
 
 class EnhancedBusInfoBottomSheet extends StatefulWidget {
-  Availabletrips? tripData;
+ 
+  Trips? tripData;
   final BusInfo busInfo;
   final Set<SeatModell>? selectedSeats;
   final ScrollController? scrollController;
@@ -72,6 +75,7 @@ class _EnhancedBusInfoBottomSheetState
   late Razorpay _razorpay;
   BookingBloc? forPayment;
   List<String> seats=[];
+   ProfileDataModel? getProfileData;
   @override
   void initState() {
     // TODO: implement initState
@@ -83,6 +87,11 @@ class _EnhancedBusInfoBottomSheetState
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
     //  saveSelectedSeat();
     getSeatList();
+    getProfileDataFromSession();
+  }
+
+  getProfileDataFromSession()async{
+    getProfileData=await Session.getProfileData();
   }
 
   getSeatList()async{
@@ -96,7 +105,7 @@ class _EnhancedBusInfoBottomSheetState
     print("✅ Payment success: ${response.paymentId}");
 
     ToastMessage().showSuccessToast("Payment successful!");
-    Future.delayed(Duration(milliseconds: 500));
+
     forPayment!.paymentVerification(
       paymentVerify: response,
       bpoint: selectedBoardingPointId!.toString(),
@@ -158,7 +167,7 @@ class _EnhancedBusInfoBottomSheetState
 
   //
 
-  List<Availabletrips>? tripsData;
+  List<Trips>? tripsData;
   // saveSelectedSeat()async{
   //   await Session.saveAllSelectedSeats(widget.selectedSeats!);
   // tripsData =  await Session().getTripsFromSession();
@@ -178,31 +187,43 @@ class _EnhancedBusInfoBottomSheetState
           if (state is BookingFailure) {
             ToastMessage().showErrorToast(state.error);
           }
-          // if (state is RazorpaySuccessState) {
-          //   print(
-          //     'RazorpaySuccessState received with order_id: ${state.razorpay_order_id}',
-          //   ); // Debug log
-
-          //   // Calculate total fare
-          //   int totalFare =
-          //       widget.selectedSeats!.length *
-          //       int.parse(widget.tripData!.fare.toString());
-
-          //   // Call the checkout function with proper parameters
-          //   _openRazorpayCheckout(totalFare, state.razorpay_order_id!);
-          // }
-
+       
           if(state is PayUSuccessState){
             print(
               'PayUSuccessState received with order_id: ${state.createOrderDataModel?.data?.payUData?.key}',
             ); // Debug log
 
+             final bookingBloc = BlocProvider.of<BookingBloc>(context);
+
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>
 
-            PayUPaymentScreen(
-              // bookingBloc: BlocProvider.of<BookingBloc>(context),
-              createOrderDataModel: state.createOrderDataModel,
-            )));
+           PayUPaymentScreen(
+  forPayment: forPayment,
+  createOrderDataModel: state.createOrderDataModel,
+  bpoint: selectedBoardingPointId!.toString(),
+  selectedSeats: widget.selectedSeats!,
+  selectedPassenger: finalSelectedPassenger,
+  selectedBoardingPointDetails: selectedBoardingPointDetails,
+  selectedDroppingPointDetails: selectedDroppingPointDetails,
+  onPayuPaymentSuccess: () {
+    // This will now be called correctly
+       bookingBloc.confirmTentativeBooking();
+                
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  bookingBloc.confirmBooking(
+                    tripData: widget.tripData,
+                    bpoint: selectedBoardingPointId!.toString(),
+                    selectedSeats: widget.selectedSeats!,
+                    selectedPassenger: finalSelectedPassenger,
+                    selectedBoardingPointDetails: selectedBoardingPointDetails,
+                    selectedDroppingPointDetails: selectedDroppingPointDetails,
+                  );
+                });
+            
+  },
+)
+            
+            ));
 
             // Call the checkout function with proper parameters
             // _openPayUCheckout(totalFare, state.createOrderDataModel?.data?.payUData?.txnid);
@@ -471,16 +492,76 @@ class _EnhancedBusInfoBottomSheetState
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("${widget.selectedSeats!.length} seat selected",
+                        Text("Base Fare:",  //"${widget.selectedSeats!.length} seat selected",
                         style: TextTheme.of(context).bodyLarge,
                         ),
-                        Text("₹ ${int.parse(widget.selectedSeats!.first.fare.toString())*widget.selectedSeats!.length}",
+                        Text("₹ ${int.parse(widget.tripData!.fare!)}",//${int.parse(widget.selectedSeats!.first.fare.toString())*widget.selectedSeats!.length}",
                         style: TextTheme.of(context).titleMedium,
                         
                         ),
                       ],
                     ),
                   ),
+                   Container(
+      
+                    padding: EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+                    decoration: BoxDecoration(
+                       
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("GST",
+                        style: TextTheme.of(context).bodyLarge,
+                        ),
+                        Text("₹ ${int.parse(widget.tripData!.fare!)*0.05}",
+                        style: TextTheme.of(context).titleMedium,
+                        
+                        ),
+                      ],
+                    ),
+                  ),
+
+                   Container(
+      
+                    padding: EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+                    decoration: BoxDecoration(
+                       
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Total Amount:",  //"${widget.selectedSeats!.length} seat selected",
+                        style: TextTheme.of(context).bodyLarge,
+                        ),
+                        Text("₹ ${(int.parse(widget.selectedSeats!.first.fare.toString())*widget.selectedSeats!.length)+(int.parse(widget.tripData!.fare!)*0.05)}",
+                        style: TextTheme.of(context).titleMedium,
+                        
+                        ),
+                      ],
+                    ),
+                  ),
+
+                   Container(
+      
+                    padding: EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+                    decoration: BoxDecoration(
+                       
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Wallet Balance:",  //"${widget.selectedSeats!.length} seat selected",
+                        style: TextTheme.of(context).bodyLarge,
+                        ),
+                        Text("-₹ ${ BlocProvider.of<BookingBloc>(context).profileDataModel!.data!.user != null? BlocProvider.of<BookingBloc>(context).profileDataModel!.data!.wallet:int.parse(tripsData!.first.fare!)*0.10 }",//${int.parse(widget.selectedSeats!.first.fare.toString())*widget.selectedSeats!.length}",
+                        style: TextTheme.of(context).titleMedium,
+                        
+                        ),
+                      ],
+                    ),
+                  ),
+
                 // }),
             // ),
             
@@ -510,7 +591,9 @@ class _EnhancedBusInfoBottomSheetState
                                   // )
                                   ),
                               // .toInt(),
-                        ),
+                          selectedSeats: widget.selectedSeats,
+                          selectedBoardingPointDetails: selectedBoardingPointDetails,
+                          selectedDroppingPointDetails: selectedDroppingPointDetails,                       ),
                       );
                     }
                   },
@@ -544,7 +627,7 @@ class _EnhancedBusInfoBottomSheetState
     );
   }
 
-  Widget _buildTabContent(BuildContext context, Availabletrips tripData) {
+  Widget _buildTabContent(BuildContext context, Trips tripData) {
     switch (selectedTabIndex) {
       case 0: // Rate & Reviews
         return _buildBoardingTab();
@@ -625,7 +708,8 @@ class _EnhancedBusInfoBottomSheetState
             : '--:--';
         final String stationName = detail.address ?? '';
         final String selectedValue = '$venue-$boardTime';
-        final int selsctedId = int.parse(detail.id.toString());
+        final String idString = detail.id.toString().replaceAll(RegExp(r'[^0-9]'), '');
+        final int selectedId = int.parse(idString); // 
 
         return _buildBoardingPoint(
           venue,
@@ -636,7 +720,7 @@ class _EnhancedBusInfoBottomSheetState
           onTap: () {
             setState(() {
               _selectedBoardingPoint = selectedValue;
-              selectedBoardingPointId = selsctedId;
+              selectedBoardingPointId = selectedId;
               selectedBoardingPointDetails = detail;
               selectedTabIndex = 1;
             });
@@ -820,9 +904,10 @@ class _EnhancedBusInfoBottomSheetState
 
 
 
-  Widget _buildPassengersTab(BuildContext context, Availabletrips tripsData) {
+  Widget _buildPassengersTab(BuildContext context, Trips tripsData) {
    
     print("Amenities list ---->>>>> ${tripsData.amenities}");
+
     return SingleChildScrollView(
       // padding: const EdgeInsets.all(12),
       child: Column(
@@ -841,11 +926,13 @@ class _EnhancedBusInfoBottomSheetState
           // ContactDetailsCard(),
           SizedBox(height: 16),
           PassengerCard(
+            tripsData: tripsData,
             selectedSeats: widget.selectedSeats,
             selectedPassengerss: (List<Passenger> finalPassengerList) {
               setState(() {
                 finalSelectedPassenger = finalPassengerList;
               });
+              BlocProvider.of<BookingBloc>(context).getProfile();
             },
           ),
           SizedBox(height: 16),

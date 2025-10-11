@@ -1,9 +1,11 @@
+import 'package:ridebooking/models/operator_list_model.dart';
+
 abstract class HomeScreenEvent {}
 
 class SearchAvailableTripsEvent extends HomeScreenEvent {
-  final String from;
-  final String to;
+  final City src;
+  final City dst;
   final String date;
 
-  SearchAvailableTripsEvent({required this.from, required this.to, required this.date});
+  SearchAvailableTripsEvent({required this.src, required this.dst, required this.date});
 }

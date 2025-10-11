@@ -12,4 +12,4 @@ String dateForTicket=now.toIso8601String().replaceAll(RegExp(r'[-:.TZ]'), '');
 String phoneNo= "8305933803";
 String email="aadityagupta778@gmail.com";
 
-OperatorListModel operatorListModel = OperatorListModel();
+StationListModel stationListModel = StationListModel();

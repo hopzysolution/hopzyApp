@@ -1,4 +1,4 @@
-import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/models/available_trip_data.dart' hide Data;
 import 'package:ridebooking/models/booking_details.dart';
 import 'package:ridebooking/models/create_order_data_model.dart' hide Data;
 import 'package:ridebooking/models/ticket_details_model.dart';
@@ -46,7 +46,7 @@ class ConfirmBooking extends BookingState{
 
 class ShowTicketState extends BookingState{
 TicketDetails? ticketDetails;
-Availabletrips? tripData;
+Trips? tripData;
 String? dropingPoint;
 Data? ticketData; 
 ShowTicketState(this.ticketDetails,this.tripData,this.dropingPoint,this.ticketData);

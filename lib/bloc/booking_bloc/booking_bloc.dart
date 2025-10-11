@@ -1,87 +1,25 @@
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:intl/intl.dart';
-// import 'package:ridebooking/bloc/booking_bloc/booking_event.dart';
-// import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
-// import 'package:ridebooking/models/available_trip_data.dart';
-// import 'package:ridebooking/models/passenger_model.dart';
-// import 'package:ridebooking/repository/ApiConst.dart';
-// import 'package:ridebooking/repository/ApiRepository.dart';
-// import 'package:ridebooking/utils/session.dart';
-
-// class BookingBloc extends Bloc<BookingEvent,BookingState> {
-//   Availabletrips tripData;
-
-// BookingBloc(this.tripData) : super(BookingInitial()) {
-
-//   on<OnContinueButtonClick>((event,emit){
-//     getTentativeBooking(
-//       event.bpoint!,event.noofseats!,event.totalfare!,event.selectedPassenger!
-//     );
-
-//   });
-
-// }
-
-//   getTentativeBooking(int bpoint,int noofseats,int totalfare,List<Passenger> selectedPassenger) async{
-
-//      emit(BookingLoading());
-
-//   try {
-
-// var formData = {
-//   "routeid": tripData.routeid,
-//   "tripid": tripData.tripid,
-//   "bpoint": bpoint,
-//   "noofseats": noofseats,
-//   "mobileno": "8305933803",
-//   "email": "aadityagupta778@gmail.com",
-//   "totalfare": totalfare,
-//   "bookedat": DateFormat('yyyy-MM-dd').format(DateTime.now()),
-//   "seatInfo": {
-//   "passengerInfo": selectedPassenger.map((p) => p.toJson()).toList()
-//   },
-//   "opid": "VGT"
-// };
-
-//     var response = await ApiRepository.postAPI(ApiConst.getTentativeBooking,formData);
-
-//     final data = response.data; // ✅ Extract actual response map
-
-//     if (data["status"] != null && data["status"]["success"] == true) {
-
-//         await Session().setPnr(data["BookingInfo"]["PNR"]);
-
-//       emit(BookingLoaded());
-//     } else {
-//       final message = data["status"]?["message"] ?? "Failed to load stations";
-//       emit(BookingFailure(error: message));
-//     }
-//   } catch (e) {
-//     print("Error in getAllStations: $e");
-//     emit(BookingFailure(error: "Something went wrong. Please try again."));
-//   }
-//   }
-
-// }
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_event.dart';
 import 'package:ridebooking/bloc/booking_bloc/booking_state.dart';
+import 'package:ridebooking/commonWidgets/gst_form_widget.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/booking_details.dart';
 import 'package:ridebooking/models/create_order_data_model.dart';
 import 'package:ridebooking/models/passenger_model.dart';
+import 'package:ridebooking/models/profile_data_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
+import 'package:ridebooking/models/tantative_booking_data_model.dart';
 import 'package:ridebooking/models/ticket_details_model.dart';
 import 'package:ridebooking/repository/ApiConst.dart';
 import 'package:ridebooking/repository/ApiRepository.dart';
 import 'package:ridebooking/utils/session.dart';
 import 'package:ridebooking/globels.dart' as globals;
 
-class BookingBloc extends Bloc<BookingEvent, BookingState> {
-  final Availabletrips tripData;
+class BookingBloc extends Bloc<BookingEvent, BookingState> {  
+  final Trips tripData;
   final String paymentVerified;
   TicketDetailsModel? ticketDetails;
   String userId = "";
@@ -92,19 +30,79 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
     // on<OnPaymentVerification>((event, emit) => ApiClient().paymentVerification(event.response!, event, emit),);
     // paymentVerified == "Payment successful." ? confirmTentativeBooking() : "";
+  getProfile();
+
   }
 
+
+  ProfileDataModel? profileDataModel;
+
+
+
+
+
+  String? bpoint,phone;
+  Set<SeatModell>? selectedSeats;
+  List<Passenger>? selectedPassenger;
+  BpDetails? selectedBoardingPointDetails;
+    DpDetails? selectedDroppingPointDetails;
+
+
+     Future<void> getProfile() async {
+    try {
+      phone = await Session().getPhoneNo();
+      print("phone number in get profile--------->>>>>$phone");
+
+     if(phone!=null) {
+        var formData = {"phone": phone};
+
+      var response = await ApiRepository.postAPI(
+        ApiConst.getProfileApi, 
+        formData, 
+        basurl2: ApiConst.baseUrl2
+      );
+      
+      final data = response.data;
+      print("profile data model before condition-------->>>>${data}");
+      
+      if (data["status"] != null && data["status"] == 1) {
+        profileDataModel = ProfileDataModel.fromJson(data);
+        Session.saveProfileData(profileDataModel!);
+        print("profile data model-------->>>>${profileDataModel!.data!.wallet}");
+      } else {
+        throw Exception("Failed to load profile");
+      }
+      }
+    } catch (e) {
+      print("Error in getProfile: $e");
+      throw e; // Re-throw to handle in _initializeData
+    }
+  }
+TantativeBookingDataModel? tantativeBookingDataModel;
+String ticketCode="";
   // Refactored event handler (async!)
   Future<void> _onContinueButtonClick(
     OnContinueButtonClick event,
     Emitter<BookingState> emit,
   ) async {
+
+      bpoint=event.bpoint.toString();
+          selectedSeats=event.selectedSeats;
+          selectedPassenger= event.selectedPassenger;
+          selectedBoardingPointDetails= event.selectedBoardingPointDetails;
+          selectedDroppingPointDetails=event.selectedDroppingPointDetails;
+
+
     emit(BookingLoading());
     try {
-      final formData = {
+      final formData = //tripData.provider=="vaagai"?
+      {
         "routeid": tripData.routeid,
         "tripid": tripData.tripid,
-        "bpoint": event.bpoint!,
+        "bpoint": event.selectedBoardingPointDetails!.id,
+        "dpoint": event.selectedDroppingPointDetails!.id,
+        "fromStation":tripData.src,
+        "toStation":tripData.dst,
         "noofseats": event.noofseats!,
         "mobileno": await Session().getPhoneNo(), //globals.phoneNo,
         "email": await Session().getEmail(), // globals.email,
@@ -119,29 +117,53 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
               .toList(),
         },
 
-        "opid": event.opId
-        ,//"VGT",
+        "opid": event.opId,
+        "provider": tripData.provider
+
+        
       };
+//       :{
+//   "mobileno": await Session().getPhoneNo(),
+//   "email": await Session().getEmail(),
+//   "tripid": tripData.tripid,
+//   "bpoint": tripData.boardingpoint,
+//   "dpoint": tripData.droppingpoint,
+//   "fromStation": tripData.srcId,
+//   "toStation": tripData.dstId,
+//   "bookedat": globals.selectedDate,
+//   "seatInfo": {
+//     "passengerInfo": event.selectedPassenger!
+//               .map(
+//                 (p) => p.toJson()
+//                   ..update('fare', (value) => (value ?? 0) + (value * 0.05)),
+//               )
+//               .toList(),
+//   },
+//   "provider":tripData.provider
+// };
 
       final response = await ApiRepository.postAPI(
         ApiConst.getTentativeBooking,
         formData,
+        basurl2: ApiConst.baseUrl2
       );
 
       final data = response.data;
+      tantativeBookingDataModel = TantativeBookingDataModel.fromJson(data);
+      print('---abc------create order before call$data');
 
-      if (data["status"] != null && data["status"]["success"] == true) {
+      if (tantativeBookingDataModel!.status != null && tantativeBookingDataModel!.status == 1) {
         print('---abc------create order before call');
         createOrder(
           event.totalfare!,
           await Session().getPhoneNo() ?? "9865329568",
           await Session().getEmail(),
         );
-        pnr = data["BookingInfo"]["PNR"];
-        await Session().setPnr(data["BookingInfo"]["PNR"]);
+        pnr = tantativeBookingDataModel!.data!.bookingInfo!.pNR;
+        await Session().setPnr(tantativeBookingDataModel!.data!.bookingInfo!.pNR!);
         emit(BookingLoaded(fare: event.totalfare!));
       } else {
-        final message = data["status"]?["message"] ?? "Failed to load stations";
+        final message = tantativeBookingDataModel!.message ?? "Failed to load stations";
         emit(BookingFailure(error: message));
       }
     } catch (e) {
@@ -154,16 +176,22 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     // String pnr = await Session().getPnr();
     emit(BookingLoading());
     try {
-      final formData = {"pnr": pnr, "opid": "VGT"};
+      final formData = {
+        "pnr": pnr,
+        "ticketCode":ticketCode,
+        "opid": tripData.operatorid,
+        "provider" : tripData.provider
+        };
 
       final response = await ApiRepository.postAPI(
         ApiConst.confirmTentative,
         formData,
+        basurl2: ApiConst.baseUrl2
       );
 
       final data = response.data;
 
-      if (data["status"] != null && data["status"]["success"] == true) {
+      if (data["status"] != null && data["status"] == 1) {
         //  ApiClient().createOrder(event.totalfare!,"8305933803","aadityagupta778@gmail.com",event,emit);
 
         // print("Pnr===========>>>>>${data["BookingInfo"]["PNR"]}");
@@ -172,7 +200,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         // emit(BookingSuccess(success: "Booking Confirm"));
         // emit(ConfirmBooking(data["BookingInfo"]["PNR"],));
       } else {
-        final message = data["status"]?["message"] ?? "Failed to load stations";
+        final message = data["message"] ?? "Failed to load stations";
         emit(BookingFailure(error: message));
       }
     } catch (e) {
@@ -191,18 +219,24 @@ CreateOrderDataModel? createOrderDataModel;
       //   "phone": phoneNo,
       //   "email": email
       //     });
-      var formData = {
+      var formData = 
+      
+      
+      {
         "amount": (fare + (fare * 0.05)).toInt(),
         "phone": phoneNo.contains("+91") ? phoneNo : "+91${phoneNo}",
-        "paymentMode": "payu",//"razorpay",
+        "paymentMode": profileDataModel!.data!.wallet!<=0? "payu":profileDataModel!.data!.wallet!>=(fare + (fare * 0.05)).toInt()?"wallet":"mixed",//"razorpay",
         "email": email,
+        "walletUsed": profileDataModel!.data!.wallet!,
+        "payuAmount": (fare + (fare * 0.05)).toInt(),
+        "clientType":"mobile"
       };
       print('---abc---2---create order inside call');
 
       final response = await ApiRepository.postAPI(
         ApiConst.createOrder,
         formData,
-        basurl2: ApiConst.baseUrl2,
+       basurl2:"https://stagingapi.hopzy.in/",//basurl2: ApiConst.baseUrl2,
       );
 
       final data = response.data;
@@ -217,7 +251,23 @@ CreateOrderDataModel? createOrderDataModel;
         // print("user_id = ${userId} order_id = ${data["data"]["order_id"]}");
         Future.delayed(Duration(microseconds: 500));
         // emit(RazorpaySuccessState(razorpay_order_id: data["data"]["order_id"]));
+        if(profileDataModel!.data!.wallet!>=(fare + (fare * 0.05)).toInt()){
+          confirmTentativeBooking();
+        Future.delayed(Duration(milliseconds: 500));
+        confirmBooking(
+          tripData: tripData,
+          bpoint: bpoint,
+          // orderId: paymentVerify.orderId,
+          selectedSeats: selectedSeats,
+          selectedPassenger: selectedPassenger,
+          selectedBoardingPointDetails: selectedBoardingPointDetails,
+          selectedDroppingPointDetails: selectedDroppingPointDetails,
+        );
+        }else{
         emit(PayUSuccessState(createOrderDataModel: createOrderDataModel));
+
+        }
+
       } else {
         final message = data["status"]?["message"] ?? "Failed to load stations";
         emit(BookingFailure(error: message));
@@ -238,13 +288,11 @@ CreateOrderDataModel? createOrderDataModel;
   }) async {
     try {
       var formData = {
-        "razorpay_order_id": paymentVerify!.orderId,
-        "razorpay_payment_id": paymentVerify.paymentId,
-        "razorpay_signature": paymentVerify.signature,
-        "user_id": userId,
-        "paymentMode":"razorpay",
-        "amount":int.parse(tripData.fare!) + (int.parse(tripData.fare!) * 0.05),
-      };
+  "mihpayid": "403993715521234567",
+  "txnid": "txn_1756985376564",
+  "status": "success", 
+  "hash": "75b93a71f923425cc780382d43bedd28f902d6f831e0a0a15d7db97f51eb68c8d97f33d71ed3bc5f999695fd72c8e13f99905d053208965e1af59b9787e33947"
+};
 
       final response = await ApiRepository.postAPI(
         ApiConst.paymentVerification,
@@ -262,7 +310,7 @@ CreateOrderDataModel? createOrderDataModel;
         confirmBooking(
           tripData: tripData,
           bpoint: bpoint,
-          orderId: paymentVerify.orderId,
+          // orderId: paymentVerify.orderId,
           selectedSeats: selectedSeats,
           selectedPassenger: selectedPassenger,
           selectedBoardingPointDetails: selectedBoardingPointDetails,
@@ -279,19 +327,22 @@ CreateOrderDataModel? createOrderDataModel;
   }
 
   Future<void> confirmBooking({
-    Availabletrips? tripData,
+    Trips? tripData,
     String? bpoint,
     Set<SeatModell>? selectedSeats,
     List<Passenger>? selectedPassenger,
     String? orderId,
     BpDetails? selectedBoardingPointDetails,
     DpDetails? selectedDroppingPointDetails,
-
+    GstDetails? gstDetails,
   }) async {
     try {
       var formData = {
-        "razorpay_order_id": orderId,
-        "pnr": pnr,
+        // "razorpay_order_id": orderId,
+        "cancellationpolicy":tripData!.cancellationpolicy,
+        "paymentMode": profileDataModel!.data!.wallet!<=0? "payu":profileDataModel!.data!.wallet!>=(int.parse(tripData!.fare!) + (int.parse(tripData.fare!) * 0.05)).toInt()?"wallet":"mixed",
+        "txnid": createOrderDataModel!.data!.payUData!.txnid,
+        "operatorpnr": pnr,
         "routeid": tripData!.routeid,
         "tripid": tripData.tripid,
         "bpoint": bpoint,
@@ -306,6 +357,11 @@ CreateOrderDataModel? createOrderDataModel;
                   ),
                 )
               : '--:--',
+          "address": selectedBoardingPointDetails.address,
+          "contactno": selectedBoardingPointDetails.contactno,
+          //  "timedelay": selectedBoardingPointDetails.timedelay,
+            "tripid": selectedBoardingPointDetails.id,
+             "venue": selectedBoardingPointDetails.venue,
         },
         "dropping_point": {
           "id": selectedDroppingPointDetails!.id,
@@ -317,19 +373,30 @@ CreateOrderDataModel? createOrderDataModel;
                   ),
                 )
               : '--:--',
+          "address": selectedDroppingPointDetails.address,
+          "contactno": selectedDroppingPointDetails.contactno,
+          // "timedelay": selectedDroppingPointDetails.timedelay,
+          "tripid": selectedDroppingPointDetails.id,
+          "venue": selectedDroppingPointDetails.venue,
         },
         "operatorName": tripData.operatorname,
         "bustype": tripData.bustype,
         "seattype": tripData.seattype,
         "from": tripData.src,
         "to": tripData.dst,
-        "paymentMode":"razorpay",
-        // "mobileno": await Session().getPhoneNo(),
-        // "email": await Session().getEmail(),
-        "totalfare":
-            (selectedSeats.length * int.parse(tripData.fare.toString()))
+        "phone": await Session().getPhoneNo(),
+        "email": await Session().getEmail(),
+        "totalfare":profileDataModel!.data!.user== null?
+        (selectedSeats.length>1?
+            ((selectedSeats.length * int.parse(tripData.fare.toString()))
+                .toInt() //conditon change karni hai
+            ):
+            ((int.parse(tripData.fare.toString()))
+                .toInt() -
+            (int.parse(tripData.fare.toString()) * 0.05)))
+            :((selectedSeats.length * int.parse(tripData.fare.toString()))
                 .toInt() +
-            (selectedSeats.length * int.parse(tripData.fare.toString()) * 0.05),
+            (selectedSeats.length * int.parse(tripData.fare.toString()) * 0.05))-profileDataModel!.data!.wallet!,
         "bookedat": globals
             .selectedDate, //DateFormat('yyyy-MM-dd').format(DateTime.now()),
         "ticketid":
@@ -342,7 +409,9 @@ CreateOrderDataModel? createOrderDataModel;
             )
             .toList(),
 
-        "opid": "VGT",
+        "opid": tripData.operatorid,
+        gstDetails??
+         "gstDetails": gstDetails
       };
 
       final response = await ApiRepository.postAPI(

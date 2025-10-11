@@ -6,6 +6,7 @@ import 'package:ridebooking/bloc/seat_layout_bloc/seat_layout_bloc.dart';
 import 'package:ridebooking/bloc/seat_layout_bloc/seat_layout_state.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
 import 'package:ridebooking/models/bus_data.dart';
+import 'package:ridebooking/models/profile_data_model.dart';
 import 'package:ridebooking/models/seat_layout_data_model.dart';
 import 'package:ridebooking/models/seat_modell.dart';
 import 'package:ridebooking/screens/seat_selection_screen/bus_seat_selection.dart';
@@ -14,7 +15,7 @@ import 'package:ridebooking/globels.dart' as globals;
 import 'package:ridebooking/utils/app_colors.dart';
 
 class SeatSelectionScreen extends StatefulWidget {
-    final Availabletrips? trip;
+    final Trips? trip;
     const SeatSelectionScreen({Key? key, this.trip});
   @override
   _SeatSelectionScreenState createState() => _SeatSelectionScreenState();
@@ -151,7 +152,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
 //  BusData busData = 
 
 
-  Widget _buildSeatSelection(SeatLayoutDataModel seatLayoutData,BusData busData,) {
+  Widget _buildSeatSelection(SeatLayoutDataModel seatLayoutData,BusData busData) {
   
         return       Stack(
 
@@ -160,7 +161,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
           Positioned.fill(
               child: BusSeatSelectionScreen(
                 // seatLayoutData: seatLayoutData,
-            seatLayout: seatLayoutData.layout!,
+            seatLayout: seatLayoutData.data!,
             busData: busData,//AppConst.busdata,
             
             onSeatsSelected: (Set<SeatModell> finaSeat) {
@@ -183,7 +184,6 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
             maxChildSize: 0.8, // 70% of screen
             builder: (BuildContext context, ScrollController scrollController) {
               return EnhancedBusInfoBottomSheet(
-
                 tripData: widget.trip,
                 busInfo: BusInfo(
                   busType: widget.trip?.bustype ?? "Sleeper",

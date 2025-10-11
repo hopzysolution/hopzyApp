@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:ridebooking/models/all_trip_data_model.dart';
+import 'package:ridebooking/models/operator_list_model.dart';
 // import 'package:ridebooking/models/station_model.dart';
 
 class StationSearchView extends StatefulWidget {
-  final List<AllAvailabletrips> allAvailabletripsList;
+  final List<City> stationList;
 
-  const StationSearchView({super.key, required this.allAvailabletripsList});
+  const StationSearchView({super.key, required this.stationList});
 
   @override
   State<StationSearchView> createState() => _StationSearchViewState();
@@ -13,12 +14,12 @@ class StationSearchView extends StatefulWidget {
 
 class _StationSearchViewState extends State<StationSearchView> {
   final TextEditingController _searchController = TextEditingController();
-  List<AllAvailabletrips> _filteredStations = [];
+  List<City> _filteredStations = [];
 
   @override
   void initState() {
     super.initState();
-    _filteredStations = widget.allAvailabletripsList; // initially show all
+    _filteredStations = widget.stationList; // initially show all
     _searchController.addListener(_filterStations);
   }
 
@@ -32,8 +33,8 @@ class _StationSearchViewState extends State<StationSearchView> {
   void _filterStations() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      _filteredStations = widget.allAvailabletripsList.where((station) {
-        final stationName = station.srcname?.toLowerCase() ?? '';
+      _filteredStations = widget.stationList.where((station) {
+        final stationName = station.cityName?.toLowerCase() ?? '';
         return stationName.contains(query);
       }).toList();
     });
@@ -68,7 +69,7 @@ class _StationSearchViewState extends State<StationSearchView> {
                     itemBuilder: (context, index) {
                       final station = _filteredStations[index];
                       return ListTile(
-                        title: Text(station.srcname ?? 'Unknown'),
+                        title: Text(station.cityName ?? 'Unknown'),
                         // subtitle: Text(station.state ?? ''),
                         onTap: () {
                           Navigator.pop(context, station); // Return selected value

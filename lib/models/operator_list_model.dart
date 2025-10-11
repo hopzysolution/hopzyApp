@@ -1,104 +1,87 @@
-class OperatorListModel {
-  Status? status;
-  List<Operatorlist>? operatorlist;
+class StationListModel {
+  final int? status;
+  final String? message;
+  final StationData? data;
 
-  OperatorListModel({this.status, this.operatorlist});
+  StationListModel({
+    this.status,
+    this.message,
+    this.data,
+  });
 
-  OperatorListModel.fromJson(Map<String, dynamic> json) {
-    status =
-        json['status'] != null ? new Status.fromJson(json['status']) : null;
-    if (json['operatorlist'] != null) {
-      operatorlist = <Operatorlist>[];
-      json['operatorlist'].forEach((v) {
-        operatorlist!.add(new Operatorlist.fromJson(v));
-      });
-    }
+  factory StationListModel.fromJson(Map<String, dynamic> json) {
+    return StationListModel(
+      status: json['status'],
+      message: json['message'],
+      data: json['data'] != null ? StationData.fromJson(json['data']) : null,
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.status != null) {
-      data['status'] = this.status!.toJson();
-    }
-    if (this.operatorlist != null) {
-      data['operatorlist'] = this.operatorlist!.map((v) => v.toJson()).toList();
-    }
-    return data;
+    return {
+      'status': status,
+      'message': message,
+      'data': data?.toJson(),
+    };
   }
 }
 
-class Status {
-  bool? success;
-  String? message;
-  Profiledata? profiledata;
-  int? code;
+class StationData {
+  final int? count;
+  final List<City>? cities;
+  final int? page;
+  final bool? hasMore;
 
-  Status({this.success, this.message, this.profiledata, this.code});
+  StationData({
+    this.count,
+    this.cities,
+    this.page,
+    this.hasMore,
+  });
 
-  Status.fromJson(Map<String, dynamic> json) {
-    success = json['success'];
-    message = json['message'];
-    profiledata = json['profiledata'] != null
-        ? new Profiledata.fromJson(json['profiledata'])
-        : null;
-    code = json['code'];
+  factory StationData.fromJson(Map<String, dynamic> json) {
+    return StationData(
+      count: json['count'],
+      page: json['page'],
+      hasMore: json['hasMore'],
+      cities: (json['cities'] as List<dynamic>?)
+          ?.map((e) => City.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['message'] = this.message;
-    if (this.profiledata != null) {
-      data['profiledata'] = this.profiledata!.toJson();
-    }
-    data['code'] = this.code;
-    return data;
+    return {
+      'count': count,
+      'page': page,
+      'hasMore': hasMore,
+      'cities': cities?.map((e) => e.toJson()).toList(),
+    };
   }
 }
 
-class Profiledata {
-  String? balance;
-  String? mode;
-  String? name;
-  String? allowopsids;
+class City {
+  final String? cityName;
+  final List<String?>? cityIds;
 
-  Profiledata({this.balance, this.mode, this.name, this.allowopsids});
+  City({
+    this.cityName,
+    this.cityIds,
+  });
 
-  Profiledata.fromJson(Map<String, dynamic> json) {
-    balance = json['balance'];
-    mode = json['mode'];
-    name = json['name'];
-    allowopsids = json['allowopsids'];
+  factory City.fromJson(Map<String, dynamic> json) {
+    return City(
+      cityName: json['cityName'],
+      cityIds: (json['cityIds'] as List<dynamic>?)
+          ?.map((e) => e?.toString())
+          .toList(),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['balance'] = this.balance;
-    data['mode'] = this.mode;
-    data['name'] = this.name;
-    data['allowopsids'] = this.allowopsids;
-    return data;
-  }
-}
-
-class Operatorlist {
-  String? name;
-  String? code;
-  String? isnewoperator;
-
-  Operatorlist({this.name, this.code, this.isnewoperator});
-
-  Operatorlist.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    code = json['code'];
-    isnewoperator = json['isnewoperator'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['code'] = this.code;
-    data['isnewoperator'] = this.isnewoperator;
-    return data;
+    return {
+      'cityName': cityName,
+      'cityIds': cityIds,
+    };
   }
 }

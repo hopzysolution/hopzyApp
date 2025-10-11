@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:ridebooking/commonWidgets/bus_receipt_widget.dart';
 import 'package:ridebooking/commonWidgets/ticket_pdf_generator.dart';
-import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/models/available_trip_data.dart' hide Data;
 import 'package:ridebooking/models/booking_details.dart';
 import 'package:ridebooking/models/ticket_details_model.dart';
 import 'package:ridebooking/screens/cancellation_refund_policy.dart';
@@ -19,7 +19,7 @@ import 'package:pdf/widgets.dart' as pw;
 
 class TripDetailsScreen extends StatefulWidget {
   TicketDetails? ticketDetails; 
-  Availabletrips? tripData;
+  Trips? tripData;
   String? dropingPoint;
   Data? ticketData;
    TripDetailsScreen({super.key,this.ticketDetails,this.tripData,this.dropingPoint,this.ticketData});
