@@ -146,7 +146,7 @@ class ApiClient {
   ApiClient._internal();
 
   final Dio dio = Dio(BaseOptions(
-    baseUrl: "https://prodapi.hopzy.in/",
+    baseUrl: "https://stagingapi.hopzy.in/", //"https://prodapi.hopzy.in/",
     connectTimeout: const Duration(seconds: 30),
     receiveTimeout: const Duration(seconds: 30),
     sendTimeout: const Duration(seconds: 30),
