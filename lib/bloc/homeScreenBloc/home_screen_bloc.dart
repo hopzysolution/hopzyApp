@@ -74,6 +74,8 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         "src": from,
         "dst": to,
         "tripdate": selectedDate,
+        "limit":200,
+        "page":1
       };
 
       // print("Response from getAvailableTrips: ${formData}");
@@ -92,7 +94,7 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         final parsed = Availabletripdata.fromJson(data);
         print("test for typecast---------->>>>3");
         allTrips.addAll(parsed.data!.trips!);
-        print("test for typecast---------->>>>4");
+        print("test for typecast---------->>>>4${allTrips.first.routeid}");
       
 
     if (allTrips.isNotEmpty) {

@@ -1,4 +1,4 @@
-class SeatModell {
+class SeatModell{
   final String seatNo;
   final int fare;
   final String available;
@@ -12,9 +12,19 @@ class SeatModell {
   factory SeatModell.fromJson(Map<String, dynamic> json) {
     return SeatModell(
       seatNo: json['seatNo'] ?? '',
-      fare: json['fare'] ,
-      available: json['seatstatus'] , // Available if status is 'A'
+      fare: json['fare'] is int
+          ? json['fare']
+          : int.tryParse(json['fare']?.toString() ?? '0') ?? 0,
+      available: json['seatstatus'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'seatNo': seatNo,
+      'fare': fare,
+      'seatstatus': available,
+    };
   }
 
   @override

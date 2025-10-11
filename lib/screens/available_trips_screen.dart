@@ -61,11 +61,15 @@ class _AvailableTripsContent extends StatefulWidget {
 class _AvailableTripsContentState extends State<_AvailableTripsContent> {
   late DateTime selectedDate;
   Key datePickerKey = UniqueKey();
+  
+  // Track filtered trips
+  List<Trips>? displayedTrips;
 
   @override
   void initState() {
     super.initState();
     selectedDate = DateFormat('yyyy-MM-dd').parse(globals.selectedDate);
+    displayedTrips = widget.allTrips;
   }
 
   void _onDateChanged(DateTime newDate) {
@@ -85,6 +89,12 @@ class _AvailableTripsContentState extends State<_AvailableTripsContent> {
         date: dateSelected,
       ),
     );
+  }
+
+  void _onFilterChanged(List<Trips> filteredTrips) {
+    setState(() {
+      displayedTrips = filteredTrips;
+    });
   }
 
   @override
@@ -130,7 +140,7 @@ class _AvailableTripsContentState extends State<_AvailableTripsContent> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "${widget.allTrips!.length} Buses",
+                          "${displayedTrips?.length ?? widget.allTrips!.length} Buses",
                           style: TextStyle(
                             fontSize: AppSizes.md,
                             color: Colors.grey[600],
@@ -149,42 +159,76 @@ class _AvailableTripsContentState extends State<_AvailableTripsContent> {
             body: Column(
               children: [
 
-                FilterRowView(),
+                FilterRowView(
+                  allTrips: widget.allTrips,
+                  onFilterChanged: _onFilterChanged,
+                ),
 
 
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: widget.allTrips?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      return TripListTile(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SeatSelectionScreen(
-                                trip: widget.allTrips![index],
-                              )
-                            )
-                          );
-                        },
-                        trip: TripModel(
-                          tripIdV2: widget.allTrips![index].subtripid ?? 'Unknown Trip ID',
-                          tripId: widget.allTrips![index].tripid ?? 'Unknown Trip ID',
-                          routeId: widget.allTrips![index].routeid ?? 'Unknown Route ID',
-                          operatorId: widget.allTrips![index].operatorid ?? 'Unknown Operator ID',
-                          operatorName: widget.allTrips![index].operatorname ?? 'Unknown Operator',
-                          srcName: widget.allTrips![index].src ?? 'Unknown Source',
-                          dstName: widget.allTrips![index].dst ?? 'Unknown Destination',
-                          departureTime: DateTime.parse(widget.allTrips![index].deptime ?? DateTime.now().toString()),
-                          arrivalTime: DateTime.parse(widget.allTrips![index].arrtime ?? DateTime.now().toString()),
-                          busType: widget.allTrips![index].bustype ?? 'Unknown Bus Type',
-                          availableSeats: widget.allTrips![index].availseats.toString() ?? "0",
-                          totalSeats: widget.allTrips![index].totalseats?.toString() ?? "",
-                          price: widget.allTrips![index].fare.toString() ?? "0",
+                  child: (displayedTrips == null || displayedTrips!.isEmpty)
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                size: 64,
+                                color: Colors.grey.shade400,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No buses found',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Try adjusting your filters',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: displayedTrips?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            return TripListTile(
+                              onTap: () {
+                                print("routeId Check ----->>>>>>>${displayedTrips![index].toJson()}");
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SeatSelectionScreen(
+                                      trip: displayedTrips![index],
+                                    )
+                                  )
+                                );
+                              },
+                              trip: TripModel(
+                                tripIdV2: displayedTrips![index].subtripid ?? 'Unknown Trip ID',
+                                tripId: displayedTrips![index].tripid ?? 'Unknown Trip ID',
+                                routeId: displayedTrips![index].routeid ?? 'Unknown Route ID',
+                                operatorId: displayedTrips![index].operatorid ?? 'Unknown Operator ID',
+                                operatorName: displayedTrips![index].operatorname ?? 'Unknown Operator',
+                                srcName: displayedTrips![index].src ?? 'Unknown Source',
+                                dstName: displayedTrips![index].dst ?? 'Unknown Destination',
+                                departureTime: DateTime.parse(displayedTrips![index].deptime ?? DateTime.now().toString()),
+                                arrivalTime: DateTime.parse(displayedTrips![index].arrtime ?? DateTime.now().toString()),
+                                busType: displayedTrips![index].bustype ?? 'Unknown Bus Type',
+                                availableSeats: displayedTrips![index].availseats.toString() ?? "0",
+                                totalSeats: displayedTrips![index].totalseats?.toString() ?? "",
+                                price: displayedTrips![index].fare.toString() ?? "0",
+                              ),
+                            );
+                          }
                         ),
-                      );
-                    }
-                  ),
                 ),
              
              

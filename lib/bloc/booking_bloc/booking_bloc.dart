@@ -204,7 +204,7 @@ String ticketCode="";
         emit(BookingFailure(error: message));
       }
     } catch (e) {
-      print("Error in getTentativeBooking=exception=====>>>>: $e");
+      print("Error in confirmTentativeBooking=exception=====>>>>: $e");
       emit(BookingFailure(error: "Something went wrong. Please try again."));
     }
   }
@@ -248,7 +248,7 @@ CreateOrderDataModel? createOrderDataModel;
 
       if (data["status"] == 1) {
         // userId = data["data"]["user_id"];
-        // print("user_id = ${userId} order_id = ${data["data"]["order_id"]}");
+        print("user_id = ${createOrderDataModel!.data!.payUData!.txnid}");
         Future.delayed(Duration(microseconds: 500));
         // emit(RazorpaySuccessState(razorpay_order_id: data["data"]["order_id"]));
         if(profileDataModel!.data!.wallet!>=(fare + (fare * 0.05)).toInt()){
@@ -273,7 +273,7 @@ CreateOrderDataModel? createOrderDataModel;
         emit(BookingFailure(error: message));
       }
     } catch (e) {
-      print("Error in getTentativeBooking: $e");
+      print("Error in createOrder: $e");
       emit(BookingFailure(error: "Something went wrong. Please try again."));
     }
   }
@@ -322,7 +322,7 @@ CreateOrderDataModel? createOrderDataModel;
         emit(BookingFailure(error: message));
       }
     } catch (e) {
-      print("Error in getTentativeBooking: $e");
+      print("Error in paymentVerification: $e");
     }
   }
 
@@ -336,6 +336,7 @@ CreateOrderDataModel? createOrderDataModel;
     DpDetails? selectedDroppingPointDetails,
     GstDetails? gstDetails,
   }) async {
+    print("transaction id ----------------->>>>>${createOrderDataModel!.data!.payUData!.txnid}");
     try {
       var formData = gstDetails!=null? {
         // "razorpay_order_id": orderId,
@@ -572,7 +573,7 @@ print(" Response from booking details api new ----------->>>> ${bookingData.mess
         emit(BookingFailure(error: message));
       }
     } catch (e) {
-      print("Error in getTentativeBooking: $e");
+      print("Error in _showTicketDetails: $e");
       emit(BookingFailure(error: "Something went wrong. Please try again."));
     }
   }

@@ -44,25 +44,46 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
   bool _isPaymentStarted = false;
   bool _isProcessingCallback = false;
   final Map<String, String> _hashCache = {};
+  Timer? _timeoutTimer;
 
   @override
   void initState() {
     super.initState();
     _checkoutPro = PayUCheckoutProFlutter(this);
 
-    // Add delay to allow WebView to initialize properly
+    // Set a safety timeout
+    _timeoutTimer = Timer(const Duration(minutes: 5), () {
+      if (mounted && !_isProcessingCallback) {
+        debugPrint("⏱️ Payment timeout - closing screen");
+        _handleTimeout();
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted && _validatePaymentData()) {
-        // Wait a bit for the UI to settle
-        await Future.delayed(const Duration(milliseconds: 300));
+        await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
           _startPayment();
         }
       } else {
         _showSnack("Invalid payment data");
-        Navigator.of(context).pop();
+        Navigator.of(context).pop({'status': 'error', 'error': 'Invalid payment data'});
       }
     });
+  }
+
+  void _handleTimeout() {
+    if (_isProcessingCallback) return;
+    _isProcessingCallback = true;
+    
+    _showSnack("Payment session timed out");
+    
+    if (mounted) {
+      Navigator.of(context).pop({
+        'status': 'timeout',
+        'error': 'Payment session exceeded maximum time',
+      });
+    }
   }
 
   bool _validatePaymentData() {
@@ -130,9 +151,8 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
 
       debugPrint("=== Hash Request ===");
       debugPrint("Hash Name: $hashName");
-      debugPrint("Hash String: $hashString");
+      debugPrint("Hash String: ${hashString?.substring(0, 30)}...");
       debugPrint("Hash Type: $hashType");
-      debugPrint("Post Salt: $postSalt");
 
       if (hashName == null || hashName.isEmpty) {
         debugPrint('❌ Missing hashName');
@@ -175,7 +195,6 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
 
       debugPrint("🔄 Calling backend for dynamic hash: $hashName");
       
-      // Run hash generation in isolate to avoid blocking main thread
       final generatedHash = await _generateHashFromBackend(
         hashName: hashName,
         hashString: hashString,
@@ -189,7 +208,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         return;
       }
 
-      debugPrint("✅ Hash generated successfully: ${generatedHash.substring(0, 20)}...");
+      debugPrint("✅ Hash generated: ${generatedHash.substring(0, 20)}...");
       _hashCache[hashName] = generatedHash;
       _checkoutPro.hashGenerated(hash: {hashName: generatedHash});
       
@@ -206,8 +225,6 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     String? hashType,
     String? postSalt,
   }) async {
-    debugPrint("🌐 Backend call - Hash: $hashName");
-    
     try {
       final requestBody = {
         'hashName': hashName,
@@ -216,16 +233,14 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         if (postSalt != null && postSalt.isNotEmpty) 'postSalt': postSalt,
       };
       
-      debugPrint("📤 Request: ${jsonEncode(requestBody)}");
-      
-      final response = await _makeRequestWithRetry(
+      final response = await http.post(
         Uri.parse('https://stagingapi.hopzy.in/api/public/generate-hash'),
-        requestBody,
-        maxRetries: 2,
-      );
-
-      debugPrint("📥 Response status: ${response.statusCode}");
-      debugPrint("📥 Response body: ${response.body}");
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(requestBody),
+      ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -238,82 +253,30 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
             return '';
           }
           
-          debugPrint("✅ Valid hash received from backend");
           return hash;
-        } else {
-          debugPrint("❌ Backend response missing success/hash fields");
-          return '';
         }
-      } else {
-        debugPrint("❌ Backend error: ${response.statusCode} - ${response.body}");
-        return '';
       }
-    } on TimeoutException catch (e) {
-      debugPrint("⏱️ Timeout: $e");
+      
+      debugPrint("❌ Backend error: ${response.statusCode}");
       return '';
-    } on SocketException catch (e) {
-      debugPrint("🌐 Network error: $e");
-      return '';
-    } catch (e, st) {
-      debugPrint("❌ Error: $e");
-      debugPrint("Stack: $st");
+    } catch (e) {
+      debugPrint("❌ Hash generation error: $e");
       return '';
     }
-  }
-
-  Future<http.Response> _makeRequestWithRetry(
-    Uri url,
-    Map<String, dynamic> body, {
-    int maxRetries = 2,
-  }) async {
-    int attempt = 0;
-    
-    while (attempt < maxRetries) {
-      try {
-        debugPrint("🔄 Attempt ${attempt + 1} of $maxRetries");
-        
-        final response = await http.post(
-          url,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: jsonEncode(body),
-        ).timeout(
-          const Duration(seconds: 20),
-          onTimeout: () {
-            throw TimeoutException('Request timeout after 20 seconds');
-          },
-        );
-        
-        return response;
-      } catch (e) {
-        attempt++;
-        if (attempt >= maxRetries) {
-          rethrow;
-        }
-        debugPrint("⚠️ Attempt $attempt failed, retrying...");
-        await Future.delayed(Duration(seconds: attempt));
-      }
-    }
-    
-    throw Exception('Max retries exceeded');
   }
 
   void _showSnack(String message) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            duration: const Duration(seconds: 3),
-            backgroundColor: message.toLowerCase().contains('success') 
-                ? Colors.green 
-                : Colors.red,
-          ),
-        );
-      }
-    });
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+        backgroundColor: message.toLowerCase().contains('success') 
+            ? Colors.green 
+            : Colors.red,
+      ),
+    );
   }
 
   @override
@@ -324,6 +287,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     }
     
     _isProcessingCallback = true;
+    _timeoutTimer?.cancel();
     
     debugPrint("✅ Payment Success: $response");
     
@@ -331,36 +295,59 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     String? txnId;
     
     if (response is Map) {
-      paymentId = response['payuMoneyId']?.toString();
-      txnId = response['txnid']?.toString();
+      paymentId = response['payuResponse']['payuMoneyId']?.toString();
+      txnId = response['payuResponse']['txnid']?.toString();
       
       debugPrint("Payment ID: $paymentId");
       debugPrint("Transaction ID: $txnId");
     }
 
+    // Show success message
     _showSnack("Payment Successful!");
     
-    // Wait for UI to update
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Small delay for UI feedback
+    await Future.delayed(const Duration(milliseconds: 300));
     
-    if (mounted) {
-      // Call the callback first
+    if (!mounted) return;
+
+    try {
+      // Call the success callback BEFORE popping
       if (widget.onPayuPaymentSuccess != null) {
-        debugPrint("🎉 Calling onPayuPaymentSuccess callback");
-        try {
-          widget.onPayuPaymentSuccess!();
-        } catch (e) {
-          debugPrint("❌ Error in callback: $e");
-        }
+        debugPrint("🎉 Executing onPayuPaymentSuccess callback");
+        widget.onPayuPaymentSuccess!();
       }
       
-      // Then pop with success result
+      // Wait a bit to ensure callback completes
+      await Future.delayed(const Duration(milliseconds: 200));
+      
+      if (!mounted) return;
+      
+      // Pop with success result
       Navigator.of(context).pop({
         'status': 'success',
         'response': response,
         'paymentId': paymentId,
         'txnId': txnId,
+        'bookingData': {
+          'seats': widget.selectedSeats?.map((s) => s.toJson()).toList(),
+          'passengers': widget.selectedPassenger?.map((p) => p.toJson()).toList(),
+          'boardingPoint': widget.selectedBoardingPointDetails?.toJson(),
+          'droppingPoint': widget.selectedDroppingPointDetails?.toJson(),
+          'amount': widget.createOrderDataModel?.data?.payUData?.amount,
+        },
       });
+    } catch (e) {
+      debugPrint("❌ Error in success callback: $e");
+      // Still pop even if callback fails
+      if (mounted) {
+        Navigator.of(context).pop({
+          'status': 'success',
+          'response': response,
+          'paymentId': paymentId,
+          'txnId': txnId,
+          'error': 'Callback failed: $e',
+        });
+      }
     }
   }
 
@@ -372,6 +359,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     }
     
     _isProcessingCallback = true;
+    _timeoutTimer?.cancel();
     
     debugPrint("❌ Payment Failed: $response");
     
@@ -401,6 +389,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         'status': 'failure',
         'response': response,
         'errorCode': errorCode,
+        'errorMessage': errorMessage,
       });
     }
   }
@@ -413,6 +402,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     }
     
     _isProcessingCallback = true;
+    _timeoutTimer?.cancel();
     
     debugPrint("⚠️ Payment Cancelled: $response");
     
@@ -434,6 +424,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     }
     
     _isProcessingCallback = true;
+    _timeoutTimer?.cancel();
     
     debugPrint("❌ PayU Error: $response");
     
@@ -454,6 +445,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
       if (error?.toLowerCase().contains('renderer') == true || 
           error?.toLowerCase().contains('crash') == true) {
         errorMessage = "Payment window crashed. Please try again.";
+        debugPrint("🔴 WebView Renderer Crash Detected");
       }
       
       // Specific handling for hash generation error
@@ -469,6 +461,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         'status': 'error',
         'response': response,
         'errorCode': errorCode,
+        'errorMessage': errorMessage,
       });
     }
   }
@@ -491,8 +484,6 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
       debugPrint("Email: ${payUData.email}");
       debugPrint("Phone: ${payUData.phone}");
 
-      final String txnId = payUData.txnid!;
-
       final Map<String, dynamic> payUPaymentParams = {
         PayUPaymentParamKey.key: payUData.key!,
         PayUPaymentParamKey.amount: payUData.amount!,
@@ -505,7 +496,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         PayUPaymentParamKey.android_surl: payUData.surl!,
         PayUPaymentParamKey.android_furl: payUData.furl!,
         PayUPaymentParamKey.environment: "1", // 1 = Test, 0 = Production
-        PayUPaymentParamKey.transactionId: txnId,
+        PayUPaymentParamKey.transactionId: payUData.txnid!,
         PayUPaymentParamKey.userCredential: "${payUData.key}:${payUData.email}",
       };
 
@@ -517,14 +508,18 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
             hashes.paymentRelatedDetailsForMobileSdk!.isNotEmpty) {
           additionalParams["payment_related_details_for_mobile_sdk"] = 
               hashes.paymentRelatedDetailsForMobileSdk!;
+          _hashCache["payment_related_details_for_mobile_sdk"] = 
+              hashes.paymentRelatedDetailsForMobileSdk!;
         }
         
         if (hashes.vasForMobileSdk != null && hashes.vasForMobileSdk!.isNotEmpty) {
           additionalParams["vas_for_mobile_sdk"] = hashes.vasForMobileSdk!;
+          _hashCache["vas_for_mobile_sdk"] = hashes.vasForMobileSdk!;
         }
         
         if (hashes.payment != null && hashes.payment!.isNotEmpty) {
           additionalParams["payment"] = hashes.payment!;
+          _hashCache["payment"] = hashes.payment!;
         }
         
         if (additionalParams.isNotEmpty) {
@@ -537,9 +532,11 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         PayUCheckoutProConfigKeys.showExitConfirmationOnCheckoutScreen: true,
         PayUCheckoutProConfigKeys.showExitConfirmationOnPaymentScreen: true,
         PayUCheckoutProConfigKeys.merchantName: "Hopzy",
-        PayUCheckoutProConfigKeys.waitingTime: 45000, // Increased to 45 seconds
-        PayUCheckoutProConfigKeys.autoSelectOtp: false, // Disabled to reduce load
-        PayUCheckoutProConfigKeys.merchantResponseTimeout: 45000, // Added
+        PayUCheckoutProConfigKeys.waitingTime: 60000, // 60 seconds
+        PayUCheckoutProConfigKeys.autoSelectOtp: false,
+        PayUCheckoutProConfigKeys.merchantResponseTimeout: 60000,
+        // Add crash recovery settings
+        PayUCheckoutProConfigKeys.autoApprove: false,
       };
 
       debugPrint("🚀 Opening PayU checkout...");
@@ -566,7 +563,36 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       body: WillPopScope(
-        onWillPop: () async => false,
+        onWillPop: () async {
+          // Allow back button but show confirmation
+          if (!_isProcessingCallback) {
+            final shouldPop = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Cancel Payment?'),
+                content: const Text('Are you sure you want to cancel this payment?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('No'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Yes'),
+                  ),
+                ],
+              ),
+            );
+            
+            if (shouldPop == true) {
+              _isProcessingCallback = true;
+              _timeoutTimer?.cancel();
+              Navigator.of(context).pop({'status': 'cancelled', 'reason': 'user_cancelled'});
+              return false;
+            }
+          }
+          return false;
+        },
         child: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -602,6 +628,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
 
   @override
   void dispose() {
+    _timeoutTimer?.cancel();
     _hashCache.clear();
     super.dispose();
   }
