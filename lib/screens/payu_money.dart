@@ -51,7 +51,6 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     super.initState();
     _checkoutPro = PayUCheckoutProFlutter(this);
 
-    // Set a safety timeout
     _timeoutTimer = Timer(const Duration(minutes: 5), () {
       if (mounted && !_isProcessingCallback) {
         debugPrint("⏱️ Payment timeout - closing screen");
@@ -151,7 +150,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
 
       debugPrint("=== Hash Request ===");
       debugPrint("Hash Name: $hashName");
-      debugPrint("Hash String: ${hashString?.substring(0, 30)}...");
+      debugPrint("Hash String: ${hashString != null && hashString.length > 30 ? hashString.substring(0, 30) : hashString}...");
       debugPrint("Hash Type: $hashType");
 
       if (hashName == null || hashName.isEmpty) {
@@ -232,15 +231,28 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         if (hashType != null && hashType.isNotEmpty) 'hashType': hashType,
         if (postSalt != null && postSalt.isNotEmpty) 'postSalt': postSalt,
       };
+
+      debugPrint("🔐 Hash Request Body: ${jsonEncode(requestBody).substring(0, 100)}...");
       
       final response = await http.post(
-        Uri.parse('https://stagingapi.hopzy.in/api/public/generate-hash'),
+        Uri.parse('https://prodapi.hopzy.in/api/public/generate-hash'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
         body: jsonEncode(requestBody),
       ).timeout(const Duration(seconds: 30));
+
+      debugPrint("🔐 Hash Response Status: ${response.statusCode}");
+      debugPrint("🔐 Hash Response Body: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}");
+
+      // Check if response is HTML (error page)
+      if (response.body.trim().startsWith('<!DOCTYPE') || 
+          response.body.trim().startsWith('<html')) {
+        debugPrint("❌ Backend returned HTML instead of JSON");
+        debugPrint("Response preview: ${response.body.substring(0, 200)}");
+        return '';
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -254,10 +266,13 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
           }
           
           return hash;
+        } else {
+          debugPrint("❌ Backend returned unsuccessful response: $data");
         }
+      } else {
+        debugPrint("❌ Backend error: ${response.statusCode} - ${response.body}");
       }
       
-      debugPrint("❌ Backend error: ${response.statusCode}");
       return '';
     } catch (e) {
       debugPrint("❌ Hash generation error: $e");
@@ -281,6 +296,8 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
 
   @override
   onPaymentSuccess(dynamic response) async {
+    debugPrint("✅ onPaymentSuccess called");
+    
     if (_isProcessingCallback) {
       debugPrint("⚠️ Already processing callback, ignoring duplicate");
       return;
@@ -289,40 +306,43 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     _isProcessingCallback = true;
     _timeoutTimer?.cancel();
     
-    debugPrint("✅ Payment Success: $response");
+    debugPrint("✅ Payment Success Response: $response");
     
     String? paymentId;
     String? txnId;
     
     if (response is Map) {
-      paymentId = response['payuResponse']['payuMoneyId']?.toString();
-      txnId = response['payuResponse']['txnid']?.toString();
+      debugPrint("📋 Response is Map, extracting payment details...");
       
-      debugPrint("Payment ID: $paymentId");
-      debugPrint("Transaction ID: $txnId");
+      // Try different possible paths for payment ID and txn ID
+      paymentId = response['payuResponse']?['id']?.toString() ??
+                  response['paymentId']?.toString() ??
+                  response['id']?.toString();
+                  
+      txnId = response['payuResponse']?['txnid']?.toString() ??
+              response['txnid']?.toString() ??
+              response['transactionId']?.toString();
+      
+      debugPrint("💳 Payment ID: $paymentId");
+      debugPrint("🔖 Transaction ID: $txnId");
     }
 
-    // Show success message
     _showSnack("Payment Successful!");
     
-    // Small delay for UI feedback
     await Future.delayed(const Duration(milliseconds: 300));
     
     if (!mounted) return;
 
     try {
-      // Call the success callback BEFORE popping
       if (widget.onPayuPaymentSuccess != null) {
         debugPrint("🎉 Executing onPayuPaymentSuccess callback");
         widget.onPayuPaymentSuccess!();
       }
       
-      // Wait a bit to ensure callback completes
       await Future.delayed(const Duration(milliseconds: 200));
       
       if (!mounted) return;
       
-      // Pop with success result
       Navigator.of(context).pop({
         'status': 'success',
         'response': response,
@@ -338,7 +358,6 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
       });
     } catch (e) {
       debugPrint("❌ Error in success callback: $e");
-      // Still pop even if callback fails
       if (mounted) {
         Navigator.of(context).pop({
           'status': 'success',
@@ -441,15 +460,15 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         errorMessage = "Error: $error";
       }
       
-      // Check for WebView crash
-      if (error?.toLowerCase().contains('renderer') == true || 
+      // Check for specific error codes
+      if (errorCode == '5014') {
+        errorMessage = "Payment gateway configuration error. Please contact support.";
+        debugPrint("🔴 Error 5014: Backend returning HTML instead of JSON");
+      } else if (error?.toLowerCase().contains('renderer') == true || 
           error?.toLowerCase().contains('crash') == true) {
         errorMessage = "Payment window crashed. Please try again.";
         debugPrint("🔴 WebView Renderer Crash Detected");
-      }
-      
-      // Specific handling for hash generation error
-      if (errorCode == '100' || errorMessage.contains('generate Hash')) {
+      } else if (errorCode == '100' || error?.contains('generate Hash') == true) {
         errorMessage = "Payment initialization failed. Please try again.";
       }
     }
@@ -532,10 +551,9 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         PayUCheckoutProConfigKeys.showExitConfirmationOnCheckoutScreen: true,
         PayUCheckoutProConfigKeys.showExitConfirmationOnPaymentScreen: true,
         PayUCheckoutProConfigKeys.merchantName: "Hopzy",
-        PayUCheckoutProConfigKeys.waitingTime: 60000, // 60 seconds
+        PayUCheckoutProConfigKeys.waitingTime: 60000,
         PayUCheckoutProConfigKeys.autoSelectOtp: false,
         PayUCheckoutProConfigKeys.merchantResponseTimeout: 60000,
-        // Add crash recovery settings
         PayUCheckoutProConfigKeys.autoApprove: false,
       };
 
@@ -564,7 +582,6 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
       backgroundColor: Colors.white,
       body: WillPopScope(
         onWillPop: () async {
-          // Allow back button but show confirmation
           if (!_isProcessingCallback) {
             final shouldPop = await showDialog<bool>(
               context: context,

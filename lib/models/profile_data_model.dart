@@ -8,41 +8,49 @@ class ProfileDataModel {
   ProfileDataModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
-    if (this.data != null) {
-      data['data'] = this.data!.toJson();
-    }
-    return data;
+    final Map<String, dynamic> map = {};
+    map['status'] = status;
+    map['message'] = message;
+    if (data != null) map['data'] = data!.toJson();
+    return map;
   }
 }
 
 class Data {
   User? user;
-  int? wallet;
+  double? wallet;
   int? bookings;
 
   Data({this.user, this.wallet, this.bookings});
 
   Data.fromJson(Map<String, dynamic> json) {
-    user = json['user'] != null ? new User.fromJson(json['user']) : null;
-    wallet = json['wallet'];
+    user = json['user'] != null ? User.fromJson(json['user']) : null;
+
+    // ✅ Safely convert wallet (handles int, double, string)
+    final walletValue = json['wallet'];
+    if (walletValue is int) {
+      wallet = walletValue.toDouble();
+    } else if (walletValue is double) {
+      wallet = walletValue;
+    } else if (walletValue is String) {
+      wallet = double.tryParse(walletValue);
+    } else {
+      wallet = 0.0;
+    }
+
     bookings = json['bookings'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.user != null) {
-      data['user'] = this.user!.toJson();
-    }
-    data['wallet'] = this.wallet;
-    data['bookings'] = this.bookings;
-    return data;
+    final Map<String, dynamic> map = {};
+    if (user != null) map['user'] = user!.toJson();
+    map['wallet'] = wallet;
+    map['bookings'] = bookings;
+    return map;
   }
 }
 
@@ -64,12 +72,12 @@ class User {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['firstName'] = this.firstName;
-    data['lastName'] = this.lastName;
-    data['email'] = this.email;
-    data['phone'] = this.phone;
-    return data;
+    final Map<String, dynamic> map = {};
+    map['_id'] = sId;
+    map['firstName'] = firstName;
+    map['lastName'] = lastName;
+    map['email'] = email;
+    map['phone'] = phone;
+    return map;
   }
 }

@@ -1,4 +1,5 @@
 
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
@@ -79,102 +80,129 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       }
     } catch (e) {
       print("Error in getProfile: $e");
-      throw e; // Re-throw to handle in _initializeData
+       // Re-throw to handle in _initializeData
     }
   }
 TantativeBookingDataModel? tantativeBookingDataModel;
 String ticketCode="";
   // Refactored event handler (async!)
   Future<void> _onContinueButtonClick(
-    OnContinueButtonClick event,
-    Emitter<BookingState> emit,
-  ) async {
+  OnContinueButtonClick event,
+  Emitter<BookingState> emit,
+) async {
+  bpoint = event.bpoint.toString();
+  selectedSeats = event.selectedSeats;
+  selectedPassenger = event.selectedPassenger;
+  selectedBoardingPointDetails = event.selectedBoardingPointDetails;
+  selectedDroppingPointDetails = event.selectedDroppingPointDetails;
 
-      bpoint=event.bpoint.toString();
-          selectedSeats=event.selectedSeats;
-          selectedPassenger= event.selectedPassenger;
-          selectedBoardingPointDetails= event.selectedBoardingPointDetails;
-          selectedDroppingPointDetails=event.selectedDroppingPointDetails;
-
-
-    emit(BookingLoading());
-    try {
-      final formData = //tripData.provider=="vaagai"?
-      {
-        "routeid": tripData.routeid,
-        "tripid": tripData.tripid,
-        "bpoint": event.selectedBoardingPointDetails!.id,
-        "dpoint": event.selectedDroppingPointDetails!.id,
-        "fromStation":tripData.src,
-        "toStation":tripData.dst,
-        "noofseats": event.noofseats!,
-        "mobileno": await Session().getPhoneNo(), //globals.phoneNo,
-        "email": await Session().getEmail(), // globals.email,
-        "totalfare": event.totalfare! + (event.totalfare! * 0.05),
-        "bookedat": globals.selectedDate,
-        "seatInfo": {
-          "passengerInfo": event.selectedPassenger!
-              .map(
-                (p) => p.toJson()
-                  ..update('fare', (value) => (value ?? 0) + (value * 0.05)),
-              )
-              .toList(),
-        },
-
-        "opid": event.opId,
-        "provider": tripData.provider
-
+  emit(BookingLoading());
+  int count=0;
+  try {
+    final formData = {
+      "basefare": selectedSeats!.first.fare,
+      // "routeid": tripData.routeid,
+      "tripid": tripData.tripid,
+      "bpoint": event.selectedBoardingPointDetails!.id,
+      "dpoint": event.selectedDroppingPointDetails!.id,
+      "fromStation": tripData.srcId ,
+      "toStation":tripData.dstId ,
+      "noofseats": event.noofseats!,
+      "mobileno": await Session().getPhoneNo(),
+      "email": await Session().getEmail(),
+      "totalfare": event.totalfare! + (event.totalfare! * 0.05),
+      "bookedat": globals.selectedDate,
+      "gstamount": event.totalfare! * 0.05,
+      "cancellationpolicy":tripData.cancellationpolicy?.toJson(),
+      "seatInfo": {
+        "passengerInfo": tripData.provider=="bitla"||tripData.provider=="ezeeinfo"?event. selectedPassenger!
+    .map((p) {
+      final originalFare = p.fare ?? 0;
+      final gstAmount = originalFare * 0.05;
+      final newFare = originalFare + gstAmount;
+      count++;
+      return p.toJson()
+        ..['ofare'] = originalFare  // Store original fare
+        ..['gst'] = gstAmount       // Store GST amount
+        ..['fare'] = newFare
+        ..['seatCode'] =tripData.tripid!+ event.selectedSeats!.first.seatNo ;     // Update fare with GST
         
-      };
-//       :{
-//   "mobileno": await Session().getPhoneNo(),
-//   "email": await Session().getEmail(),
-//   "tripid": tripData.tripid,
-//   "bpoint": tripData.boardingpoint,
-//   "dpoint": tripData.droppingpoint,
-//   "fromStation": tripData.srcId,
-//   "toStation": tripData.dstId,
-//   "bookedat": globals.selectedDate,
-//   "seatInfo": {
-//     "passengerInfo": event.selectedPassenger!
-//               .map(
-//                 (p) => p.toJson()
-//                   ..update('fare', (value) => (value ?? 0) + (value * 0.05)),
-//               )
-//               .toList(),
-//   },
-//   "provider":tripData.provider
-// };
+    })
+    .toList() :event.selectedPassenger!
+            .map(
+              (p) => p.toJson()
+                ..update('fare', (value) => (value ?? 0) + (value * 0.05)),
+            )
+            .toList(),
+      },
+      "opid": event.opId,
+      "provider": tripData.provider,
+    };
 
-      final response = await ApiRepository.postAPI(
-        ApiConst.getTentativeBooking,
-        formData,
-        basurl2: ApiConst.baseUrl2
+    final response = await ApiRepository.postAPI(
+      ApiConst.getTentativeBooking,
+      formData,
+      basurl2: ApiConst.baseUrl2,
+    );
+
+    if (response == null) {
+      emit(BookingFailure(error: "No response from server. Please try again."));
+      return;
+    }
+
+    // Handle HTTP error responses
+    if (response is Map && response['status'] == false) {
+      emit(BookingFailure(error: response['message'] ?? "Server error."));
+      return;
+    }
+
+    final data = response.data;
+    tantativeBookingDataModel = TantativeBookingDataModel.fromJson(data);
+  
+    print('--- Tentative Booking Response ---');
+    print("-------------=-->>>>${selectedBoardingPointDetails!.boardtime.toString()}");
+    print(data);
+
+    if (tantativeBookingDataModel?.status == 1) {
+      print('✅ Tentative booking successful. Proceeding to payment...');
+       pnr = tantativeBookingDataModel!.data!.pnr;
+      await Session().setPnr(pnr!);
+      createOrder(
+        event.totalfare!,
+        await Session().getPhoneNo() ?? "9865329568",
+        await Session().getEmail(),
       );
+     
+      emit(BookingLoaded(fare: event.totalfare!));
+    } else {
+      final message =
+          tantativeBookingDataModel?.message ?? "Booking failed. Please try again.";
+      emit(BookingFailure(error: message));
+    }
+  } catch (e, stacktrace) {
+    print("❌ Error in getTentativeBooking: $e");
+    print("🪵 Stacktrace: $stacktrace");
 
-      final data = response.data;
-      tantativeBookingDataModel = TantativeBookingDataModel.fromJson(data);
-      print('---abc------create order before call$data');
-
-      if (tantativeBookingDataModel!.status != null && tantativeBookingDataModel!.status == 1) {
-        print('---abc------create order before call');
-        createOrder(
-          event.totalfare!,
-          await Session().getPhoneNo() ?? "9865329568",
-          await Session().getEmail(),
-        );
-        pnr = tantativeBookingDataModel!.data!.bookingInfo!.pNR;
-        await Session().setPnr(tantativeBookingDataModel!.data!.bookingInfo!.pNR!);
-        emit(BookingLoaded(fare: event.totalfare!));
-      } else {
-        final message = tantativeBookingDataModel!.message ?? "Failed to load stations";
-        emit(BookingFailure(error: message));
+    // Handle DioException separately for clear error message
+    if (e is DioException) {
+      String msg = "Something went wrong. Please try again.";
+      if (e.response != null) {
+        msg = e.response?.data?['message'] ??
+            "Server error (${e.response?.statusCode}). Please try again later.";
+      } else if (e.type == DioExceptionType.connectionError) {
+        msg = "Network error. Check your internet connection.";
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        msg = "Request timeout. Please try again later.";
       }
-    } catch (e) {
-      print("Error in getTentativeBooking: $e");
-      emit(BookingFailure(error: "Something went wrong. Please try again."));
+      emit(BookingFailure(error: msg));
+    } else {
+      emit(BookingFailure(
+          error: "Unexpected error occurred. Please try again later."));
     }
   }
+}
+
 
   Future confirmTentativeBooking() async {
     // String pnr = await Session().getPnr();
@@ -195,6 +223,8 @@ String ticketCode="";
 
       final data = response.data;
 
+      print("------boardingTime--------->>>>>>${selectedBoardingPointDetails!.boardtime.toString()}");
+
       if (data["status"] != null && data["status"] == 1) {
         //  ApiClient().createOrder(event.totalfare!,"8305933803","aadityagupta778@gmail.com",event,emit);
 
@@ -213,6 +243,7 @@ String ticketCode="";
     }
   }
 CreateOrderDataModel? createOrderDataModel;
+String? txnId="";
   Future<void> createOrder(int fare, String phoneNo, String email) async {
     print('---abc----1--create order inside call');
 
@@ -231,8 +262,10 @@ CreateOrderDataModel? createOrderDataModel;
         "phone": phoneNo.contains("+91") ? phoneNo : "+91${phoneNo}",
         "paymentMode": profileDataModel!.data!.wallet!<=0? "payu":profileDataModel!.data!.wallet!>=(fare + (fare * 0.05)).toInt()?"wallet":"mixed",//"razorpay",
         "email": email,
+        "orderId":pnr,
         "walletUsed": profileDataModel!.data!.wallet!,
         "payuAmount": (fare + (fare * 0.05)).toInt(),
+
         "clientType":"mobile"
       };
       print('---abc---2---create order inside call');
@@ -240,20 +273,21 @@ CreateOrderDataModel? createOrderDataModel;
       final response = await ApiRepository.postAPI(
         ApiConst.createOrder,
         formData,
-       basurl2:"https://stagingapi.hopzy.in/",//basurl2: ApiConst.baseUrl2,
+       basurl2: ApiConst.baseUrl2, //"https://stagingapi.hopzy.in/",//
       );
 
       final data = response.data;
       print('---abc------create order inside call');
 
       print("Response from createorder api====>>>> $data");
-
+      
       createOrderDataModel = CreateOrderDataModel.fromJson(data) ;      
-
+      txnId= (profileDataModel!.data!.wallet!<=0? "payu":profileDataModel!.data!.wallet!>=(fare + (fare * 0.05)).toInt()?"wallet":"mixed")=="wallet"? data["data"]["txnid"]:createOrderDataModel!.data!.payUData!.txnid!;
       if (data["status"] == 1) {
         // userId = data["data"]["user_id"];
-        print("user_id = ${createOrderDataModel!.data!.payUData!.txnid}");
+        // print("user_id = ${createOrderDataModel!.data!.payUData!.txnid}");
         Future.delayed(Duration(microseconds: 500));
+        
         // emit(RazorpaySuccessState(razorpay_order_id: data["data"]["order_id"]));
         if(profileDataModel!.data!.wallet!>=(fare + (fare * 0.05)).toInt()){
           confirmTentativeBooking();
@@ -282,53 +316,53 @@ CreateOrderDataModel? createOrderDataModel;
     }
   }
 
-  Future<void> paymentVerification({
-    PaymentSuccessResponse? paymentVerify,
-    String? bpoint,
-    Set<SeatModell>? selectedSeats,
-    List<Passenger>? selectedPassenger,
-    BpDetails? selectedBoardingPointDetails,
-    DpDetails? selectedDroppingPointDetails,
-  }) async {
-    try {
-      var formData = {
-  "mihpayid": "403993715521234567",
-  "txnid": "txn_1756985376564",
-  "status": "success", 
-  "hash": "75b93a71f923425cc780382d43bedd28f902d6f831e0a0a15d7db97f51eb68c8d97f33d71ed3bc5f999695fd72c8e13f99905d053208965e1af59b9787e33947"
-};
+//   Future<void> paymentVerification({
+//     PaymentSuccessResponse? paymentVerify,
+//     String? bpoint,
+//     Set<SeatModell>? selectedSeats,
+//     List<Passenger>? selectedPassenger,
+//     BpDetails? selectedBoardingPointDetails,
+//     DpDetails? selectedDroppingPointDetails,
+//   }) async {
+//     try {
+//       var formData = {
+//   "mihpayid": "403993715521234567",
+//   "txnid": "txn_1756985376564",
+//   "status": "success", 
+//   "hash": "75b93a71f923425cc780382d43bedd28f902d6f831e0a0a15d7db97f51eb68c8d97f33d71ed3bc5f999695fd72c8e13f99905d053208965e1af59b9787e33947"
+// };
 
-      final response = await ApiRepository.postAPI(
-        ApiConst.paymentVerification,
-        formData,
-        basurl2: ApiConst.baseUrl2,
-      );
+//       final response = await ApiRepository.postAPI(
+//         ApiConst.paymentVerification,
+//         formData,
+//         basurl2: ApiConst.baseUrl2,
+//       );
 
-      final data = response.data;
+//       final data = response.data;
 
-      print("Response from paymentVerification api ----------->>>> $data");
+//       print("Response from paymentVerification api ----------->>>> $data");
 
-      if (data["status"] == 1) {
-        confirmTentativeBooking();
-        Future.delayed(Duration(milliseconds: 500));
-        confirmBooking(
-          tripData: tripData,
-          bpoint: bpoint,
-          // orderId: paymentVerify.orderId,
-          selectedSeats: selectedSeats,
-          selectedPassenger: selectedPassenger,
-          selectedBoardingPointDetails: selectedBoardingPointDetails,
-          selectedDroppingPointDetails: selectedDroppingPointDetails,
-        );
-        emit(BookingLoaded());
-      } else {
-        final message = data["status"]?["message"] ?? "Failed to load stations";
-        emit(BookingFailure(error: message));
-      }
-    } catch (e) {
-      print("Error in paymentVerification: $e");
-    }
-  }
+//       if (data["status"] == 1) {
+//         confirmTentativeBooking();
+//         Future.delayed(Duration(milliseconds: 500));
+//         confirmBooking(
+//           tripData: tripData,
+//           bpoint: bpoint,
+//           // orderId: paymentVerify.orderId,
+//           selectedSeats: selectedSeats,
+//           selectedPassenger: selectedPassenger,
+//           selectedBoardingPointDetails: selectedBoardingPointDetails,
+//           selectedDroppingPointDetails: selectedDroppingPointDetails,
+//         );
+//         emit(BookingLoaded());
+//       } else {
+//         final message = data["status"]?["message"] ?? "Failed to load stations";
+//         emit(BookingFailure(error: message));
+//       }
+//     } catch (e) {
+//       print("Error in paymentVerification: $e");
+//     }
+//   }
 
   Future<void> confirmBooking({
     Trips? tripData,
@@ -340,13 +374,13 @@ CreateOrderDataModel? createOrderDataModel;
     DpDetails? selectedDroppingPointDetails,
     GstDetails? gstDetails,
   }) async {
-    print("transaction id ----------------->>>>>${createOrderDataModel!.data!.payUData!.txnid}");
+    // print("transaction id ----------------->>>>>${createOrderDataModel!.data!.payUData!.txnid}");
     try {
       var formData = gstDetails!=null? {
         // "razorpay_order_id": orderId,
         "cancellationpolicy":tripData!.cancellationpolicy,
         "paymentMode": profileDataModel!.data!.wallet!<=0? "payu":profileDataModel!.data!.wallet!>=(int.parse(tripData!.fare!) + (int.parse(tripData.fare!) * 0.05)).toInt()?"wallet":"mixed",
-        "txnid": createOrderDataModel!.data!.payUData!.txnid,
+        "txnid": txnId,//createOrderDataModel!.data!.payUData!.txnid,
         "operatorpnr": pnr,
         "routeid": tripData!.routeid,
         "tripid": tripData.tripid,
@@ -356,7 +390,7 @@ CreateOrderDataModel? createOrderDataModel;
           "id": selectedBoardingPointDetails!.id,
           "name": selectedBoardingPointDetails.address,
           "time": selectedBoardingPointDetails.boardtime != null
-              ? DateFormat('hh:mm a  dd MMM yyyy').format(
+              ? DateFormat('hh:mm').format(
                   DateTime.parse(
                     selectedBoardingPointDetails.boardtime.toString(),
                   ),
@@ -370,13 +404,14 @@ CreateOrderDataModel? createOrderDataModel;
         },
         "dropping_point": {
           "id": selectedDroppingPointDetails!.id,
-          "name": selectedDroppingPointDetails.address,
+          "name": selectedDroppingPointDetails.stnname,
           "time": selectedDroppingPointDetails.droptime != null
-              ? DateFormat('hh:mm a  dd MMM yyyy').format(
-                  DateTime.parse(
-                    selectedDroppingPointDetails.droptime.toString(),
-                  ),
-                )
+              ? 
+              // DateFormat('hh:mm a  dd MMM yyyy').format(
+              //     DateTime.parse(
+                    selectedDroppingPointDetails.droptime.toString()
+                //   ),
+                // )
               : '--:--',
           "address": selectedDroppingPointDetails.address,
           "contactno": selectedDroppingPointDetails.contactno,
@@ -415,12 +450,13 @@ CreateOrderDataModel? createOrderDataModel;
             .toList(),
 
         "opid": tripData.operatorid,
-         "gstDetails": gstDetails
+         "gstDetails": gstDetails,
+         "pnr":pnr
       }:{
         // "razorpay_order_id": orderId,
-        "cancellationpolicy":tripData!.cancellationpolicy,
+        "cancellationpolicy":tripData!.cancellationpolicy!.toJson(),
         "paymentMode": profileDataModel!.data!.wallet!<=0? "payu":profileDataModel!.data!.wallet!>=(int.parse(tripData!.fare!) + (int.parse(tripData.fare!) * 0.05)).toInt()?"wallet":"mixed",
-        "txnid": createOrderDataModel!.data!.payUData!.txnid,
+        "txnid": txnId,//createOrderDataModel!.data!.payUData!.txnid,
         "operatorpnr": pnr,
         "routeid": tripData!.routeid,
         "tripid": tripData.tripid,
@@ -430,11 +466,12 @@ CreateOrderDataModel? createOrderDataModel;
           "id": selectedBoardingPointDetails!.id,
           "name": selectedBoardingPointDetails.address,
           "time": selectedBoardingPointDetails.boardtime != null
-              ? DateFormat('hh:mm a  dd MMM yyyy').format(
-                  DateTime.parse(
-                    selectedBoardingPointDetails.boardtime.toString(),
-                  ),
-                )
+              ? 
+              // DateFormat('hh:mm').format(
+              //     DateTime.parse(
+                    selectedBoardingPointDetails.boardtime.toString()
+                //   ),
+                // )
               : '--:--',
           "address": selectedBoardingPointDetails.address,
           "contactno": selectedBoardingPointDetails.contactno,
@@ -489,7 +526,8 @@ CreateOrderDataModel? createOrderDataModel;
             .toList(),
 
         "opid": tripData.operatorid,
-         "gstDetails": gstDetails
+         "gstDetails": gstDetails,
+         "pnr":pnr
       };
 
       final response = await ApiRepository.postAPI(

@@ -106,14 +106,14 @@ class _EnhancedBusInfoBottomSheetState
 
     ToastMessage().showSuccessToast("Payment successful!");
 
-    forPayment!.paymentVerification(
-      paymentVerify: response,
-      bpoint: selectedBoardingPointId!.toString(),
-      selectedSeats: widget.selectedSeats!,
-      selectedPassenger: finalSelectedPassenger,
-      selectedBoardingPointDetails: selectedBoardingPointDetails,
-      selectedDroppingPointDetails: selectedDroppingPointDetails,
-    );
+    // forPayment!.paymentVerification(
+    //   paymentVerify: response,
+    //   bpoint: selectedBoardingPointId!.toString(),
+    //   selectedSeats: widget.selectedSeats!,
+    //   selectedPassenger: finalSelectedPassenger,
+    //   selectedBoardingPointDetails: selectedBoardingPointDetails,
+    //   selectedDroppingPointDetails: selectedDroppingPointDetails,
+    // );
     //   final respo = await ApiClient().paymentVerification(response);
     //   // 👉 Call your trip API or booking confirmation logic here
     //   String pnr=await Session().getPnr();
@@ -135,31 +135,31 @@ class _EnhancedBusInfoBottomSheetState
     print("💼 External wallet selected: ${response.walletName}");
   }
 
-  void _openRazorpayCheckout(int totalFare, String orderId) {
-    // var totalAmount = (widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())) * 100;
+  // void _openRazorpayCheckout(int totalFare, String orderId) {
+  //   // var totalAmount = (widget.selectedSeats!.length * int.parse(widget.tripData!.fare.toString())) * 100;
 
-    var options = {
-      'key': 'rzp_test_qTYImJGXuKbQ98',
-      'amount': (totalFare + 50) * 100, // Amount in paisa
-      'order_id': orderId,
-      'name': 'VaagaiBus',
-      'description': 'Bus ticket booking',
-      'prefill': {
-        'contact': '8305933803',
-        'email': 'aadityagupta778@gmail.com',
-      },
-      'external': {
-        'wallets': ['paytm'],
-      },
-    };
+  //   var options = {
+  //     'key': 'rzp_test_qTYImJGXuKbQ98',
+  //     'amount': (totalFare + 50) * 100, // Amount in paisa
+  //     'order_id': orderId,
+  //     'name': 'VaagaiBus',
+  //     'description': 'Bus ticket booking',
+  //     'prefill': {
+  //       'contact': '8305933803',
+  //       'email': 'aadityagupta778@gmail.com',
+  //     },
+  //     'external': {
+  //       'wallets': ['paytm'],
+  //     },
+  //   };
 
-    try {
-      _razorpay.open(options);
-    } catch (e) {
-      debugPrint('Error: $e');
-      ToastMessage().showErrorToast("Failed to open Razorpay");
-    }
-  }
+  //   try {
+  //     _razorpay.open(options);
+  //   } catch (e) {
+  //     debugPrint('Error: $e');
+  //     ToastMessage().showErrorToast("Failed to open Razorpay");
+  //   }
+  // }
 
   //
 
@@ -249,6 +249,8 @@ class _EnhancedBusInfoBottomSheetState
             print(
               'PayUSuccessState received with order_id: ${state.createOrderDataModel?.data?.payUData?.key}',
             ); // Debug log
+
+            Future.delayed(Duration(milliseconds: 1000));
 
             final bookingBloc = BlocProvider.of<BookingBloc>(context);
 
@@ -579,7 +581,7 @@ class _EnhancedBusInfoBottomSheetState
                                         style: TextTheme.of(context).bodyLarge,
                                       ),
                                       Text(
-                                        "₹ ${int.parse(widget.tripData!.fare!) * 0.05}",
+                                        "₹ ${(int.parse(widget.tripData!.fare!) * 0.05).toInt()}",
                                         style: TextTheme.of(
                                           context,
                                         ).titleMedium,
@@ -603,7 +605,7 @@ class _EnhancedBusInfoBottomSheetState
                                         style: TextTheme.of(context).bodyLarge,
                                       ),
                                       Text(
-                                        "₹ ${(int.parse(widget.selectedSeats!.first.fare.toString()) * widget.selectedSeats!.length) + (int.parse(widget.tripData!.fare!) * 0.05)}",
+                                        "₹ ${((int.parse(widget.selectedSeats!.first.fare.toString()) * widget.selectedSeats!.length) + (int.parse(widget.tripData!.fare!) * 0.05)).toInt()}",
                                         style: TextTheme.of(
                                           context,
                                         ).titleMedium,
@@ -627,7 +629,7 @@ class _EnhancedBusInfoBottomSheetState
                                         style: TextTheme.of(context).bodyLarge,
                                       ),
                                       Text(
-                                        "-₹ ${BlocProvider.of<BookingBloc>(context).profileDataModel!.data!.user != null ? BlocProvider.of<BookingBloc>(context).profileDataModel!.data!.wallet : int.parse(tripsData!.first.fare!) * 0.10}", //${int.parse(widget.selectedSeats!.first.fare.toString())*widget.selectedSeats!.length}",
+                                        "-₹ ${BlocProvider.of<BookingBloc>(context).profileDataModel!.data != null ? BlocProvider.of<BookingBloc>(context).profileDataModel!.data!.wallet : int.parse(tripsData!.first.fare!) * 0.10}", //${int.parse(widget.selectedSeats!.first.fare.toString())*widget.selectedSeats!.length}",
                                         style: TextTheme.of(
                                           context,
                                         ).titleMedium,

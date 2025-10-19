@@ -23,100 +23,107 @@ class TantativeBookingDataModel {
 }
 
 class Data {
-  Status? status;
-  BookingInfo? bookingInfo;
+  String? pnrNumber;
+  String? operatorPnr;
+  int? tentativeTimeInMillisec;
+  String? tentativeExpiryTime;
+  List<SeatFareDetails>? seatFareDetails;
+  String? pnr;
 
-  Data({this.status, this.bookingInfo});
+  Data(
+      {this.pnrNumber,
+      this.operatorPnr,
+      this.tentativeTimeInMillisec,
+      this.tentativeExpiryTime,
+      this.seatFareDetails,
+      this.pnr});
 
   Data.fromJson(Map<String, dynamic> json) {
-    status =
-        json['status'] != null ? new Status.fromJson(json['status']) : null;
-    bookingInfo = json['BookingInfo'] != null
-        ? new BookingInfo.fromJson(json['BookingInfo'])
+    pnrNumber = json['pnr_number'];
+    operatorPnr = json['operator_pnr'];
+    tentativeTimeInMillisec = json['tentative_time_in_millisec'].toInt();
+    tentativeExpiryTime = json['tentative_expiry_time'];
+    if (json['seat_fare_details'] != null) {
+      seatFareDetails = <SeatFareDetails>[];
+      json['seat_fare_details'].forEach((v) {
+        seatFareDetails!.add(new SeatFareDetails.fromJson(v));
+      });
+    }
+    pnr = json['pnr'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['pnr_number'] = this.pnrNumber;
+    data['operator_pnr'] = this.operatorPnr;
+    data['tentative_time_in_millisec'] = this.tentativeTimeInMillisec;
+    data['tentative_expiry_time'] = this.tentativeExpiryTime;
+    if (this.seatFareDetails != null) {
+      data['seat_fare_details'] =
+          this.seatFareDetails!.map((v) => v.toJson()).toList();
+    }
+    data['pnr'] = this.pnr;
+    return data;
+  }
+}
+
+class SeatFareDetails {
+  SeatDetail? seatDetail;
+
+  SeatFareDetails({this.seatDetail});
+
+  SeatFareDetails.fromJson(Map<String, dynamic> json) {
+    seatDetail = json['seat_detail'] != null
+        ? new SeatDetail.fromJson(json['seat_detail'])
         : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.status != null) {
-      data['status'] = this.status!.toJson();
-    }
-    if (this.bookingInfo != null) {
-      data['BookingInfo'] = this.bookingInfo!.toJson();
+    if (this.seatDetail != null) {
+      data['seat_detail'] = this.seatDetail!.toJson();
     }
     return data;
   }
 }
 
-class Status {
-  bool? success;
-  String? message;
-  Profiledata? profiledata;
-  int? code;
+class SeatDetail {
+  String? seatNumber;
+  int? fare;
+  int? serviceTax;
+  int? convenienceCharge;
+  int? offerDiscount;
+  int? discount;
+  int? additionalFare;
 
-  Status({this.success, this.message, this.profiledata, this.code});
+  SeatDetail(
+      {this.seatNumber,
+      this.fare,
+      this.serviceTax,
+      this.convenienceCharge,
+      this.offerDiscount,
+      this.discount,
+      this.additionalFare});
 
-  Status.fromJson(Map<String, dynamic> json) {
-    success = json['success'];
-    message = json['message'];
-    profiledata = json['profiledata'] != null
-        ? new Profiledata.fromJson(json['profiledata'])
-        : null;
-    code = json['code'];
+  SeatDetail.fromJson(Map<String, dynamic> json) {
+    seatNumber = json['seat_number'];
+    fare = json['fare'];
+    serviceTax = json['service_tax'];
+    convenienceCharge = json['convenience_charge'];
+    offerDiscount = json['offer_discount'];
+    discount = json['discount'];
+    additionalFare = json['additional_fare'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['message'] = this.message;
-    if (this.profiledata != null) {
-      data['profiledata'] = this.profiledata!.toJson();
-    }
-    data['code'] = this.code;
-    return data;
-  }
-}
-
-class Profiledata {
-  String? balance;
-  String? mode;
-  String? name;
-  String? allowopsids;
-
-  Profiledata({this.balance, this.mode, this.name, this.allowopsids});
-
-  Profiledata.fromJson(Map<String, dynamic> json) {
-    balance = json['balance'];
-    mode = json['mode'];
-    name = json['name'];
-    allowopsids = json['allowopsids'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['balance'] = this.balance;
-    data['mode'] = this.mode;
-    data['name'] = this.name;
-    data['allowopsids'] = this.allowopsids;
-    return data;
-  }
-}
-
-class BookingInfo {
-  String? pNR;
-  String? validity;
-
-  BookingInfo({this.pNR, this.validity});
-
-  BookingInfo.fromJson(Map<String, dynamic> json) {
-    pNR = json['PNR'];
-    validity = json['Validity'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['PNR'] = this.pNR;
-    data['Validity'] = this.validity;
+    data['seat_number'] = this.seatNumber;
+    data['fare'] = this.fare;
+    data['service_tax'] = this.serviceTax;
+    data['convenience_charge'] = this.convenienceCharge;
+    data['offer_discount'] = this.offerDiscount;
+    data['discount'] = this.discount;
+    data['additional_fare'] = this.additionalFare;
     return data;
   }
 }

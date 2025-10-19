@@ -7,7 +7,7 @@ import 'package:ridebooking/models/operator_list_model.dart';
 
 class AllStationBloc extends Bloc<AllStationEvent, AllStationState> {
   final Dio _dio = Dio();
-  final String baseUrl = 'https://stagingapi.hopzy.in/api/public/stations';
+  final String baseUrl = 'https://prodapi.hopzy.in/api/public/stations';
 
   AllStationBloc() : super(AllStationInitial()) {
     on<FetchStationsEvent>(_onFetchStations);

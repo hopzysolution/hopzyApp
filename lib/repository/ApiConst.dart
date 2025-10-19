@@ -10,7 +10,7 @@ class ApiConst {
 
   
 
-  static String baseUrl2= "https://stagingapi.hopzy.in/";//"https://prodapi.hopzy.in/";//
+  static String baseUrl2= "https://prodapi.hopzy.in/";//"https://stagingapi.hopzy.in/";//"
 
   // static const String accessToken= "MTIxYzMyYzExNWMxMTNjOTljMTEyYzEwOGM5NWMxMDdjOTljMzJjNTZjMzJjOTVjMTEwYzEwM2M5NWMxMDFjOTljMTA4YzExNGMzMmM0MmMzMmMxMTBjOTVjMTEzYzExM2MxMTdjMTA5YzExMmM5OGMzMmM1NmMzMmM0N2M0OGM0OWMzMmMxMjNjNjQ";
 

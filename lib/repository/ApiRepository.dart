@@ -113,51 +113,93 @@ class ApiRepository {
     }
   }
 
-  static Future<dynamic> postAPI(String apiName, var formData,{String? basurl2}) async {
-    try {
-      String callUrl =basurl2!=null?basurl2+apiName :ApiConst.baseUrl + apiName;
+ static Future<dynamic> postAPI(String apiName, var formData, {String? basurl2}) async {
+  try {
+    // ✅ Build URL
+    String callUrl = basurl2 != null ? basurl2 + apiName : ApiConst.baseUrl + apiName;
 
-      
-      String token = await Session().getToken();
-    
+    // ✅ Get token
+    String token = await Session().getToken();
 
-      // if (token.isNotEmpty) {
-      //   client.options.headers["authorization"] = "Bearer " + token;
-      // } // todo:token get if present or required!
-     
-        
-        // client.options.headers["devicetoken"]="";
-        // client.options.headers["deviceType"]=Platform.isAndroid? "ANDROID":Platform.isIOS? "IOS":"WEB";
-        if(basurl2!=null){
-       client.options.headers["User-Agent"]="insomnia/11.2.0";
-        client.options.headers["Authorization"]="Bearer $token";
-        // client.options.headers["token"]= ApiConst.accessToken;
-        }else{
-       client.options.headers["User-Agent"]="insomnia/11.2.0";
-        client.options.headers["token"]= ApiConst.accessToken;
-        }
-        // client.options.headers["Cookie"]="";
-        // client.options.headers["PHPSESSID"]="qjmtid5a30e8sdgpcdu7h9a399";
-      
-      print("-------------------------");
-      print("-------------------------");
-      print("url:----- ${callUrl}");
-      print("token:--- ${token}");
-      print("header:----${client.options.headers.toString()}");
-      print("data :--- ${formData.toString()}");
+    // ✅ Set headers based on base URL
+    client.options.headers["User-Agent"] = "insomnia/11.2.0";
+    if (basurl2 != null) {
+      client.options.headers["Authorization"] = "Bearer $token";
+    } else {
+      client.options.headers["token"] = ApiConst.accessToken;
+    }
 
-      var response = await client.post(callUrl, data: formData);
-      // todo: response come when status is 200 only
-      print("Response from the post Api ===> $response");
-      return response;
-    } on DioException catch (e) {
-      //todo: other Exception code come here or message return
-      if (e.response != null) {
-        return e.response;
+    // ✅ Debug logs
+    print("------------------------------------------------------------");
+    print("📡 POST API CALL");
+    print("➡️ URL: $callUrl");
+    print("🔑 Token: $token");
+    print("🧾 Headers: ${client.options.headers}");
+    print("📦 Data: $formData");
+    print("------------------------------------------------------------");
+
+    // ✅ API Call
+    final response = await client.post(callUrl, data: formData);
+
+    // ✅ Only log 200/201 as success
+    print("✅ Response (${response.statusCode}): ${response.data}");
+
+    return response;
+  } on DioException catch (e) {
+    print("❌ DioException occurred");
+
+    // ✅ Check if we got a response from server
+    if (e.response != null) {
+      print("🔴 Server responded with status: ${e.response?.statusCode}");
+      print("🧩 Response data: ${e.response?.data}");
+
+      // Handle different status codes gracefully
+      switch (e.response?.statusCode) {
+        case 400:
+          return {"status": false, "message": e.message};
+        case 401:
+          return {"status": false, "message": e.message};
+        case 403:
+          return {"status": false, "message": e.message};
+        case 404:
+          return {"status": false, "message": e.message};
+        case 408:
+          return {"status": false, "message": e.message};
+        case 500:
+          return {"status": false, "message": e.message};
+        case 502:
+        case 503:
+        case 504:
+          return {"status": false, "message": e.message};
+        default:
+          return {
+            "status": false,
+            "message": "Unexpected server error (${e.response?.statusCode}).",
+            "data": e.response?.data
+          };
+      }
+    } else {
+      // ✅ No server response (network, timeout, etc.)
+      if (e.type == DioExceptionType.connectionTimeout) {
+        return {"status": false, "message": "Connection timeout — check your internet connection."};
+      } else if (e.type == DioExceptionType.receiveTimeout) {
+        return {"status": false, "message": "Response timeout — please try again later."};
+      } else if (e.type == DioExceptionType.badCertificate) {
+        return {"status": false, "message": "SSL certificate error — connection not secure."};
+      } else if (e.type == DioExceptionType.connectionError) {
+        return {"status": false, "message": "Network error — please check your connection."};
+      } else if (e.type == DioExceptionType.cancel) {
+        return {"status": false, "message": "Request was cancelled."};
       } else {
-        var err = {'"status"': 'false', '"message"': '"${e.message}"'};
-        return err;
+        return {"status": false, "message": e.message ?? "Unexpected error occurred."};
       }
     }
+  } catch (err, stacktrace) {
+    // ✅ Catch any other unexpected exceptions
+    print("⚠️ Unexpected Exception: $err");
+    print("🪵 Stacktrace: $stacktrace");
+    return {"status": false, "message": "Something went wrong. Please try again later."};
   }
+}
+
 }
