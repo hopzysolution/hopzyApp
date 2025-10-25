@@ -785,75 +785,75 @@ class _EnhancedBusInfoBottomSheetState
   int? selectedBoardingPointId;
   BpDetails? selectedBoardingPointDetails;
   Widget _buildBoardingTab() {
-  final bpDetails = widget.tripData?.boardingpoint?.bpDetails;
+    final bpDetails = widget.tripData?.boardingpoint?.bpDetails;
 
-  if (bpDetails == null || bpDetails.isEmpty) {
-    return const Center(child: Text("No boarding points available"));
+    if (bpDetails == null || bpDetails.isEmpty) {
+      return const Center(child: Text("No boarding points available"));
+    }
+
+    return Column(
+      children: List.generate(bpDetails.length, (int index) {
+        final detail = bpDetails[index];
+
+        final String venue = detail.venue ?? '';
+        final String boardTime = _formatBoardingTime(detail.boardtime);
+        final String stationName = detail.address ?? '';
+        final String selectedValue = '$venue-$boardTime';
+        final String idString = detail.id.toString().replaceAll(
+          RegExp(r'[^0-9]'),
+          '',
+        );
+        final int selectedId = int.parse(idString);
+
+        return _buildBoardingPoint(
+          venue,
+          boardTime,
+          stationName,
+          groupValue: _selectedBoardingPoint,
+          selectedValue: selectedValue,
+          onTap: () {
+            setState(() {
+              _selectedBoardingPoint = selectedValue;
+              selectedBoardingPointId = selectedId;
+              selectedBoardingPointDetails = detail;
+              selectedTabIndex = 1;
+            });
+            print('Selected boarding point: $venue at $boardTime');
+          },
+        );
+      }),
+    );
   }
 
-  return Column(
-    children: List.generate(bpDetails.length, (int index) {
-      final detail = bpDetails[index];
+  // Add this helper method in your class
+  String _formatBoardingTime(String? time) {
+    if (time == null || time.isEmpty) return '--:--';
 
-      final String venue = detail.venue ?? '';
-      final String boardTime = _formatBoardingTime(detail.boardtime);
-      final String stationName = detail.address ?? '';
-      final String selectedValue = '$venue-$boardTime';
-      final String idString = detail.id.toString().replaceAll(
-        RegExp(r'[^0-9]'),
-        '',
-      );
-      final int selectedId = int.parse(idString);
+    try {
+      // Check if it's a full datetime string
+      if (time.contains('T') || time.contains('-')) {
+        return DateFormat('hh:mm a').format(DateTime.parse(time));
+      }
 
-      return _buildBoardingPoint(
-        venue,
-        boardTime,
-        stationName,
-        groupValue: _selectedBoardingPoint,
-        selectedValue: selectedValue,
-        onTap: () {
-          setState(() {
-            _selectedBoardingPoint = selectedValue;
-            selectedBoardingPointId = selectedId;
-            selectedBoardingPointDetails = detail;
-            selectedTabIndex = 1;
-          });
-          print('Selected boarding point: $venue at $boardTime');
-        },
-      );
-    }),
-  );
-}
+      // Handle time-only format (HH:mm or HH:mm:ss)
+      final parts = time.split(':');
+      if (parts.length >= 2) {
+        int hour = int.parse(parts[0]);
+        int minute = int.parse(parts[1]);
 
-// Add this helper method in your class
-String _formatBoardingTime(String? time) {
-  if (time == null || time.isEmpty) return '--:--';
-  
-  try {
-    // Check if it's a full datetime string
-    if (time.contains('T') || time.contains('-')) {
-      return DateFormat('hh:mm a').format(DateTime.parse(time));
+        // Convert to 12-hour format
+        String period = hour >= 12 ? 'PM' : 'AM';
+        int displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+
+        return '${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
+      }
+
+      return time; // Return as-is if format is unexpected
+    } catch (e) {
+      print('Error formatting boarding time: $e - Input: $time');
+      return time; // Return original on error
     }
-    
-    // Handle time-only format (HH:mm or HH:mm:ss)
-    final parts = time.split(':');
-    if (parts.length >= 2) {
-      int hour = int.parse(parts[0]);
-      int minute = int.parse(parts[1]);
-      
-      // Convert to 12-hour format
-      String period = hour >= 12 ? 'PM' : 'AM';
-      int displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-      
-      return '${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
-    }
-    
-    return time; // Return as-is if format is unexpected
-  } catch (e) {
-    print('Error formatting boarding time: $e - Input: $time');
-    return time; // Return original on error
   }
-}
 
   Widget _buildBoardingPoint(
     String location,
@@ -1018,7 +1018,11 @@ String _formatBoardingTime(String? time) {
   //   );
   // }
 
-  Widget _buildPassengersTab(BuildContext context, Trips tripsData, BookingBloc bloc,) {
+  Widget _buildPassengersTab(
+    BuildContext context,
+    Trips tripsData,
+    BookingBloc bloc,
+  ) {
     print("Amenities list ---->>>>> ${tripsData.amenities}");
 
     return SingleChildScrollView(

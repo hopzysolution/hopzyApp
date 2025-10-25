@@ -49,6 +49,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
   @override
   void initState() {
     super.initState();
+    print("PayUData: ${widget.createOrderDataModel?.data?.payUData?.toJson()}");
     _checkoutPro = PayUCheckoutProFlutter(this);
 
     _timeoutTimer = Timer(const Duration(minutes: 5), () {
@@ -207,7 +208,10 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         return;
       }
 
-      debugPrint("✅ Hash generated: ${generatedHash.substring(0, 20)}...");
+      debugPrint(
+        "✅ Hash generated: ${generatedHash.length > 20 ? generatedHash.substring(0, 20) : generatedHash}...",
+      );
+
       _hashCache[hashName] = generatedHash;
       _checkoutPro.hashGenerated(hash: {hashName: generatedHash});
       
@@ -514,7 +518,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         PayUPaymentParamKey.ios_furl: payUData.furl!,
         PayUPaymentParamKey.android_surl: payUData.surl!,
         PayUPaymentParamKey.android_furl: payUData.furl!,
-        PayUPaymentParamKey.environment: "1", // 1 = Test, 0 = Production
+        PayUPaymentParamKey.environment: "0", // 1 = Test, 0 = Production
         PayUPaymentParamKey.transactionId: payUData.txnid!,
         PayUPaymentParamKey.userCredential: "${payUData.key}:${payUData.email}",
       };

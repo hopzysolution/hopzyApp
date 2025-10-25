@@ -133,7 +133,7 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
         }
       } catch (e) {
         print("------------------cancel booking error: $e");
-        emit(BookingListFailure(error: "Something went wrong. Please try again."));
+        emit(BookingListFailure(error: "Something went wrong. Please try ."));
       }
     });
     
@@ -141,6 +141,7 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
   }
 
   Future<void> fetchBookingList() async {
+    print("Inside fetching booking list");
     String? phoneNumber = await Session().getPhoneNo();
     emit(BookingListLoading());
     try {
@@ -161,10 +162,12 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
         final message = data["message"] ?? "Failed to load bookings";
         emit(BookingListFailure(error: message));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       print("------------------fetch bookings error: $e");
+      print("------------------StackTrace: $stackTrace");
       emit(BookingListFailure(error: "Something went wrong. Please try again."));
     }
+
   }
 
   Future<void> cancelHopzyBooking(
@@ -268,8 +271,9 @@ class Booking {
       to: json['to'],
       bustype: json['bustype'],
       seattype: json['seattype'],
-      numberOfSeats: json['numberOfSeats'] ?? 0,
-      totalFare: json['totalFare'] ?? 0,
+      numberOfSeats: (json['numberOfSeats'] as num?)?.toInt() ?? 0,
+      totalFare: (json['totalFare'] as num?)?.toInt() ?? 0,
+
       bookedAt: json['bookedAt'] ?? '',
       status: json['status'] ?? '',
       cancelledAt: json['cancelledAt'],
@@ -281,7 +285,7 @@ class Booking {
           [],
     );
   }
-  
+
   // Helper method to get boarding point name
   String get boardingPointName {
     if (boardingPoint != null && boardingPoint!['name'] != null) {
@@ -384,7 +388,8 @@ class CancelPassenger {
       seatCode: json['seatCode'] ?? '',
       seatNo: json['seatNo'] ?? '',
       age: json['age'] ?? 0,
-      fare: json['fare'] ?? 0,
+      fare: (json['fare'] as num?)?.toInt() ?? 0,
+
       status: json['status'] ?? '',
     );
   }

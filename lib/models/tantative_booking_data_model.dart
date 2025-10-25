@@ -28,7 +28,8 @@ class Data {
   int? tentativeTimeInMillisec;
   String? tentativeExpiryTime;
   List<SeatFareDetails>? seatFareDetails;
-  String? pnr;
+  String? pnr; // backward compatible, still works everywhere
+  Map<String, dynamic>? bookingInfo; // store full BookingInfo for future use
 
   Data(
       {this.pnrNumber,
@@ -36,12 +37,16 @@ class Data {
       this.tentativeTimeInMillisec,
       this.tentativeExpiryTime,
       this.seatFareDetails,
-      this.pnr});
+      this.pnr,
+      this.bookingInfo,
+      });
 
   Data.fromJson(Map<String, dynamic> json) {
     pnrNumber = json['pnr_number'];
     operatorPnr = json['operator_pnr'];
-    tentativeTimeInMillisec = json['tentative_time_in_millisec'].toInt();
+    tentativeTimeInMillisec = json['tentative_time_in_millisec'] != null
+        ? json['tentative_time_in_millisec'].toInt()
+        : 0;
     tentativeExpiryTime = json['tentative_expiry_time'];
     if (json['seat_fare_details'] != null) {
       seatFareDetails = <SeatFareDetails>[];
@@ -49,7 +54,11 @@ class Data {
         seatFareDetails!.add(new SeatFareDetails.fromJson(v));
       });
     }
-    pnr = json['pnr'];
+    // Save the full BookingInfo map
+    bookingInfo = json['BookingInfo'] as Map<String, dynamic>?;
+
+    // Populate the pnr from BookingInfo if available, fallback to json['pnr']
+    pnr = bookingInfo?['PNR'] as String? ?? json['pnr'];
   }
 
   Map<String, dynamic> toJson() {
@@ -63,6 +72,8 @@ class Data {
           this.seatFareDetails!.map((v) => v.toJson()).toList();
     }
     data['pnr'] = this.pnr;
+    if (bookingInfo != null) data['BookingInfo'] = bookingInfo;
+
     return data;
   }
 }
