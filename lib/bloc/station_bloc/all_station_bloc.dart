@@ -26,6 +26,8 @@ class AllStationBloc extends Bloc<AllStationEvent, AllStationState> {
     emit(AllStationLoading());
 
     try {
+      print("Seaching hhhhh-->${event.searchQuery}");
+      print("Seaching hhhhh-->${event.type}");
       final response = await _dio.get(
         baseUrl,
         queryParameters: {

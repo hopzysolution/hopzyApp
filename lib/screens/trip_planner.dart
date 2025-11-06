@@ -196,7 +196,11 @@ You are an expert AI Travel Planner. Your response MUST be a single, valid JSON 
   Widget build(BuildContext context) {
     return Container(
       padding: widget.padding ?? const EdgeInsets.all(0),
-      color: _backgroundColor,
+      decoration: BoxDecoration(
+        color: _backgroundColor,
+        borderRadius: BorderRadius.circular(20)
+      ),
+
       child: _isLoading
           ? const TripPlannerLoadingWidget()
           : _showForm

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewPagesScreen extends StatelessWidget {
@@ -20,7 +21,7 @@ class WebViewPagesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(title: Text(title)),
+      // appBar: AppBar(title: Text(title)),
       body: WebViewPagesScreenBody(
         titleMain: title,
         bodyTags: body,
@@ -70,6 +71,7 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
       ..enableZoom(false)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
+
       ..setNavigationDelegate(
         NavigationDelegate(
           // onProgress: (int progress) {
@@ -126,6 +128,7 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
             });
             print("--------------start ${url}");
           },
+
           // onWebResourceError: (WebResourceError error) {
           // LoadingDialog.hide(context);
           // Dialogs.ErrorAlertInOut(
@@ -135,6 +138,32 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
           //     );
           // },
           onNavigationRequest: (NavigationRequest request) async {
+            final String reqUrl = request.url;
+            // ✅ Handle UPI / PayTM / PhonePe / GPay links
+            if (reqUrl.startsWith("upi:") ||
+                reqUrl.startsWith("upi://") ||
+                reqUrl.contains("paytm") ||
+                reqUrl.contains("phonepe") ||
+                reqUrl.contains("gpay") ||
+                reqUrl.contains("tez") ||
+                reqUrl.contains("upi/pay")) {
+
+              try {
+                Uri uri = Uri.parse(url);
+
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("No UPI app found")),
+                  );
+                }
+              } catch (e) {
+                debugPrint("UPI Launch Error: $e");
+              }
+
+              return NavigationDecision.prevent;
+            }
             print("-------asd-------${request.url}");
             if (request.url.contains("products")) {
               final lastSegment = extractLastSegment(request.url);
@@ -202,34 +231,45 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      padding: widget.body.isEmpty ? EdgeInsets.all(0) : EdgeInsets.all(10),
-      child: Column(
-        mainAxisAlignment: urlAndBodyNotFound
-            ? MainAxisAlignment.center
-            : MainAxisAlignment.start,
-        children: [
-          (urlAndBodyNotFound)
-              ? Center(
-                  child: Text(
-                    "Not Found",
-                  ),
-                )
-              : widget.isLoading
-              ? Container(
-                  margin: EdgeInsets.only(top: 0, bottom: 10),
-                  alignment: Alignment.bottomCenter,
-                  width: MediaQuery.of(context).size.width,
-                  height: 4,
-                  child: LinearProgressIndicator(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                    color: Colors.black,
-                    backgroundColor: Colors.white,
-                  ),
-                )
-              : Expanded(child: WebViewWidget(controller: _controller)),
-        ],
+    return WillPopScope(
+      onWillPop: () async{
+        if(await _controller.canGoBack()){
+          _controller.goBack();
+          return false;
+        }
+        return true;
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: widget.body.isEmpty ? EdgeInsets.all(0) : EdgeInsets.all(10),
+        child: Column(
+          mainAxisAlignment: urlAndBodyNotFound
+              ? MainAxisAlignment.center
+              : MainAxisAlignment.start,
+          children: [
+            (urlAndBodyNotFound)
+                ? Center(
+                    child: Text(
+                      "Not Found",
+                    ),
+                  )
+                : widget.isLoading
+                ? Container(
+                    margin: EdgeInsets.only(top: 0, bottom: 10),
+                    alignment: Alignment.bottomCenter,
+                    width: MediaQuery.of(context).size.width,
+                    height: 4,
+                    child: LinearProgressIndicator(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      color: Colors.black,
+                      backgroundColor: Colors.white,
+                    ),
+                  )
+                : Expanded(child: RefreshIndicator(
+              onRefresh: ()async=>_controller.reload(),
+                child: WebViewWidget(controller: _controller))),
+          ],
+        ),
       ),
     );
   }

@@ -61,7 +61,7 @@ class _AvailableTripsContent extends StatefulWidget {
 class _AvailableTripsContentState extends State<_AvailableTripsContent> {
   late DateTime selectedDate;
   Key datePickerKey = UniqueKey();
-  
+
   // Track filtered trips
   List<Trips>? displayedTrips;
 
@@ -81,7 +81,7 @@ class _AvailableTripsContentState extends State<_AvailableTripsContent> {
 
     String dateSelected = DateFormat('yyyy-MM-dd').format(newDate);
     globals.selectedDate = dateSelected; // Update global state
-    
+
     context.read<HomeScreenBloc>().add(
       SearchAvailableTripsEvent(
         src: widget.from!,
@@ -123,7 +123,12 @@ class _AvailableTripsContentState extends State<_AvailableTripsContent> {
           }
 
           return Scaffold(
+
             appBar: AppBar(
+              leading:  IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+            onPressed: () => Navigator.pop(context),
+          ),
               title: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -132,7 +137,7 @@ class _AvailableTripsContentState extends State<_AvailableTripsContent> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "${widget.allTrips!.first.src} → ${widget.allTrips!.first.dst}",
+                          "${widget.from!.cityName} → ${widget.to!.cityName}",
                           style: TextStyle(
                             fontSize: AppSizes.md,
                             fontWeight: FontWeight.w600,

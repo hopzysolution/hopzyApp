@@ -119,7 +119,7 @@ class SeatDetail {
   SeatDetail.fromJson(Map<String, dynamic> json) {
     seatNumber = json['seat_number'];
     fare = json['fare'];
-    serviceTax = json['service_tax'];
+    serviceTax = json['service_tax'].toInt();
     convenienceCharge = json['convenience_charge'];
     offerDiscount = json['offer_discount'];
     discount = json['discount'];

@@ -69,7 +69,9 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
 
   try {
     // Prepare futures for all operator calls
-   
+    print("Searching hhh from -->${from}");
+    print("Searching hhh from -->${to}");
+    allTrips.clear(); //
       final formData = {
         "src": from,
         "dst": to,

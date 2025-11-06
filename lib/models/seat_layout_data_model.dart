@@ -171,7 +171,7 @@ class SeatInfo {
       this.berth});
 
   SeatInfo.fromJson(Map<String, dynamic> json) {
-    seatCode = json['seatCode'];
+    seatCode = json['code'];
     seatNo = json['seatNo'];
     fare = json['fare'];
     servicetax = json['servicetax'].toInt();

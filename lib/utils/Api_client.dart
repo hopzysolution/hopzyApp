@@ -322,12 +322,20 @@ class ApiClient {
       }
 
       final newToken = await _refreshAccessToken(refreshToken);
-
+      //old
+      // if (newToken != null) {
+      //   await _saveTokens(newToken);
+      //   return true;
+      // }
       if (newToken != null) {
-        await _saveTokens(newToken);
+        final prefs = await SharedPreferences.getInstance();
+        final refreshToken = prefs.getString('refreshToken'); // always get latest
+        // always get latest
+        await _saveTokens(newToken, refreshToken); // pass refresh token as well
         return true;
       }
-      
+
+
       return false;
     } catch (e) {
       print("Token refresh error: $e");
@@ -337,24 +345,39 @@ class ApiClient {
 
   Future<String?> _refreshAccessToken(String refreshToken) async {
     try {
-      final response = await dio.post(
+      final Dio refreshDio=Dio();
+      refreshDio.options.baseUrl=dio.options.baseUrl;
+
+      final response = await refreshDio.post(
         ApiConst.refreshTokenApi, 
         data: {'refreshToken': refreshToken},
-        options: Options(
-          headers: {'Authorization': null}, // Remove auth header for refresh
-        ),
+        // options: Options(
+        //   headers: {'Authorization': null}, // Remove auth header for refresh
+        // ),
       );
-
+      //old
+      // if (response.statusCode == 200) {
+      //   final data = response.data;
+      //
+      //   // Some APIs return new refresh token as well
+      //   if (data['refreshToken'] != null) {
+      //     final prefs = await SharedPreferences.getInstance();
+      //     await prefs.setString('refreshToken', data['refreshToken']);
+      //   }
+      //
+      //   return data['accessToken'];
+      // }
       if (response.statusCode == 200) {
         final data = response.data;
-        
-        // Some APIs return new refresh token as well
-        if (data['refreshToken'] != null) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('refreshToken', data['refreshToken']);
+
+        final prefs = await SharedPreferences.getInstance();
+        final newRefreshToken = data['refreshToken'] as String?;
+        if (newRefreshToken != null) {
+          await prefs.setString('refreshToken', newRefreshToken);
         }
-        
-        return data['accessToken'];
+
+        final newAccessToken = data['accessToken'] as String?;
+        return newAccessToken;
       }
       
       return null;
@@ -399,13 +422,34 @@ class ApiClient {
 
   Future<Response> _retryRequest(RequestOptions requestOptions) async {
     final prefs = await SharedPreferences.getInstance();
+    //old
+    // final token = prefs.getString('accessToken');
+    //
+    // if (token != null) {
+    //   requestOptions.headers['Authorization'] = 'Bearer $token';
+    // }
+    //
+    // return await dio.fetch(requestOptions);
     final token = prefs.getString('accessToken');
-    
+
+    final options = Options(
+      method: requestOptions.method,
+      headers: Map<String, dynamic>.from(requestOptions.headers),
+      responseType: requestOptions.responseType,
+      contentType: requestOptions.contentType,
+      followRedirects: requestOptions.followRedirects,
+    );
+
     if (token != null) {
-      requestOptions.headers['Authorization'] = 'Bearer $token';
+      options.headers!['Authorization'] = 'Bearer $token';
     }
-    
-    return await dio.fetch(requestOptions);
+
+    return await dio.request(
+      requestOptions.path,
+      data: requestOptions.data,
+      queryParameters: requestOptions.queryParameters,
+      options: options,
+    );
   }
 
   Future<void> _processQueuedRequests() async {

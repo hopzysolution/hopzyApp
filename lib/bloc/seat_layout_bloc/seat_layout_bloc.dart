@@ -115,6 +115,7 @@ class SeatLayoutBloc extends Bloc<SeatLayoutEvent, SeatLayoutState> {
         seatNo: seat.seatNo ?? '',
         fare: seat.fare ?? 0,
         available: seat.seatstatus!,
+        seatCode: seat.seatCode,
       );
     }).toList();
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:ridebooking/bloc/station_bloc/all_station_event.dart';
 import 'package:ridebooking/commonWidgets/custom_action_button.dart';
 import 'package:ridebooking/bloc/station_bloc/all_station_bloc.dart';
 import 'package:ridebooking/models/operator_list_model.dart';
@@ -61,6 +62,7 @@ class CustomSearchWidget extends StatelessWidget {
                     context: context,
                     controller: fromController,
                     icon: Icons.directions_bus,
+
                     hintText: 'From',
                     searchType: 'src',
                     onStationSelected: onFromSelected,
@@ -76,6 +78,7 @@ class CustomSearchWidget extends StatelessWidget {
                   ),
                 ],
               ),
+
               Positioned(
                 right: 3,
                 top: 40,
@@ -133,7 +136,7 @@ class CustomSearchWidget extends StatelessWidget {
                         Icon(
                           Icons.calendar_today,
                           color: AppColors.vibrent,
-                          size: 18,
+                          size: 12,
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -214,18 +217,19 @@ class CustomSearchWidget extends StatelessWidget {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: TextStyle(color: Colors.grey.shade500),
+                hintStyle: TextStyle(color: Colors.grey.shade900),
                 border: InputBorder.none,
                 filled: true,
-                fillColor: Colors.grey.shade100,
+                // fillColor: Colors.grey.shade100,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 10,
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
+                // enabledBorder: OutlineInputBorder(
+                //   borderRadius: BorderRadius.circular(8),
+                //   borderSide: BorderSide(color: Colors.grey.shade300),
+                // ),
+                enabledBorder:InputBorder.none,
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(
@@ -236,12 +240,14 @@ class CustomSearchWidget extends StatelessWidget {
               ),
               onTap: () async {
                 // Create a new instance of AllStationBloc for the dialog
-                final stationBloc = AllStationBloc();
-                
+                // final stationBloc = AllStationBloc();
+
+
+
                 final selectedStation = await showDialog<City>(
                   context: context,
-                  builder: (dialogContext) => BlocProvider<AllStationBloc>.value(
-                    value: stationBloc,
+                  builder: (dialogContext) => BlocProvider<AllStationBloc>(
+                    create: (context) => AllStationBloc(),
                     child: StationSearchDialog(
                       searchType: searchType,
                       title: 'Select $hintText Station',
@@ -250,7 +256,7 @@ class CustomSearchWidget extends StatelessWidget {
                 );
 
                 // Close the bloc after dialog is dismissed
-                stationBloc.close();
+
 
                 if (selectedStation != null) {
                   controller.text = selectedStation.cityName ?? '';

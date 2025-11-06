@@ -227,7 +227,8 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     required String hashString,
     String? hashType,
     String? postSalt,
-  }) async {
+  }) async
+  {
     try {
       final requestBody = {
         'hashName': hashName,
@@ -236,8 +237,10 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         if (postSalt != null && postSalt.isNotEmpty) 'postSalt': postSalt,
       };
 
-      debugPrint("🔐 Hash Request Body: ${jsonEncode(requestBody).substring(0, 100)}...");
-      
+      final reqJson = jsonEncode(requestBody);
+      debugPrint("🔐 Hash Request Body: ${reqJson.substring(0, reqJson.length > 100 ? 100 : reqJson.length)}...");
+
+
       final response = await http.post(
         Uri.parse('https://prodapi.hopzy.in/api/public/generate-hash'),
         headers: {
@@ -248,7 +251,9 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
       ).timeout(const Duration(seconds: 30));
 
       debugPrint("🔐 Hash Response Status: ${response.statusCode}");
-      debugPrint("🔐 Hash Response Body: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}");
+      // debugPrint("🔐 Hash Response Body: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}");
+      final resBody = response.body;
+      debugPrint("🔐 Hash Response Body: ${resBody.substring(0, resBody.length > 200 ? 200 : resBody.length)}");
 
       // Check if response is HTML (error page)
       if (response.body.trim().startsWith('<!DOCTYPE') || 
@@ -314,22 +319,32 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     
     String? paymentId;
     String? txnId;
-    
-    if (response is Map) {
-      debugPrint("📋 Response is Map, extracting payment details...");
-      
-      // Try different possible paths for payment ID and txn ID
-      paymentId = response['payuResponse']?['id']?.toString() ??
-                  response['paymentId']?.toString() ??
-                  response['id']?.toString();
-                  
-      txnId = response['payuResponse']?['txnid']?.toString() ??
-              response['txnid']?.toString() ??
-              response['transactionId']?.toString();
-      
-      debugPrint("💳 Payment ID: $paymentId");
-      debugPrint("🔖 Transaction ID: $txnId");
+
+
+// ✅ PayU Mobile returns String sometimes — convert to Map if needed
+    dynamic data = response;
+
+    try {
+      if (response is String) {
+        data = jsonDecode(response);
+      }
+    } catch (e) {
+      debugPrint("⚠️ Response is not JSON, using raw value");
     }
+
+// ✅ Extract IDs safely
+    if (data is Map) {
+      paymentId = data['payuResponse']?['id']?.toString() ??
+          data['paymentId']?.toString() ??
+          data['id']?.toString();
+
+      txnId = data['payuResponse']?['txnid']?.toString() ??
+          data['txnid']?.toString() ??
+          data['transactionId']?.toString();
+    }
+
+    debugPrint("💳 Payment ID: $paymentId");
+    debugPrint("🔖 Transaction ID: $txnId");
 
     _showSnack("Payment Successful!");
     
@@ -337,16 +352,18 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
     
     if (!mounted) return;
 
-    try {
+
+    try
+    {
       if (widget.onPayuPaymentSuccess != null) {
         debugPrint("🎉 Executing onPayuPaymentSuccess callback");
         widget.onPayuPaymentSuccess!();
       }
-      
+
       await Future.delayed(const Duration(milliseconds: 200));
-      
+
       if (!mounted) return;
-      
+
       Navigator.of(context).pop({
         'status': 'success',
         'response': response,
@@ -559,6 +576,7 @@ class _PayUPaymentScreenState extends State<PayUPaymentScreen>
         PayUCheckoutProConfigKeys.autoSelectOtp: false,
         PayUCheckoutProConfigKeys.merchantResponseTimeout: 60000,
         PayUCheckoutProConfigKeys.autoApprove: false,
+
       };
 
       debugPrint("🚀 Opening PayU checkout...");

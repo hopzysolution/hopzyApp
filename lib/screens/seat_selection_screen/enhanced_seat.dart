@@ -190,18 +190,18 @@ class _EnhancedBusInfoBottomSheetState
           selectedDroppingPointDetails: selectedDroppingPointDetails,
           onPayuPaymentSuccess: () {
             // This will now be called correctly
-            //  bookingBloc.confirmTentativeBooking();
+             bookingBloc.confirmTentativeBooking();
 
-            //           Future.delayed(const Duration(milliseconds: 500), () {
-            //             bookingBloc.confirmBooking(
-            //               tripData: widget.tripData,
-            //               bpoint: selectedBoardingPointId!.toString(),
-            //               selectedSeats: widget.selectedSeats!,
-            //               selectedPassenger: finalSelectedPassenger,
-            //               selectedBoardingPointDetails: selectedBoardingPointDetails,
-            //               selectedDroppingPointDetails: selectedDroppingPointDetails,
-            //             );
-            //           });
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        bookingBloc.confirmBooking(
+                          tripData: widget.tripData,
+                          bpoint: selectedBoardingPointId!.toString(),
+                          selectedSeats: widget.selectedSeats!,
+                          selectedPassenger: finalSelectedPassenger,
+                          selectedBoardingPointDetails: selectedBoardingPointDetails,
+                          selectedDroppingPointDetails: selectedDroppingPointDetails,
+                        );
+                      });
           },
         ),
       ),

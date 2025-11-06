@@ -51,7 +51,9 @@ class _StationSearchViewState extends State<StationSearchView> {
             child: TextField(
               controller: _searchController,
               autofocus: true,
+              style: TextStyle(color: Colors.grey.shade900), // text color
               decoration: InputDecoration(
+                hintStyle: TextStyle(color: Colors.grey.shade900),
                 hintText: 'Search station...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
@@ -69,7 +71,8 @@ class _StationSearchViewState extends State<StationSearchView> {
                     itemBuilder: (context, index) {
                       final station = _filteredStations[index];
                       return ListTile(
-                        title: Text(station.cityName ?? 'Unknown'),
+                        title: Text(station.cityName ?? 'Unknown',
+                        style: TextStyle(color: Colors.grey.shade900),),
                         // subtitle: Text(station.state ?? ''),
                         onTap: () {
                           Navigator.pop(context, station); // Return selected value

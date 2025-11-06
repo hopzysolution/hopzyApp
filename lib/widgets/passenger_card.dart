@@ -502,284 +502,286 @@ class _AddPassengerFormState extends State<_AddPassengerForm>
   Widget build(BuildContext context) {
     return SlideTransition(
       position: _slideAnimation,
-      child: Container(
-        margin: const EdgeInsets.only(top: 50),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(10),
+      child: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.only(top: 50),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(10),
+              topRight: Radius.circular(10),
+            ),
           ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-            left: 20,
-            right: 20,
-            top: 20,
-          ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              left: 20,
+              right: 20,
+              top: 20,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.primaryBlueLight.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.person_add,
-                        color: Colors.white,
-                        size: 20,
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    const Text(
-                      "Add New Passenger",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF333333),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Full Name',
-                    prefixIcon: const Icon(Icons.person_outline),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF1976D2),
-                        width: 2,
-                      ),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey.shade50,
                   ),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Please enter passenger name' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  keyboardType: TextInputType.emailAddress,
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF1976D2),
-                        width: 2,
-                      ),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey.shade50,
-                  ),
-                  // validator: (value) =>
-                  //     value!.isEmpty ? 'Please enter passenger name' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  onChanged: (value) {
-                    if (value.length>9) {
-                      widget.bookingBloc?.getProfile(phoneNumb: value);
-                    }
-                  },
-                  keyboardType: TextInputType.phone,
-                  controller: phoneController,
-                  decoration: InputDecoration(
-                    labelText: 'Phone',
-                    prefixIcon: const Icon(Icons.phone_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF1976D2),
-                        width: 2,
-                      ),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey.shade50,
-                  ),
-                  // validator: (value) =>
-                  //     value!.isEmpty ? 'Please enter passenger name' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: ageController,
-                  decoration: InputDecoration(
-                    labelText: 'Age',
-                    prefixIcon: const Icon(Icons.cake_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF1976D2),
-                        width: 2,
-                      ),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey.shade50,
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Please enter age';
-                    final age = int.tryParse(value);
-                    if (age == null || age <= 0 || age > 120) {
-                      return 'Please enter a valid age';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: gender,
-                  items: [
-                    DropdownMenuItem(
-                      value: 'male',
-                      child: Row(
-                        children: const [
-                          // Icon(Icons.male, color: Colors.cyan),
-                          SizedBox(width: 8),
-                          Text('male'),
-                        ],
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: 'female',
-                      child: Row(
-                        children: const [
-                          // Icon(Icons.female, color: Colors.pink),
-                          SizedBox(width: 8),
-                          Text('female'),
-                        ],
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: 'other',
-                      child: Row(
-                        children: const [
-                          // Icon(Icons.person, color: Colors.purple),
-                          SizedBox(width: 8),
-                          Text('other'),
-                        ],
-                      ),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      gender = value!;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Gender',
-                    prefixIcon: Icon(
-                      gender == 'male'
-                          ? Icons.male
-                          : gender == 'female'
-                              ? Icons.female
-                              : Icons.person,
-                      color: gender == 'male'
-                          ? Colors.cyan
-                          : gender == 'female'
-                              ? Colors.pink
-                              : Colors.purple,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF1976D2),
-                        width: 2,
-                      ),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey.shade50,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: AppSizes.buttonHeight,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppColors.secondaryTeal,
-                          AppColors.primaryBlue
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryBlueLight.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryBlueLight.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                      ],
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
+                        child: const Icon(
+                          Icons.person_add,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        "Add New Passenger",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Full Name',
+                      prefixIcon: const Icon(Icons.person_outline),
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        onTap: _submit,
-                        child: Container(
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.add, color: Colors.white),
-                              SizedBox(width: 8),
-                              Text(
-                                'Add to Passenger List',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                          width: 2,
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Please enter passenger name' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                          width: 2,
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                    // validator: (value) =>
+                    //     value!.isEmpty ? 'Please enter passenger name' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    onChanged: (value) {
+                      if (value.length>9) {
+                        widget.bookingBloc?.getProfile(phoneNumb: value);
+                      }
+                    },
+                    keyboardType: TextInputType.phone,
+                    controller: phoneController,
+                    decoration: InputDecoration(
+                      labelText: 'Phone',
+                      prefixIcon: const Icon(Icons.phone_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                          width: 2,
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                    // validator: (value) =>
+                    //     value!.isEmpty ? 'Please enter passenger name' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: ageController,
+                    decoration: InputDecoration(
+                      labelText: 'Age',
+                      prefixIcon: const Icon(Icons.cake_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                          width: 2,
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value!.isEmpty) return 'Please enter age';
+                      final age = int.tryParse(value);
+                      if (age == null || age <= 0 || age > 120) {
+                        return 'Please enter a valid age';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: gender,
+                    items: [
+                      DropdownMenuItem(
+                        value: 'male',
+                        child: Row(
+                          children: const [
+                            // Icon(Icons.male, color: Colors.cyan),
+                            SizedBox(width: 8),
+                            Text('male'),
+                          ],
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'female',
+                        child: Row(
+                          children: const [
+                            // Icon(Icons.female, color: Colors.pink),
+                            SizedBox(width: 8),
+                            Text('female'),
+                          ],
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'other',
+                        child: Row(
+                          children: const [
+                            // Icon(Icons.person, color: Colors.purple),
+                            SizedBox(width: 8),
+                            Text('other'),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        gender = value!;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Gender',
+                      prefixIcon: Icon(
+                        gender == 'male'
+                            ? Icons.male
+                            : gender == 'female'
+                                ? Icons.female
+                                : Icons.person,
+                        color: gender == 'male'
+                            ? Colors.cyan
+                            : gender == 'female'
+                                ? Colors.pink
+                                : Colors.purple,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                          width: 2,
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: AppSizes.buttonHeight,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            AppColors.secondaryTeal,
+                            AppColors.primaryBlue
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primaryBlueLight.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: _submit,
+                          child: Container(
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.add, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Add to Passenger List',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-              ],
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
           ),
         ),

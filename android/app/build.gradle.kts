@@ -25,8 +25,8 @@ android {
         applicationId = "com.hopzy.ridebooking"
         minSdk = flutter.minSdkVersion
         targetSdk = 35
-        versionCode = 7
-        versionName = "1.0.2"
+        versionCode = 9
+        versionName = "1.0.9"
 
         // Add NDK configuration
         ndk {

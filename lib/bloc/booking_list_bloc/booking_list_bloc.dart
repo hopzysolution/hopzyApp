@@ -8,6 +8,7 @@ import 'package:ridebooking/utils/session.dart';
 
 class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
   String ticketId = "";
+  String opid="";
   String ticketCode = "";
   String provider = "";
   double cca = 0;
@@ -24,11 +25,13 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
     on<FetchCancelDetailsEvent>((event, emit) async {
       emit(BookingListLoading());
       try {
+        print("------trying to cancel");
         // Store booking details for later use
         final booking = event.booking;
         ticketId = booking.ticketId;
         ticketCode = booking.ticketCode ?? "";
         provider = booking.provider ?? "";
+        opid = booking.opid ?? "";
         pnr = booking.pnr;
         
         // Collect seat codes and passenger IDs
@@ -39,9 +42,16 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
         passengerIds = booking.passengers.map((p) => p.id).toList();
 
         // Step 1: Call cancel booking API to get cancellation details
+        // var cancelPayload = {
+        //   "ticketCode": ticketId,
+        //   "provider": provider,
+        // };
         var cancelPayload = {
-          "ticketCode": ticketCode,
-          "provider": provider,
+          "opid": booking.opid ?? "",
+          "pnr": booking.pnr ?? "",
+          "seatno": booking.passengers.first.seatNo ?? "",
+          "ticketCode": booking.ticketId ?? "",
+          "provider": booking.provider ?? "",
         };
 
         var cancelResponse = await ApiRepository.postAPI(
@@ -218,6 +228,7 @@ class Booking {
   final Map<String, dynamic>? boardingPoint;
   final Map<String, dynamic>? droppingPoint;
   final String? from;
+  final String? opid;
   final String? to;
   final String? bustype;
   final String? seattype;
@@ -243,6 +254,7 @@ class Booking {
     this.droppingPoint,
     this.from,
     this.to,
+    this.opid,
     this.bustype,
     this.seattype,
     required this.numberOfSeats,
@@ -260,6 +272,7 @@ class Booking {
       id: json['_id'] ?? '',
       ticketId: json['ticketId'] ?? '',
       ticketCode: json['ticketCode'],
+      // provider: json['provider'],
       provider: json['provider'],
       pnr: json['pnr'] ?? '',
       operatorpnr: json['operatorpnr'],
@@ -269,6 +282,7 @@ class Booking {
       droppingPoint: json['dropping_point'],
       from: json['from'],
       to: json['to'],
+      opid: json['opid'],
       bustype: json['bustype'],
       seattype: json['seattype'],
       numberOfSeats: (json['numberOfSeats'] as num?)?.toInt() ?? 0,

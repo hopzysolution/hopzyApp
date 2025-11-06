@@ -446,7 +446,27 @@ class _TicketsState extends State<Tickets> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          _showBookingDetails(context, booking);
+                          final pnr = booking.pnr;
+                          final ticketId = booking.ticketId;
+                          final provider = booking.opid; // ✅ Correct provider field
+
+                          final seatNo = (booking.passengers != null && booking.passengers!.isNotEmpty)
+                              ? booking.passengers!.first.seatNo
+                              : '';
+
+                          print("✅ PNR: $pnr");
+                          print("✅ Ticket ID: $ticketId");
+                          print("✅ Provider (opid): $provider");
+                          print("✅ Seat No: $seatNo");
+
+                          context.read<BookingListBloc>().add(
+                            FetchCancelDetailsEvent(
+                              pnr,
+                              seatNo,
+                              ticketId,
+                              booking, // ✅ passing complete booking object
+                            ),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue[700],
@@ -455,13 +475,24 @@ class _TicketsState extends State<Tickets> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text(
-                          'View Details',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.cancel_outlined,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 6,),
+                            const Text(
+                              'Cancel Booking',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     )

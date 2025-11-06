@@ -97,55 +97,68 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     emit(BookingLoading());
     int count = 0;
     try {
+      final mobileRaw = await Session().getPhoneNo();
+      final mobile = mobileRaw?.replaceAll("+91", ""); // remove +91
+
+      final totalFare = event.totalfare!;
+      final gst = (totalFare * 0.05).round(); // ✅ GST as integer
+      final finalFare = (totalFare + gst).round(); // ✅ total as integer
+
       final formData = {
         "basefare": selectedSeats!.first.fare,
-        "routeid": tripData.routeid,
+
+        if (tripData.routeid != "null")"routeid": tripData.routeid,
+
         "tripid": tripData.tripid,
         "bpoint": event.selectedBoardingPointDetails!.id,
         "dpoint": event.selectedDroppingPointDetails!.id,
         "fromStation": tripData.srcId,
         "toStation": tripData.dstId,
         "noofseats": event.noofseats!,
-        "mobileno": await Session().getPhoneNo(),
+        "mobileno": mobile.toString(),
         "email": await Session().getEmail(),
-        "totalfare": event.totalfare! + (event.totalfare! * 0.05),
+        "totalfare": finalFare,  // ✅ int
         "bookedat": globals.selectedDate,
-        "gstamount": event.totalfare! * 0.05,
+        "gstamount": gst,        // ✅ int
         "cancellationpolicy": tripData.cancellationpolicy?.toJson(),
+
         "seatInfo": {
-          "passengerInfo":
-              tripData.provider == "bitla" || tripData.provider == "ezeeinfo"
+          "passengerInfo": (tripData.provider == "bitla" ||
+              tripData.provider == "ezeeinfo")
               ? event.selectedPassenger!.map((p) {
-                  final originalFare = p.fare ?? 0;
-                  final gstAmount = originalFare * 0.05;
-                  final newFare = originalFare + gstAmount;
-                  count++;
-                  return p.toJson()
-                    ..['ofare'] =
-                        originalFare // Store original fare
-                    ..['gst'] =
-                        gstAmount // Store GST amount
-                    ..['fare'] = newFare
-                    ..['seatCode'] =
-                        tripData.tripid! +
-                        event
-                            .selectedSeats!
-                            .first
-                            .seatNo; // Update fare with GST
-                }).toList()
-              : event.selectedPassenger!
-                    .map(
-                      (p) => p.toJson()
-                        ..update(
-                          'fare',
-                          (value) => (value ?? 0) + (value * 0.05),
-                        ),
-                    )
-                    .toList(),
+            final originalFare = p.fare ?? 0;
+            final gstAmount = (originalFare * 0.05).round(); // ✅ int
+            final newFare = (originalFare + gstAmount).round(); // ✅ int
+
+            final gender = (p.gender?.toLowerCase() == "male") ? "M" : "F";
+
+            return p.toJson()
+              ..['ofare'] = originalFare
+              ..['gst'] = gstAmount
+              ..['fare'] = newFare
+              ..['gender'] = gender
+            // ✅ DO NOT change seatCode as requested
+              ..['seatCode'] =event.selectedSeats!.first.seatCode;
+          }).toList()
+              : event.selectedPassenger!.map((p) {
+            final originalFare = p.fare ?? 0;
+            final gstAmount = (originalFare * 0.05).round();
+            final updatedFare = (originalFare + gstAmount).round();
+
+            final gender = (p.gender?.toLowerCase() == "male") ? "M" : "F";
+
+            return p.toJson()
+              ..update('fare', (_) => updatedFare)
+              ..['gst'] = gstAmount
+              ..['gender'] = gender;
+          }).toList(),
         },
+
         "opid": event.opId,
         "provider": tripData.provider,
+
       };
+
       print('📦 tripData${jsonEncode(tripData)}');
       print('This is route id ${jsonEncode(tripData.routeid)}');
       final response = await ApiRepository.postAPI(

@@ -13,6 +13,7 @@ class TripListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final width=MediaQuery.of(context).size.width;
 
     // Calculate seat availability percentage
     final availabilityPercentage =
@@ -44,15 +45,19 @@ class TripListTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
+
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        trip.operatorName,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width*0.65,
+                        child: Text(
+                          trip.operatorName,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
+                          ),
+                          overflow: TextOverflow.ellipsis
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                       Row(
                         children: [
@@ -230,6 +235,7 @@ class TripListTile extends StatelessWidget {
 
                   // Boarding / Droping point
                   _buildChip(
+
                     icon: Icons.location_on,
                     label: "Boarding / Droping Points",
                     colorScheme: colorScheme,
@@ -238,6 +244,7 @@ class TripListTile extends StatelessWidget {
 
                   // Amenities (Example)
                   _buildChip(
+
                     icon: Icons.chair, // or custom icon
                     label: "Amenities",
                     colorScheme: colorScheme,
@@ -246,6 +253,7 @@ class TripListTile extends StatelessWidget {
 
                   //Cancellation Policy
                   _buildChip(
+
                     icon: Icons.cancel_sharp, // or custom icon
                     label: "Cancellation Policies",
                     colorScheme: colorScheme,
@@ -279,6 +287,7 @@ class TripListTile extends StatelessWidget {
     required ThemeData theme,
   }) {
     return Container(
+
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: colorScheme.surfaceVariant,
@@ -289,11 +298,18 @@ class TripListTile extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: colorScheme.onSurfaceVariant),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+
+
             ),
           ),
         ],

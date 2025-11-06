@@ -352,8 +352,10 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
     int maxRows,
     int maxCols,
     String berthType,
-  ) {
+  )
+  {
     return Container(
+
       //  decoration: BoxDecoration(
       //       borderRadius: BorderRadius.circular(8),
       //       border: Border.all(
@@ -413,6 +415,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
     String seatNo = seat.seatNo ?? '';
     String status = seat.seatstatus ?? '';
     String? gender = seat.gender;
+    String? code=seat.seatCode;
     bool isSelected = selectedSeats.any(
       (selectedSeat) => selectedSeat.seatNo == seatNo,
     );
@@ -440,6 +443,8 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
                     seatNo: seat.seatNo!,
                     fare: seat.fare ?? 0,
                     available: status,
+                    seatCode:code,
+
                   ),
                 );
               }
@@ -504,7 +509,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
                         seat.seatNo!,
                         style: const TextStyle(
                           color: AppColors.neutral900,
-                          fontSize: 9,
+                          fontSize: 8,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -564,11 +569,17 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
       ),
     );
   }
+  // SizedBox(
+  // height: MediaQuery.of(context).size.height * 0.8, -- old method
 
   seaLayoutWidgetr() {
     return Center(
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.7,
+      child: ConstrainedBox(
+
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 1,
+          minHeight: MediaQuery.of(context).size.height * 0.8,
+        ),
         child: RotatedBox(
           quarterTurns: 1,
           child: SingleChildScrollView(

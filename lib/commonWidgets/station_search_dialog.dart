@@ -30,21 +30,28 @@ class _StationSearchDialogState extends State<StationSearchDialog> {
   }
 
   void _onSearchChanged() {
+    if (!mounted) return; // widget gone
+
+    final bloc = context.read<AllStationBloc>();
+    if (bloc.isClosed) return; // bloc closed
+
     final query = _searchController.text.trim();
+
     if (query.length >= 2) {
-      context.read<AllStationBloc>().add(
+      bloc.add(
         FetchStationsEvent(
           searchQuery: query,
           type: widget.searchType,
         ),
       );
     } else if (query.isEmpty) {
-      context.read<AllStationBloc>().add(ClearStationsEvent());
+      bloc.add(ClearStationsEvent());
     }
   }
 
   @override
   void dispose() {
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }

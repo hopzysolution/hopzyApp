@@ -1,9 +1,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:media_store_plus/media_store_plus.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:ridebooking/screens/webview_pages/webview_pages_screen.dart';
 import 'package:ridebooking/utils/Api_client.dart';
 import 'package:ridebooking/utils/app_theme.dart';
 import 'package:ridebooking/utils/route_generate.dart';
+
 
 void main() async{
   
@@ -32,22 +35,36 @@ class BusBookingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-     
-      title: 'Hopezy',
+
+    //original Flow
+    // return MaterialApp(
+    //
+    //   title: 'Hopzy',
+    //   debugShowCheckedModeBanner: false,
+    //   theme: AppTheme.lightTheme,
+    //   darkTheme: AppTheme.darkTheme,
+    //   onGenerateRoute: Routes.onCreateRoute,
+    //     initialRoute: Routes.splash,
+    //   themeMode: ThemeMode.system, // or ThemeMode.light / dark
+    //   builder: (context, child) {
+    //     final mediaQuery = MediaQuery.of(context);
+    //     return MediaQuery(
+    //       data: mediaQuery.copyWith(textScaleFactor: 1.0),
+    //       child: child!,
+    //     );
+    //   },
+    // );
+
+
+    //webvie Flow
+     return MaterialApp(
+      title: 'Hopzy',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      onGenerateRoute: Routes.onCreateRoute,
-        initialRoute: Routes.splash,
-      themeMode: ThemeMode.system, // or ThemeMode.light / dark
-      builder: (context, child) {
-        final mediaQuery = MediaQuery.of(context);
-        return MediaQuery(
-          data: mediaQuery.copyWith(textScaleFactor: 1.0),
-          child: child!,
-        );
-      },
-    );
+       home: Scaffold(
+         body: SafeArea(
+             child: WebViewPagesScreen(titleMain: "Hopzy", urlToLoad: "https://www.hopzy.in/", bodyTags: "",)),
+       ),
+     );
+
   }
 }

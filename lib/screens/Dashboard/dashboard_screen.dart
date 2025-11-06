@@ -200,7 +200,7 @@ Map<String, dynamic> ticketData = {};
   }
 
   PreferredSizeWidget _buildAppBar(bool isTablet) {
-    final titleFontSize = isTablet ? 22.0 : 18.0;
+    final titleFontSize = isTablet ? 22.0 : 15.0;
     final iconSize = isTablet ? 26.0 : 22.0;
     final walletFontSize = isTablet ? 16.0 : 14.0;
 
@@ -209,52 +209,52 @@ Map<String, dynamic> ticketData = {};
       elevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle.light,
       toolbarHeight: isTablet ? 70 : 56,
-      leading: Builder(
-        builder: (context) => IconButton(
-          icon: Icon(
-            Icons.menu_rounded,
-            color: Colors.white,
-            size: iconSize,
-          ),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            Scaffold.of(context).openDrawer();
-          },
-        ),
-      ),
-      title: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(isTablet ? 8 : 6),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Image.asset(
-              
-                'assets/images/ticket.png',
-                color: Colors.white,
-                
-                width: isTablet ? 20 : 18,
-                height: isTablet ? 20 : 18,
-              )
-            // Icon(
-            //   Icons.location_on_rounded,
-            //   color: Colors.white,
-            //   size: isTablet ? 20 : 18,
+      // leading: Builder(
+      //   builder: (context) => IconButton(
+      //     icon: Icon(
+      //       Icons.menu_rounded,
+      //       color: Colors.white,
+      //       size: iconSize,
+      //     ),
+      //     onPressed: () {
+      //       HapticFeedback.lightImpact();
+      //       Scaffold.of(context).openDrawer();
+      //     },
+      //   ),
+      // ),
+      automaticallyImplyLeading: false,
+      title: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            // Container(
+            //   padding: EdgeInsets.all(isTablet ? 8 : 6),
+            //   decoration: BoxDecoration(
+            //     color: Colors.black,
+            //     borderRadius: BorderRadius.circular(8),
+            //   ),
+            //   child: Image.asset(
+            //
+            //       'assets/images/ticket.png',
+            //       color: Colors.white,
+            //
+            //       width: isTablet ? 20 : 18,
+            //       height: isTablet ? 20 : 18,
+            //     )
+            //
             // ),
-          ),
-          SizedBox(width: isTablet ? 12 : 8),
-          Text(
-            'Bus Tickets',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: titleFontSize,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
+
+            Text(
+              'WHERE WOULD YOU LIKE TO GO?',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       actions: [
         accessTokenHopzy!=""?Container():
