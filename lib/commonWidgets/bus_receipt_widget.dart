@@ -11,11 +11,12 @@ class BusReceiptWidget extends StatelessWidget {
   final String droppingPoint;
   final String busType;
   final String journeyDate;
+  final String boardingDate;
   final String boardingTime;
-  final String droppingTime;
   final String totalSeats;
   final String seatNumbers;
-  final List<SeatDetails> seatdetails;
+  // final List<SeatDetails>? seatdetails;
+  final List<Map<String, dynamic>> seatdetails;
   final String phoneNumber;
   final VoidCallback? onHomePressed;
   final VoidCallback? onDownloadPressed;
@@ -33,7 +34,7 @@ class BusReceiptWidget extends StatelessWidget {
       required this.busType,
       required this.journeyDate,
       required this.boardingTime,
-      required this.droppingTime,
+      required this.boardingDate,
       required this.totalSeats,
       required this.seatNumbers,
       required this.seatdetails,
@@ -95,15 +96,15 @@ class BusReceiptWidget extends StatelessWidget {
                         fontSize: 12,
                       ),
                     ),
-                    // Text(
-                    //   busServiceName,
-                    //   textAlign: TextAlign.left,
-                    //   style: TextStyle(
-                    //     color: AppColors.neutral100,
-                    //     fontSize: 14,
-                    //     fontWeight: FontWeight.bold,
-                    //   ),
-                    // ),
+                    Text(
+                      busServiceName,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        color: AppColors.neutral100,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     // Route Information
                     Text(
                       route,
@@ -272,8 +273,8 @@ class BusReceiptWidget extends StatelessWidget {
                     _buildValueRow(busType, journeyDate),
                     const SizedBox(height: 10),
                     // Boarding and Dropping Time
-                    _buildInfoRow('Boarding Time', 'Dropping Time'),
-                    _buildValueRow(boardingTime, droppingTime),
+                    _buildInfoRow('Boarding Date', 'Boarding Time'),
+                    _buildValueRow(boardingDate, boardingTime),
                     const SizedBox(height: 10),
                     // Total Seats and Seat Numbers
                     _buildInfoRow('Total Seats', 'Seat No.'),
@@ -337,45 +338,51 @@ class BusReceiptWidget extends StatelessWidget {
                       ],
                     ),
                     // Passenger Information
-                    ...seatdetails.asMap().entries.map((entry) {
+                    ...(seatdetails).asMap().entries.map((entry) {
                       int index = entry.key;
-                      SeatDetails passenger = entry.value;
+                      final passenger = entry.value as Map<String, dynamic>;
+
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          // === Passenger Name ===
                           Flexible(
                             fit: FlexFit.tight,
                             flex: 2,
                             child: Text(
                               textAlign: TextAlign.center,
-                              '${index + 1}. ${passenger.name}',
-                              style: TextStyle(
+                              '${index + 1}. ${passenger["Name"] ?? "Passenger"}',
+                              style: const TextStyle(
                                 color: AppColors.neutral900,
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
+
+                          // === Passenger Age ===
                           Flexible(
                             fit: FlexFit.tight,
                             flex: 1,
                             child: Text(
                               textAlign: TextAlign.center,
-                              passenger.age.toString(),
-                              style: TextStyle(
+                              '${passenger["age"] ?? "N/A"}',
+                              style: const TextStyle(
                                 color: AppColors.neutral900,
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
+
+                          // === Passenger Gender ===
                           Flexible(
                             flex: 1,
                             fit: FlexFit.tight,
                             child: Text(
                               textAlign: TextAlign.center,
-                              passenger.gender!,
-                              style: TextStyle(
+                              '${passenger["gender"] ?? "N/A"}',
+                              style: const TextStyle(
                                 color: AppColors.neutral900,
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -385,6 +392,55 @@ class BusReceiptWidget extends StatelessWidget {
                         ],
                       );
                     }).toList(),
+
+                    // ...seatdetails.asMap().entries.map((entry) {
+                    //   int index = entry.key;
+                    //   SeatDetails passenger = entry.value;
+                    //   return Row(
+                    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //     children: [
+                    //       Flexible(
+                    //         fit: FlexFit.tight,
+                    //         flex: 2,
+                    //         child: Text(
+                    //           textAlign: TextAlign.center,
+                    //           '${index + 1}. ${passenger.name}',
+                    //           style: TextStyle(
+                    //             color: AppColors.neutral900,
+                    //             fontSize: 14,
+                    //             fontWeight: FontWeight.bold,
+                    //           ),
+                    //         ),
+                    //       ),
+                    //       Flexible(
+                    //         fit: FlexFit.tight,
+                    //         flex: 1,
+                    //         child: Text(
+                    //           textAlign: TextAlign.center,
+                    //           passenger.age.toString(),
+                    //           style: TextStyle(
+                    //             color: AppColors.neutral900,
+                    //             fontSize: 14,
+                    //             fontWeight: FontWeight.bold,
+                    //           ),
+                    //         ),
+                    //       ),
+                    //       Flexible(
+                    //         flex: 1,
+                    //         fit: FlexFit.tight,
+                    //         child: Text(
+                    //           textAlign: TextAlign.center,
+                    //           passenger.gender!,
+                    //           style: TextStyle(
+                    //             color: AppColors.neutral900,
+                    //             fontSize: 14,
+                    //             fontWeight: FontWeight.bold,
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   );
+                    // }).toList(),
                     // Dotted line
                     Padding(
                       padding: const EdgeInsets.all(5.0),
@@ -458,14 +514,7 @@ class BusReceiptWidget extends StatelessWidget {
                                   Text('₹${basicFare.toStringAsFixed(2)}'),
                                 ],
                               ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('ASN'),
-                                  Text('₹0.00'),
-                                ],
-                              ),
+
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -608,6 +657,7 @@ class BusReceiptWidget extends StatelessWidget {
             color: AppColors.neutral400,
             fontSize: 12,
             fontWeight: FontWeight.bold,
+
           ),
         ),
         Text(
@@ -626,12 +676,15 @@ class BusReceiptWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          leftValue,
-          style: TextStyle(
-            color: AppColors.neutral900,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+        Flexible(
+          child: Text(
+            leftValue,
+            style: TextStyle(
+              color: AppColors.neutral900,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              overflow: TextOverflow.ellipsis
+            ),
           ),
         ),
         Text(

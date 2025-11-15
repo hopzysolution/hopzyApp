@@ -29,7 +29,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
   BookingBloc(this.tripData, this.paymentVerified) : super(BookingInitial()) {
     on<OnContinueButtonClick>(_onContinueButtonClick);
-    on<ShowTicket>(_showTicketDetails);
+    // on<ShowTicket>(_showTicketDetails);
 
     // on<OnPaymentVerification>((event, emit) => ApiClient().paymentVerification(event.response!, event, emit),);
     // paymentVerified == "Payment successful." ? confirmTentativeBooking() : "";
@@ -87,7 +87,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   Future<void> _onContinueButtonClick(
     OnContinueButtonClick event,
     Emitter<BookingState> emit,
-  ) async {
+  ) async
+  {
     bpoint = event.bpoint.toString();
     selectedSeats = event.selectedSeats;
     selectedPassenger = event.selectedPassenger;
@@ -106,9 +107,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
       final formData = {
         "basefare": selectedSeats!.first.fare,
-
         if (tripData.routeid != "null")"routeid": tripData.routeid,
-
         "tripid": tripData.tripid,
         "bpoint": event.selectedBoardingPointDetails!.id,
         "dpoint": event.selectedDroppingPointDetails!.id,
@@ -193,6 +192,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         print('✅ Tentative booking successful. Proceeding to payment...');
 
         pnr = tantativeBookingDataModel!.data!.pnr;
+
         print(pnr);
 
         await Session().setPnr(pnr!);
@@ -263,7 +263,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       if (data["status"] != null && data["status"] == 1) {
         //  ApiClient().createOrder(event.totalfare!,"8305933803","aadityagupta778@gmail.com",event,emit);
 
-        // print("Pnr===========>>>>>${data["BookingInfo"]["PNR"]}");
+        print("Pnr===========>>>>>${jsonEncode(data)}");
         //   await Session().setPnr(data["BookingInfo"]["PNR"]);
 
         // emit(BookingSuccess(success: "Booking Confirm"));
@@ -302,6 +302,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         "orderId": pnr,
         "walletUsed": profileDataModel!.data!.wallet!,
         "payuAmount": (fare + (fare * 0.05)).toInt(),
+        // "isTestMode":"true",
 
         "clientType": "mobile",
       };
@@ -349,6 +350,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
             selectedDroppingPointDetails: selectedDroppingPointDetails,
           );
         } else {
+          // print("Payment Gateway need to + ${jsonEncode(createOrderDataModel)}");
           emit(PayUSuccessState(createOrderDataModel: createOrderDataModel));
 
         }
@@ -419,7 +421,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     BpDetails? selectedBoardingPointDetails,
     DpDetails? selectedDroppingPointDetails,
     GstDetails? gstDetails,
-  }) async {
+  }) async
+  {
     // print("transaction id ----------------->>>>>${createOrderDataModel!.data!.payUData!.txnid}");
     try {
       var formData = gstDetails != null
@@ -498,7 +501,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
               "bookedat": globals
                   .selectedDate, //DateFormat('yyyy-MM-dd').format(DateTime.now()),
               "ticketid":
-                  "TU${globals.dateForTicket}", //"ticket_5906_149424_20250804074906571",
+              "TU${DateTime.now().millisecondsSinceEpoch}", //"ticket_5906_149424_20250804074906571",
               "passengerInfo": selectedPassenger!
                   .map(
                     (p) => p.toJson()
@@ -588,7 +591,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
               "bookedat": globals
                   .selectedDate, //DateFormat('yyyy-MM-dd').format(DateTime.now()),
               "ticketid":
-                  "TU${globals.dateForTicket}", //"ticket_5906_149424_20250804074906571",
+              "TU${DateTime.now().millisecondsSinceEpoch}", //"ticket_5906_149424_20250804074906571",
               "passengerInfo": selectedPassenger!
                   .map(
                     (p) => p.toJson()
@@ -620,16 +623,40 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         //  ApiClient().createOrder(event.totalfare!,"8305933803","aadityagupta778@gmail.com",event,emit);
 
         print("Pnr====confirm booking api hopzy=======>>>>>${data}");
+
         // await Session().setPnr(data["BookingInfo"]["PNR"]);
 
         // emit(BookingSuccess(success: "Booking Confirm"));
+        // emit(
+        //   ConfirmBooking(
+        //     selectedPassenger.first.name,
+        //     data["data"]["pnr"],
+        //     // "TU${globals.dateForTicket}", old
+        //      "TU${DateTime.now().millisecondsSinceEpoch}",
+        //
+        //
+        // ),
+        // );
+        // Convert the API response to TicketDetailsModel
+        final ticketJson = data["data"];
+
+        // Create TicketDetailsModel from the API response
+        // final ticketDetailsModel = TicketDetailsModel.fromJson({
+        //   "status": {"success": true},
+        //   "ticketDetails": ticketJson,
+        // });
+        print("This is ticket details: ${jsonEncode(ticketJson)}");
+        // Emit ShowTicketState to navigate to trip details screen
         emit(
-          ConfirmBooking(
-            selectedPassenger.first.name,
-            data["data"]["pnr"],
-            "TU${globals.dateForTicket}",
+          ShowTicketState(
+            ticketJson, // Proper TicketDetails object
+            // tripData,                            // Trip data for route info
+            // selectedDroppingPointDetails?.address ??
+            //     selectedDroppingPointDetails?.stnname, // Dropping point
+            // ticketJson,                          // Raw API response
           ),
         );
+
       } else {
         final message = data["message"] ?? "Failed to load data";
         emit(BookingFailure(error: message));
@@ -640,69 +667,71 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       //  print("Response from confirmbooking api ----------->>>> $data");
 
       //  return data;
-    } catch (e) {
-      print("Error in confirmTentativeBooking: $e");
+    } catch (e,stackTrace) {
+      print("Error in confirmTentativeBooking: $stackTrace");
     }
   }
 
-  Future<void> _showTicketDetails(
-    ShowTicket event,
-    Emitter<BookingState> emit,
-  ) async {
-    emit(BookingLoading());
-    try {
-      var formData = {"opid": "VGT", "pnr": event.pnr};
+  // Future<void> _showTicketDetails(
+  //   ShowTicket event,
+  //   Emitter<BookingState> emit,
+  // ) async
+  // {
+  //   emit(BookingLoading());
+  //   try {
+  //     var formData = {"opid": event.tripData!.operatorid, "pnr": event.pnr};
+  //
+  //     var bookingResponse = await ApiRepository.getAPI(
+  //       ApiConst.bookingTicketDetails.replaceAll("{ticketId}", event.ticketId!),
+  //       basurl2: ApiConst.baseUrl2,
+  //     );
+  //
+  //     print(
+  //       " Response from booking details api new ----------->>>> ${bookingResponse.data}",
+  //     );
+  //     BookingDetails? bookingData = BookingDetails.fromJson(
+  //       bookingResponse.data,
+  //     );
+  //
+  //     print(
+  //       " Response from booking details api new ----------->>>> ${bookingData.message}",
+  //     );
+  //
+  //     final response = await ApiRepository.postAPI(
+  //       ApiConst.ticketDetails.replaceAll(
+  //         "apiagent",
+  //         event.userName!.replaceAll(" ", ""),
+  //       ),
+  //       formData,
+  //     );
+  //
+  //     final data = response.data;
+  //
+  //     print('--- show ticket ====>>>>>>>${data}');
+  //
+  //     ticketDetails = TicketDetailsModel.fromJson(data);
+  //
+  //     if (data["status"] != null && data["status"]["success"] == true) {
+  //       print('---abc------create order before call');
+  //       // pnr=data["BookingInfo"]["PNR"];
+  //       // await Session().setPnr(data["BookingInfo"]["PNR"]);
+  //
+  //       emit(
+  //         ShowTicketState(
+  //           ticketDetails!.ticketDetails,
+  //           event.tripData!,
+  //           event.dropingPoint,
+  //           bookingData.data,
+  //         ),
+  //       );
+  //     } else {
+  //       final message = data["status"]?["message"] ?? "Failed to load stations";
+  //       emit(BookingFailure(error: message));
+  //     }
+  //   } catch (e) {
+  //     print("Error in _showTicketDetails: $e");
+  //     emit(BookingFailure(error: "Something went wrong. Please try again."));
+  //   }
+  // }
 
-      var bookingResponse = await ApiRepository.getAPI(
-        ApiConst.bookingTicketDetails.replaceAll("{ticketId}", event.ticketId!),
-        basurl2: ApiConst.baseUrl2,
-      );
-
-      print(
-        " Response from booking details api new ----------->>>> ${bookingResponse.data}",
-      );
-      BookingDetails? bookingData = BookingDetails.fromJson(
-        bookingResponse.data,
-      );
-
-      print(
-        " Response from booking details api new ----------->>>> ${bookingData.message}",
-      );
-
-      final response = await ApiRepository.postAPI(
-        ApiConst.ticketDetails.replaceAll(
-          "apiagent",
-          event.userName!.replaceAll(" ", ""),
-        ),
-        formData,
-      );
-
-      final data = response.data;
-
-      print('--- show ticket ====>>>>>>>${data}');
-
-      ticketDetails = TicketDetailsModel.fromJson(data);
-
-      if (data["status"] != null && data["status"]["success"] == true) {
-        print('---abc------create order before call');
-        // pnr=data["BookingInfo"]["PNR"];
-        // await Session().setPnr(data["BookingInfo"]["PNR"]);
-
-        emit(
-          ShowTicketState(
-            ticketDetails!.ticketDetails,
-            event.tripData!,
-            event.dropingPoint,
-            bookingData.data,
-          ),
-        );
-      } else {
-        final message = data["status"]?["message"] ?? "Failed to load stations";
-        emit(BookingFailure(error: message));
-      }
-    } catch (e) {
-      print("Error in _showTicketDetails: $e");
-      emit(BookingFailure(error: "Something went wrong. Please try again."));
-    }
-  }
 }

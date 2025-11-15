@@ -34,6 +34,7 @@ class WebViewPagesScreen extends StatelessWidget {
 class WebViewPagesScreenBody extends StatefulWidget {
   String title = '', url = '', body = '';
   bool isLoading = true;
+
   WebViewPagesScreenBody({
     super.key,
     required String titleMain,
@@ -53,6 +54,19 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
   late final WebViewController _controller;
   late WebViewController webViewControllerr;
   bool urlAndBodyNotFound = false;
+  bool isUpiUrl(String url) {
+    url = url.toLowerCase();
+
+    return url.startsWith("upi:")
+        || url.startsWith("upi://")
+        || url.startsWith("intent:")
+        || url.contains("upi/pay")
+        || url.contains("paytm")
+        || url.contains("phonepe")
+        || url.contains("gpay")
+        || url.contains("tez");
+  }
+
 
   @override
   void initState() {
@@ -120,13 +134,13 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
   }, 5000);
  
 """);
-            print("--------------start ${url}");
+            print("--------------starting1 ${url}");
           },
           onPageFinished: (String url) {
             setState(() {
               widget.isLoading = false;
             });
-            print("--------------start ${url}");
+            print("--------------starting ${url}");
           },
 
           // onWebResourceError: (WebResourceError error) {
@@ -138,6 +152,7 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
           //     );
           // },
           onNavigationRequest: (NavigationRequest request) async {
+            debugPrint("Inside url testing");
             final String reqUrl = request.url;
             // ✅ Handle UPI / PayTM / PhonePe / GPay links
             if (reqUrl.startsWith("upi:") ||
@@ -147,13 +162,17 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
                 reqUrl.contains("gpay") ||
                 reqUrl.contains("tez") ||
                 reqUrl.contains("upi/pay")) {
+              debugPrint("requrl is ${reqUrl}");
 
               try {
-                Uri uri = Uri.parse(url);
+                Uri uri = Uri.parse(reqUrl);
+                debugPrint("parsed uri is ${uri}");
 
                 if (await canLaunchUrl(uri)) {
+                  debugPrint("can launch url");
                   await launchUrl(uri, mode: LaunchMode.externalApplication);
                 } else {
+                  debugPrint("cannot launch url");
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("No UPI app found")),
                   );
@@ -161,7 +180,7 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
               } catch (e) {
                 debugPrint("UPI Launch Error: $e");
               }
-
+              debugPrint("stopping launch url");
               return NavigationDecision.prevent;
             }
             print("-------asd-------${request.url}");
@@ -197,6 +216,38 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
               return NavigationDecision.navigate;
             }
           },
+          //new
+          // onNavigationRequest: (NavigationRequest request) async {
+          //   debugPrint("Inside url testing");
+          //   final url = request.url;
+          //
+          //   if (isUpiUrl(url)) {
+          //     try {
+          //       String fixedUrl = url.replaceAll("intent://", "upi://");
+          //       final uri = Uri.parse(fixedUrl);
+          //
+          //       if (await canLaunchUrl(uri)) {
+          //         await launchUrl(uri, mode: LaunchMode.externalApplication);
+          //       }
+          //     } catch (e) {
+          //       debugPrint("UPI Intent Error: $e");
+          //     }
+          //
+          //     return NavigationDecision.prevent;
+          //   }
+          //
+          //   return NavigationDecision.navigate;
+          // },
+          // onUrlChange: (change) async {
+          //   final url = change.url ?? "";
+          //   print("URL Changed: $url");
+          //
+          //   if (isUpiUrl(url)) {
+          //     String fixedUrl = url.replaceAll("intent://", "upi://");
+          //     await launchUrl(Uri.parse(fixedUrl), mode: LaunchMode.externalApplication);
+          //   }
+          // },
+
         ),
       );
     print(

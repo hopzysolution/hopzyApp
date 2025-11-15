@@ -122,7 +122,8 @@ final dropingPoint = args['dropingPoint'];
 final ticketData = args['ticketData'];
         return MaterialPageRoute(
           builder: (context) {
-            return TripDetailsScreen(ticketDetails: ticketDetails,tripData: tripData,dropingPoint: dropingPoint,ticketData: ticketData,);
+            // return TripDetailsScreen(ticketDetails: ticketDetails,tripData: tripData,dropingPoint: dropingPoint,ticketData: ticketData,);
+            return TripDetailsScreen(ticketDetails: ticketDetails,);
           },
         );
 

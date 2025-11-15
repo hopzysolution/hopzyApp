@@ -24,7 +24,7 @@ class CreateOrderDataModel {
 
 class Data {
   String? gateway;
-  String? action;
+  // String? action;
   PayUData? payUData;
   String? userId;
   int? totalAmount;
@@ -38,7 +38,7 @@ class Data {
 
   Data(
       {this.gateway,
-      this.action,
+      // this.action,
       this.payUData,
       this.userId,
       this.totalAmount,
@@ -52,7 +52,7 @@ class Data {
 
   Data.fromJson(Map<String, dynamic> json) {
     gateway = json['gateway'];
-    action = json['action'];
+    // action = json['action'];
     payUData = json['payUData'] != null
         ? new PayUData.fromJson(json['payUData'])
         : null;
@@ -71,7 +71,7 @@ class Data {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['gateway'] = this.gateway;
-    data['action'] = this.action;
+    // data['action'] = this.action;
     if (this.payUData != null) {
       data['payUData'] = this.payUData!.toJson();
     }

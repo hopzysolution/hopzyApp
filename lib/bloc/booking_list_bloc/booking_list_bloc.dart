@@ -8,7 +8,7 @@ import 'package:ridebooking/utils/session.dart';
 
 class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
   String ticketId = "";
-  String opid="";
+  String opid = "";
   String ticketCode = "";
   String provider = "";
   double cca = 0;
@@ -16,7 +16,7 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
   String pnr = "";
   List<String> seatCodeList = [];
   List<String> passengerIds = [];
-  
+
   BookingListBloc() : super(BookingListInitial()) {
     on<FetchBookingsEvent>((event, emit) async {
       await fetchBookingList();
@@ -27,75 +27,122 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
       try {
         print("------trying to cancel");
         // Store booking details for later use
+        // Step 0️⃣: Extract booking data
         final booking = event.booking;
         ticketId = booking.ticketId;
         ticketCode = booking.ticketCode ?? "";
         provider = booking.provider ?? "";
         opid = booking.opid ?? "";
         pnr = booking.pnr;
-        
-        // Collect seat codes and passenger IDs
-        seatCodeList = booking.passengers
-            .map((p) => p.seatCode)
-            .where((code) => code.isNotEmpty)
-            .toList();
-        passengerIds = booking.passengers.map((p) => p.id).toList();
 
-        // Step 1: Call cancel booking API to get cancellation details
-        // var cancelPayload = {
-        //   "ticketCode": ticketId,
-        //   "provider": provider,
+
+        // Collect seat codes and passenger IDs
+
+        seatCodeList = event.seatNo
+            .split(',')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
+        // passengerIds = selectedPassengers.map((p) => p.id).toList();
+        // 3️⃣ Extract only matching passenger IDs
+        final selectedPassengers = booking.passengers.where((p)=>seatCodeList.contains(p.seatNo)).toList();
+        passengerIds = selectedPassengers.map((p) => p.id).toList();
+
+        print("✅ Selected seatNo list: $seatCodeList");
+        print("✅ Matched passenger IDs: $passengerIds");
+        if (opid.isEmpty ||
+            pnr.isEmpty ||
+            seatCodeList.isEmpty ||
+            passengerIds.isEmpty) {
+          emit(
+            BookingListFailure(error: "Missing passenger data. Cannot cancel."),
+          );
+          return;
+        }
+        // STEP 1️⃣ - Calculate refund for selected passengers
+        double totalFare = 0, totalRefund = 0, totalCancelCharges = 0;
+
+        for (final p in selectedPassengers) {
+          final result = _calculateRefund(
+            p.fare.toDouble() ?? 0,
+            booking.boardingPoint?['time'],
+          );
+          totalFare += result['fare']!;
+          totalRefund += result['refundAmount']!;
+          totalCancelCharges += result['cancelCharge']!;
+        }
+
+        final refundPercentage = totalFare > 0
+            ? (totalRefund / totalFare) * 100
+            : 0;
+        final cancelledAt = DateFormat("dd/MM/yyyy").format(DateTime.now());
+
+        // ✅ Step 2️⃣ - Prepare Admin payload (final confirmation payload)
+        // final confirmAdminPayload = {
+        //   "ticketid": ticketId,
+        //   "passengers": passengerIds,
+        //   "cancelledAt": cancelledAt,
+        //   "refundPercentage": refundPercentage.round(),
+        //   "refundAmount": totalRefund.round(),
+        //   "cancellationCharges": totalCancelCharges.round(),
+        //   "mode": "wallet",
         // };
-        var cancelPayload = {
-          "opid": booking.opid ?? "",
-          "pnr": booking.pnr ?? "",
-          "seatno": booking.passengers.first.seatNo ?? "",
-          "ticketCode": booking.ticketId ?? "",
-          "provider": booking.provider ?? "",
-        };
+
+        // === Step 3️⃣: Get cancellation charge details from API ===
+        Map<String, dynamic> cancelChargePayload;
+        if (provider == "ezeeinfo") {
+          cancelChargePayload = {"ticketCode": ticketCode, "provider": "ezeeinfo"};
+        } else if (provider == "bitla") {
+          cancelChargePayload = {"pnr": pnr, "seatno": seatCodeList, "provider": "bitla"};
+        } else {
+          cancelChargePayload = {"opid": opid, "pnr": pnr, "seatno": seatCodeList, "provider": "vaagai"};
+        }
+
 
         var cancelResponse = await ApiRepository.postAPI(
           ApiConst.cancelBooking,
-          cancelPayload,
+          cancelChargePayload,
           basurl2: ApiConst.baseUrl2,
         );
 
-        print("------------------cancel booking response: ${cancelResponse.data}");
-        
+
+        print("------------------cancel booking response: ${cancelResponse}");
+
+
         if (cancelResponse.data["status"] == 1) {
           final data = cancelResponse.data["data"];
-          
-          // Extract cancellation charge and policy code
-          cca = (data["cca"] ?? 0).toDouble();
-          ctpc = data["ctpc"] ?? "";
-          
-          // Extract ticket details for display
-          final ticketDetails = data["data"]["ticketDetails"] as List;
-          if (ticketDetails.isNotEmpty) {
-            final firstTicket = ticketDetails[0];
-            
+          final result = data["result"];
+          final cancelInfo = result["is_ticket_cancellable"];
+
+          if (cancelInfo != null && cancelInfo["is_cancellable"] == true) {
             final cancelDetails = CancelDetails(
-              seatNo: event.seatNo,
-              ticketFare: (firstTicket["seatFare"] ?? 0).toInt(),
-              cancellationCharge: (firstTicket["cancellationCharges"] ?? 0).toDouble(),
-              refundAmount: (firstTicket["refundAmount"] ?? 0).toDouble(),
+              seatNo: seatCodeList,
+              ticketFare: 0, // ❗API doesn’t return fare, set manually if you have it
+              cancellationCharge: (cancelInfo["cancellation_charges"] ?? 0).toDouble(),
+              refundAmount: (cancelInfo["refund_amount"] ?? 0).toDouble(),
             );
-            
-            emit(CancelDetailsLoaded(
-              cancelDetails: cancelDetails,
-              pnr: pnr,
-              booking: booking,
-            ));
+
+            emit(
+                CancelDetailsLoaded(
+                  cancelDetails: cancelDetails,
+                  pnr: pnr,
+                  booking: booking,
+                ),
+            );
           } else {
             emit(BookingListFailure(error: "No ticket details found"));
           }
         } else {
-          final message = cancelResponse.data["message"] ?? "Failed to fetch cancel details";
+          final message =
+              cancelResponse.data["message"] ??
+              "Failed to fetch cancel details";
           emit(BookingListFailure(error: message));
         }
-      } catch (e) {
-        print("------------------cancel error: $e");
-        emit(BookingListFailure(error: "Something went wrong. Please try again."));
+      } catch (e, stacktrace) {
+        print("------------------cancel error: $stacktrace");
+        emit(
+          BookingListFailure(error: "Something went wrong. Please try again."),
+        );
       }
     });
 
@@ -103,14 +150,21 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
       emit(BookingListLoading());
       try {
         // Step 2: Confirm cancellation with the bus operator
-        var confirmCancelPayload = {
-          "seatCodeList": seatCodeList,
-          "ticketCode": ticketCode,
-          "cca": cca,
-          "ctpc": ctpc,
-          "pnr": pnr,
-          "provider": provider,
-        };
+        // === Step 4️⃣: Confirm cancellation with provider ===
+
+        Map<String, dynamic> confirmCancelPayload;
+        if (provider == "ezeeinfo") {
+          confirmCancelPayload = {
+            "seatCodeList": seatCodeList,
+            "ticketCode": ticketCode,
+            "pnr": pnr,
+            "provider": "ezeeinfo"
+          };
+        } else if (provider == "bitla") {
+          confirmCancelPayload = {"pnr": pnr, "seatno": seatCodeList, "provider": "bitla"};
+        } else {
+          confirmCancelPayload = {"opid": opid, "pnr": pnr, "seatno": seatCodeList, "provider": "vaagai"};
+        }
 
         var confirmResponse = await ApiRepository.postAPI(
           ApiConst.confirmCancelBooking,
@@ -118,13 +172,17 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
           basurl2: ApiConst.baseUrl2,
         );
 
-        print("------------------confirm cancel response: ${confirmResponse.data}");
+        print(
+          "------------------confirm cancel response: ${confirmResponse.data}",
+        );
 
         if (confirmResponse.data["status"] == 1) {
-          final confirmData = confirmResponse.data["data"]["data"];
-          final totalRefundAmount = confirmData["totalRefundAmount"] ?? 0;
-          final cancellationCharge = confirmData["cancellationCharge"] ?? 0;
-          
+          final result = confirmResponse.data["data"]["result"];
+          final cancelTicket = result["cancel_ticket"];
+
+          final totalRefundAmount = cancelTicket["refund_amount"] ?? 0;
+          final cancellationCharge = cancelTicket["cancellation_charges"] ?? 0;
+
           // Step 3: Update booking status in Hopzy system
           await cancelHopzyBooking(
             ticketId,
@@ -132,13 +190,16 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
             totalRefundAmount.toDouble(),
             cancellationCharge.toDouble(),
           );
-          
-          emit(BookingCancelledSuccess(message: "Booking cancelled successfully"));
-          
+
+          emit(
+            BookingCancelledSuccess(message: "Booking cancelled successfully"),
+          );
+
           // Refresh the booking list
           await fetchBookingList();
         } else {
-          final message = confirmResponse.data["message"] ?? "Failed to cancel booking";
+          final message =
+              confirmResponse.data["message"] ?? "Failed to cancel booking";
           emit(BookingListFailure(error: message));
         }
       } catch (e) {
@@ -146,8 +207,36 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
         emit(BookingListFailure(error: "Something went wrong. Please try ."));
       }
     });
-    
+
     fetchBookingList();
+  }
+
+  Map<String, double> _calculateRefund(double fare, String? boardingTimeStr) {
+    DateTime? boardingTime = DateTime.tryParse(boardingTimeStr ?? "");
+    final now = DateTime.now();
+    double hoursBeforeDeparture = 0;
+
+    if (boardingTime != null) {
+      hoursBeforeDeparture = boardingTime.difference(now).inHours.toDouble();
+    }
+
+    double refundPercentage;
+    if (hoursBeforeDeparture >= 24) {
+      refundPercentage = 80; // 20% cancel charge
+    } else if (hoursBeforeDeparture >= 12) {
+      refundPercentage = 50;
+    } else {
+      refundPercentage = 0;
+    }
+
+    double refundAmount = (fare * refundPercentage) / 100;
+    double cancelCharge = fare - refundAmount;
+
+    return {
+      "fare": fare,
+      "refundAmount": refundAmount,
+      "cancelCharge": cancelCharge,
+    };
   }
 
   Future<void> fetchBookingList() async {
@@ -156,17 +245,19 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
     emit(BookingListLoading());
     try {
       var response = await ApiRepository.getAPI(
-        ApiConst.getUserBookings, //.replaceAll("{phoneNumber}", phoneNumber!.replaceAll("+", "")),
+        ApiConst
+            .getUserBookings, //.replaceAll("{phoneNumber}", phoneNumber!.replaceAll("+", "")),
         basurl2: ApiConst.baseUrl2,
       );
       final data = response.data;
       print("------------------get user bookings data: ${data}");
 
-      if (data["status"] == 1 && data["message"] == "Bookings fetched successfully.") {
+      if (data["status"] == 1 &&
+          data["message"] == "Bookings fetched successfully.") {
         final bookings = (data["data"]["bookings"] as List)
             .map((json) => Booking.fromJson(json))
             .toList();
-        
+
         emit(BookingListLoaded(bookings: bookings));
       } else {
         final message = data["message"] ?? "Failed to load bookings";
@@ -175,9 +266,10 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
     } catch (e, stackTrace) {
       print("------------------fetch bookings error: $e");
       print("------------------StackTrace: $stackTrace");
-      emit(BookingListFailure(error: "Something went wrong. Please try again."));
+      emit(
+        BookingListFailure(error: "Something went wrong. Please try again."),
+      );
     }
-
   }
 
   Future<void> cancelHopzyBooking(
@@ -189,8 +281,9 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
     try {
       // Calculate refund percentage (approximation)
       double totalFare = refundAmount + cancellationCharges;
-      double refundPercentage = (refundAmount / totalFare * 100).roundToDouble();
-      
+      double refundPercentage = (refundAmount / totalFare * 100)
+          .roundToDouble();
+
       var formData = {
         "ticketid": ticketId,
         "passengers": passengerIds,
@@ -206,8 +299,10 @@ class BookingListBloc extends Bloc<BookingListEvent, BookingListState> {
         formData,
         basurl2: ApiConst.baseUrl2,
       );
-      
-      print("------------------Hopzy cancel booking response: ${response.data}");
+
+      print(
+        "------------------Hopzy cancel booking response: ${response.data}",
+      );
     } catch (e) {
       print("------------------Hopzy cancel error: $e");
       // Don't emit error here as the main cancellation was successful
@@ -293,7 +388,8 @@ class Booking {
       cancelledAt: json['cancelledAt'],
       user: CancelUser.fromJson(json['user'] ?? {}),
       payment: CancelPayment.fromJson(json['payment'] ?? {}),
-      passengers: (json['passengers'] as List<dynamic>?)
+      passengers:
+          (json['passengers'] as List<dynamic>?)
               ?.map((e) => CancelPassenger.fromJson(e))
               .toList() ??
           [],
@@ -378,7 +474,7 @@ class CancelPassenger {
   final String seatCode;
   final String seatNo;
   final int age;
-  final int fare;
+  late final int fare;
   final String status;
 
   CancelPassenger({
@@ -410,7 +506,7 @@ class CancelPassenger {
 }
 
 class CancelDetails {
-  final String seatNo;
+  final List seatNo;
   final int ticketFare;
   final double cancellationCharge;
   final double refundAmount;

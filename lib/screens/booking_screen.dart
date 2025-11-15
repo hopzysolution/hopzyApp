@@ -77,7 +77,7 @@ class BookingListScreen extends StatelessWidget {
                         parentContext.read<BookingListBloc>().add(
                               CancelBookingEvent(
                                 state.pnr!,
-                                state.cancelDetails.seatNo,
+                                  state.cancelDetails.seatNo.join(','),
                               ),
                             );
                         Navigator.pop(dialogContext);

@@ -55,6 +55,8 @@ class ApiConst {
   static const String confirmTentative = "api/public/confirmBookingFromTentative";
 //ticket details
   static const String ticketDetails ="GetTicketAllInfo/apiagent";
+  static const String getPendingBooking ="api/public/pending-bookings/pnr/{thispnr}";
+
 
 
   static const String bookingTicketDetails="api/public/bookings/{ticketId}";

@@ -11,6 +11,7 @@ import 'package:ridebooking/utils/route_generate.dart';
 void main() async{
   
   WidgetsFlutterBinding.ensureInitialized();
+
   await MediaStore.ensureInitialized();
    MediaStore.appFolder = "Hopzy";
   final apiClient = ApiClient();

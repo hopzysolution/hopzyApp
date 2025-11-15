@@ -1,4 +1,5 @@
 // Enhanced Bottom Sheet Widget
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -176,8 +177,11 @@ class _EnhancedBusInfoBottomSheetState
     BuildContext context,
     CreateOrderDataModel createOrderDataModel,
     BookingBloc bookingBloc,
-  ) async {
-    final result = await Navigator.pushReplacement(
+  ) async
+  {
+    print("This is CreateMode : ${jsonEncode(createOrderDataModel.data?.hashes)}");
+
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => PayUPaymentScreen(
@@ -188,12 +192,16 @@ class _EnhancedBusInfoBottomSheetState
           selectedPassenger: finalSelectedPassenger,
           selectedBoardingPointDetails: selectedBoardingPointDetails,
           selectedDroppingPointDetails: selectedDroppingPointDetails,
-          onPayuPaymentSuccess: () {
+          isTestMode: false,
+          onPayuPaymentSuccess: () async {
             // This will now be called correctly
-             bookingBloc.confirmTentativeBooking();
+            debugPrint("Calling Tentative Booking");
+             // await bookingBloc.confirmTentativeBooking(); old -> commented as not found in backend
+              //
 
-                      Future.delayed(const Duration(milliseconds: 500), () {
-                        bookingBloc.confirmBooking(
+                      await Future.delayed(const Duration(milliseconds: 500), () async {
+                        debugPrint("Calling confirm Booking");
+                        await bookingBloc.confirmBooking(
                           tripData: widget.tripData,
                           bpoint: selectedBoardingPointId!.toString(),
                           selectedSeats: widget.selectedSeats!,
@@ -201,36 +209,40 @@ class _EnhancedBusInfoBottomSheetState
                           selectedBoardingPointDetails: selectedBoardingPointDetails,
                           selectedDroppingPointDetails: selectedDroppingPointDetails,
                         );
+
                       });
+
           },
+
         ),
       ),
     );
 
     // Handle result
-    if (result != null) {
-      if (result['status'] == 'success') {
-        // Payment successful
-        bookingBloc.confirmTentativeBooking();
-
-        Future.delayed(const Duration(milliseconds: 500), () {
-          bookingBloc.confirmBooking(
-            tripData: widget.tripData,
-            bpoint: selectedBoardingPointId!.toString(),
-            selectedSeats: widget.selectedSeats!,
-            selectedPassenger: finalSelectedPassenger,
-            selectedBoardingPointDetails: selectedBoardingPointDetails,
-            selectedDroppingPointDetails: selectedDroppingPointDetails,
-          );
-        });
-        // final bookingData = result['bookingData'];
-
-        // Use this data to complete booking
-      } else if (result['status'] == 'failure') {
-        // Show error
-        print(result['errorMessage']);
-      }
-    }
+    debugPrint("Calling Tentative Booking from here");
+    // if (result != null) {
+    //   if (result['status'] == 'success') {
+    //     // Payment successful
+    //     bookingBloc.confirmTentativeBooking();
+    //
+    //     Future.delayed(const Duration(milliseconds: 500), () {
+    //       bookingBloc.confirmBooking(
+    //         tripData: widget.tripData,
+    //         bpoint: selectedBoardingPointId!.toString(),
+    //         selectedSeats: widget.selectedSeats!,
+    //         selectedPassenger: finalSelectedPassenger,
+    //         selectedBoardingPointDetails: selectedBoardingPointDetails,
+    //         selectedDroppingPointDetails: selectedDroppingPointDetails,
+    //       );
+    //     });
+    //     // final bookingData = result['bookingData'];
+    //
+    //     // Use this data to complete booking
+    //   } else if (result['status'] == 'failure') {
+    //     // Show error
+    //     print(result['errorMessage']);
+    //   }
+    // }
   }
 
   @override
@@ -286,28 +298,32 @@ class _EnhancedBusInfoBottomSheetState
             // Navigator.pushReplacementNamed(context, Routes.dashboard);
           }
           if (state is ConfirmBooking) {
-            ToastMessage().showSuccessToast("Booking Confirmed"); //---abc--
+            debugPrint("INside the confirm bookingStata");
+
             // Future.delayed(Duration(milliseconds: 500));
-            BlocProvider.of<BookingBloc>(context).add(
-              ShowTicket(
-                pnr: state.pnr,
-                userName: state.userName,
-                tripData: widget.tripData,
-                dropingPoint: _selectedDroppingPoint,
-                ticketId: state.ticketId,
-              ),
-            );
+            // BlocProvider.of<BookingBloc>(context).add(
+            //   ShowTicket(
+            //     pnr: state.pnr,
+            //     userName: state.userName,
+            //     tripData: widget.tripData,
+            //     dropingPoint: _selectedDroppingPoint,
+            //     ticketId: state.ticketId,
+            //   ),
+            // );
             // Navigator.pushReplacementNamed(context, Routes.dashboard);
           }
           if (state is ShowTicketState) {
+            debugPrint("✅ Booking confirmed! Navigating to trip details...");
+
+            ToastMessage().showSuccessToast("Booking Confirmed Successfully!");
             Navigator.pushReplacementNamed(
               context,
               Routes.tripDetailsScreen,
               arguments: {
                 'ticketDetails': state.ticketDetails,
-                'tripData': state.tripData,
-                'dropingPoint': state.dropingPoint,
-                "ticketData": state.ticketData,
+                // 'tripData': state.tripData,
+                // 'dropingPoint': state.dropingPoint,
+                // "ticketData": state.ticketData,
               },
             );
           }
@@ -649,6 +665,7 @@ class _EnhancedBusInfoBottomSheetState
                                     height: 50,
                                     child: ElevatedButton(
                                       onPressed: () {
+
                                         // Navigator.push(context, MaterialPageRoute(builder: (context)=>RazorpayPage()));
                                         if (_selectedBoardingPoint != null &&
                                             _selectedDroppingPoint != null &&
