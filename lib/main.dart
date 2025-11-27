@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -7,13 +6,11 @@ import 'package:ridebooking/utils/Api_client.dart';
 import 'package:ridebooking/utils/app_theme.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 
-
-void main() async{
-  
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await MediaStore.ensureInitialized();
-   MediaStore.appFolder = "Hopzy";
+  MediaStore.appFolder = "Hopzy";
   final apiClient = ApiClient();
   apiClient.init();
   // await Firebase.initializeApp(
@@ -27,45 +24,60 @@ void main() async{
   //   androidProvider: AndroidProvider.playIntegrity,
   // );
 
-
   runApp(const BusBookingApp());
 }
 
 class BusBookingApp extends StatelessWidget {
   const BusBookingApp({Key? key}) : super(key: key);
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   //original Flow
+  //   return MaterialApp(
+  //     title: 'Hopzy',
+  //     debugShowCheckedModeBanner: false,
+  //     theme: AppTheme.lightTheme,
+  //     darkTheme: AppTheme.darkTheme,
+  //     onGenerateRoute: Routes.onCreateRoute,
+  //     initialRoute: Routes.splash,
+  //     themeMode: ThemeMode.system, // or ThemeMode.light / dark
+  //     builder: (context, child) {
+  //       final mediaQuery = MediaQuery.of(context);
+  //       return MediaQuery(
+  //         data: mediaQuery.copyWith(textScaleFactor: 1.0),
+  //         child: child!,
+  //       );
+  //     },
+  //   );
   @override
   Widget build(BuildContext context) {
-
     //original Flow
-    // return MaterialApp(
-    //
-    //   title: 'Hopzy',
-    //   debugShowCheckedModeBanner: false,
-    //   theme: AppTheme.lightTheme,
-    //   darkTheme: AppTheme.darkTheme,
-    //   onGenerateRoute: Routes.onCreateRoute,
-    //     initialRoute: Routes.splash,
-    //   themeMode: ThemeMode.system, // or ThemeMode.light / dark
-    //   builder: (context, child) {
-    //     final mediaQuery = MediaQuery.of(context);
-    //     return MediaQuery(
-    //       data: mediaQuery.copyWith(textScaleFactor: 1.0),
-    //       child: child!,
-    //     );
-    //   },
-    // );
+    return MaterialApp(
+      onGenerateRoute: Routes.onCreateRoute,
+      initialRoute: Routes.splash,
+      themeMode: ThemeMode.system,
 
+      builder: (context, child) {
+        if (child == null) {
+          return const Center(child: Text("Error: Failed to load route."));
+        }
+
+        final mediaQuery = MediaQuery.of(context);
+        return MediaQuery(
+          data: mediaQuery.copyWith(textScaleFactor: 1.0),
+          child: child, // Removed '!' since we checked for null above
+        );
+      },
+    );
 
     //webvie Flow
-     return MaterialApp(
-      title: 'Hopzy',
-      debugShowCheckedModeBanner: false,
-       home: Scaffold(
-         body: SafeArea(
-             child: WebViewPagesScreen(titleMain: "Hopzy", urlToLoad: "https://www.hopzy.in/", bodyTags: "",)),
-       ),
-     );
-
+    //  return MaterialApp(
+    //   title: 'Hopzy',
+    //   debugShowCheckedModeBanner: false,
+    //    home: Scaffold(
+    //      body: SafeArea(
+    //          child: WebViewPagesScreen(titleMain: "Hopzy", urlToLoad: "https://www.hopzy.in/", bodyTags: "",)),
+    //    ),
+    //  );
   }
 }
