@@ -346,14 +346,13 @@ class TripListTile extends StatelessWidget {
 
                             isLowAvailability
                                 ? Text(
-                              "Seat filling fast",
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.error,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            )
+                                    "Seat filling fast",
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.error,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  )
                                 : const SizedBox.shrink(),
-
                           ],
                         ),
                       ),
@@ -451,7 +450,7 @@ class TripListTile extends StatelessWidget {
                     colorScheme: colorScheme,
                   ),
 
-                  SizedBox(height: MediaQuery.of(context).size.height*0.03),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.03),
 
                   // Wrap(
                   //   spacing: 6,

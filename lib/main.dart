@@ -20,7 +20,7 @@ void main() async {
   //         messagingSenderId: "604780340704",
   //         projectId: "redbus-4d7c2"));
 
-  // await FirebaseAppCheck.instance.activate(
+  // await FirebaseAppCheck.instance.act ivate(
   //   androidProvider: AndroidProvider.playIntegrity,
   // );
 
