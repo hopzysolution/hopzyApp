@@ -1,5 +1,3 @@
-
-
 // import 'package:dio/dio.dart';
 // import 'package:ridebooking/repository/ApiConst.dart';
 // import 'package:ridebooking/utils/session.dart';
@@ -18,7 +16,6 @@
 //       onRequest: (options, handler) async {
 //         final prefs = await SharedPreferences.getInstance();
 //         final token = prefs.getString('accessToken');
-
 
 //         if (token != null && options.path != ApiConst.refreshTokenApi) {
 //           options.headers['Authorization'] = 'Bearer $token';
@@ -40,7 +37,7 @@
 //             if (newToken != null) {
 //               await prefs.setString('accessToken', newToken);
 //     await Session().setHopzyAccessToken(newToken);
-              
+
 //               error.requestOptions.headers['Authorization'] = 'Bearer $newToken';
 
 //               final cloneReq = await dio.fetch(error.requestOptions);
@@ -81,7 +78,7 @@
 //     print("Request Otp Data: {'email': $email}");
 
 //     final response = await dio.post(ApiConst.requesOtp, data: {'email': email});
-    
+
 //     print("Request Otp Success: ${response.data}");
 //     return response;
 //   } on DioException catch (e) {
@@ -93,7 +90,7 @@
 //     // Optional: Handle specific status
 //     if (e.response?.statusCode == 500) {
 //       // Maybe show dialog or return custom error
-     
+
 //     }
 
 //     return null; // Let caller decide what to do
@@ -102,7 +99,6 @@
 //     return null;
 //   }
 // }
-
 
 //   // Verify OTP
 //  Future<Response?> verifyOtp(String email, String otp) async {
@@ -128,10 +124,7 @@
 //   }
 // }
 
-
-
 // }
-
 
 import 'dart:async';
 import 'package:dio/dio.dart';
@@ -145,84 +138,90 @@ class ApiClient {
   factory ApiClient() => _instance;
   ApiClient._internal();
 
-  final Dio dio = Dio(BaseOptions(
-    baseUrl: "https://prodapi.hopzy.in/", //"https://stagingapi.hopzy.in/", //"https://prodapi.hopzy.in/",
-    connectTimeout: const Duration(seconds: 30),
-    receiveTimeout: const Duration(seconds: 30),
-    sendTimeout: const Duration(seconds: 30),
-  ));
+  final Dio dio = Dio(
+    BaseOptions(
+      baseUrl:
+          "https://prodapi.hopzy.in/", //"https://stagingapi.hopzy.in/", //"https://prodapi.hopzy.in/",
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+      sendTimeout: const Duration(seconds: 30),
+    ),
+  );
 
   bool _isRefreshing = false;
   final List<RequestOptions> _failedQueue = [];
   Timer? _refreshTimer;
-  
+
   // Token refresh interval (10 minutes)
   static const Duration _refreshInterval = Duration(minutes: 10);
 
   void init() {
-    dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        try {
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString('accessToken');
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          try {
+            final prefs = await SharedPreferences.getInstance();
+            final token = prefs.getString('accessToken');
 
-          if (token != null && options.path != ApiConst.refreshTokenApi) {
-            options.headers['Authorization'] = 'Bearer $token';
+            if (token != null && options.path != ApiConst.refreshTokenApi) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
+
+            _logRequest(options);
+            return handler.next(options);
+          } catch (e) {
+            return handler.reject(
+              DioException(
+                requestOptions: options,
+                error: 'Failed to prepare request: $e',
+              ),
+            );
           }
+        },
+        onResponse: (response, handler) {
+          _logResponse(response);
+          return handler.next(response);
+        },
+        onError: (DioException error, handler) async {
+          _logError(error);
 
-          _logRequest(options);
-          return handler.next(options);
-        } catch (e) {
-          return handler.reject(DioException(
-            requestOptions: options,
-            error: 'Failed to prepare request: $e',
-          ));
-        }
-      },
-      onResponse: (response, handler) {
-        _logResponse(response);
-        return handler.next(response);
-      },
-      onError: (DioException error, handler) async {
-        _logError(error);
-        
-        if (error.response?.statusCode == 401 && 
-            error.requestOptions.path != ApiConst.refreshTokenApi) {
-          
-          if (!_isRefreshing) {
-            _isRefreshing = true;
-            
-            try {
-              final success = await _handleTokenRefresh();
-              
-              if (success) {
-                // Retry original request
-                final cloneReq = await _retryRequest(error.requestOptions);
-                
-                // Process queued requests
-                await _processQueuedRequests();
-                
-                return handler.resolve(cloneReq);
-              } else {
+          if (error.response?.statusCode == 401 &&
+              error.requestOptions.path != ApiConst.refreshTokenApi) {
+            if (!_isRefreshing) {
+              _isRefreshing = true;
+
+              try {
+                final success = await _handleTokenRefresh();
+
+                if (success) {
+                  // Retry original request
+                  final cloneReq = await _retryRequest(error.requestOptions);
+
+                  // Process queued requests
+                  await _processQueuedRequests();
+
+                  return handler.resolve(cloneReq);
+                } else {
+                  await _handleLogout();
+                  _rejectQueuedRequests(error);
+                }
+              } catch (e) {
                 await _handleLogout();
                 _rejectQueuedRequests(error);
+              } finally {
+                _isRefreshing = false;
               }
-            } catch (e) {
-              await _handleLogout();
-              _rejectQueuedRequests(error);
-            } finally {
-              _isRefreshing = false;
+            } else {
+              // Queue the request to retry after token refresh
+              _failedQueue.add(error.requestOptions);
+              return; // Don't call handler.next() yet
             }
-          } else {
-            // Queue the request to retry after token refresh
-            _failedQueue.add(error.requestOptions);
-            return; // Don't call handler.next() yet
           }
-        }
 
-        return handler.next(error);
-      },
-    ));
+          return handler.next(error);
+        },
+      ),
+    );
 
     // Start periodic token refresh
     _startPeriodicTokenRefresh();
@@ -231,12 +230,14 @@ class ApiClient {
   /// Start automatic token refresh every 10 minutes
   void _startPeriodicTokenRefresh() {
     _refreshTimer?.cancel(); // Cancel existing timer if any
-    
+
     _refreshTimer = Timer.periodic(_refreshInterval, (timer) async {
       await _performPeriodicRefresh();
     });
-    
-    print("🔄 Periodic token refresh started (every ${_refreshInterval.inMinutes} minutes)");
+
+    print(
+      "🔄 Periodic token refresh started (every ${_refreshInterval.inMinutes} minutes)",
+    );
   }
 
   /// Stop the periodic token refresh
@@ -295,9 +296,9 @@ class ApiClient {
     try {
       _isRefreshing = true;
       print("🔄 Manual token refresh initiated...");
-      
+
       final success = await _handleTokenRefresh();
-      
+
       if (success) {
         print("✅ Manual token refresh successful");
         // Reset the periodic timer
@@ -316,7 +317,7 @@ class ApiClient {
     try {
       final prefs = await SharedPreferences.getInstance();
       final refreshToken = prefs.getString('refreshToken');
-      
+
       if (refreshToken == null) {
         return false;
       }
@@ -329,12 +330,13 @@ class ApiClient {
       // }
       if (newToken != null) {
         final prefs = await SharedPreferences.getInstance();
-        final refreshToken = prefs.getString('refreshToken'); // always get latest
+        final refreshToken = prefs.getString(
+          'refreshToken',
+        ); // always get latest
         // always get latest
         await _saveTokens(newToken, refreshToken); // pass refresh token as well
         return true;
       }
-
 
       return false;
     } catch (e) {
@@ -345,11 +347,11 @@ class ApiClient {
 
   Future<String?> _refreshAccessToken(String refreshToken) async {
     try {
-      final Dio refreshDio=Dio();
-      refreshDio.options.baseUrl=dio.options.baseUrl;
+      final Dio refreshDio = Dio();
+      refreshDio.options.baseUrl = dio.options.baseUrl;
 
       final response = await refreshDio.post(
-        ApiConst.refreshTokenApi, 
+        ApiConst.refreshTokenApi,
         data: {'refreshToken': refreshToken},
         // options: Options(
         //   headers: {'Authorization': null}, // Remove auth header for refresh
@@ -379,7 +381,7 @@ class ApiClient {
         final newAccessToken = data['accessToken'] as String?;
         return newAccessToken;
       }
-      
+
       return null;
     } catch (e) {
       print("Refresh token failed: $e");
@@ -389,23 +391,26 @@ class ApiClient {
 
   Future<void> _saveTokens(String accessToken, [String? refreshToken]) async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     await prefs.setString('accessToken', accessToken);
     await Session().setToken(accessToken);
     await Session().setHopzyAccessToken(accessToken);
-    
+
     if (refreshToken != null) {
       await prefs.setString('refreshToken', refreshToken);
     }
 
     // Store the refresh timestamp for debugging
-    await prefs.setInt('lastTokenRefresh', DateTime.now().millisecondsSinceEpoch);
+    await prefs.setInt(
+      'lastTokenRefresh',
+      DateTime.now().millisecondsSinceEpoch,
+    );
   }
 
   /// Get time until next refresh
   Duration? getTimeUntilNextRefresh() {
     if (_refreshTimer == null || !_refreshTimer!.isActive) return null;
-    
+
     // This is an approximation since Timer.periodic doesn't expose remaining time
     return _refreshInterval;
   }
@@ -417,7 +422,9 @@ class ApiClient {
   Future<DateTime?> getLastRefreshTime() async {
     final prefs = await SharedPreferences.getInstance();
     final timestamp = prefs.getInt('lastTokenRefresh');
-    return timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null;
+    return timestamp != null
+        ? DateTime.fromMillisecondsSinceEpoch(timestamp)
+        : null;
   }
 
   Future<Response> _retryRequest(RequestOptions requestOptions) async {
@@ -455,7 +462,7 @@ class ApiClient {
   Future<void> _processQueuedRequests() async {
     final requests = List<RequestOptions>.from(_failedQueue);
     _failedQueue.clear();
-    
+
     for (final request in requests) {
       try {
         await _retryRequest(request);
@@ -473,13 +480,13 @@ class ApiClient {
     try {
       // Stop periodic refresh on logout
       stopPeriodicRefresh();
-      
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('accessToken');
       await prefs.remove('refreshToken');
       await prefs.remove('lastTokenRefresh');
       // await Session().clearSession();
-      
+
       print("🚪 User logged out, tokens cleared");
       // Navigate to login screen
       // Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
@@ -504,24 +511,24 @@ class ApiClient {
   // Conditional logging
   void _logRequest(RequestOptions options) {
     // if (globals.isDebugMode) {
-      print("🚀 REQUEST: ${options.method} ${options.uri}");
-      print("Headers: ${options.headers}");
-      if (options.data != null) print("Data: ${options.data}");
+    print("🚀 REQUEST: ${options.method} ${options.uri}");
+    print("Headers: ${options.headers}");
+    if (options.data != null) print("Data: ${options.data}");
     // }
   }
 
   void _logResponse(Response response) {
     // if (globals.isDebugMode) {
-      print("✅ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}");
-      print("Data: ${response.data}");
+    print("✅ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}");
+    print("Data: ${response.data}");
     // }
   }
 
   void _logError(DioException error) {
     // if (globals.isDebugMode) {
-      print("❌ ERROR: ${error.response?.statusCode} ${error.requestOptions.uri}");
-      print("Message: ${error.message}");
-      print("Data: ${error.response?.data}");
+    print("❌ ERROR: ${error.response?.statusCode} ${error.requestOptions.uri}");
+    print("Message: ${error.message}");
+    print("Data: ${error.response?.data}");
     // }
   }
 
@@ -530,11 +537,11 @@ class ApiClient {
     try {
       phone = phone.contains("+91") ? phone : "+91$phone";
       final response = await dio.post(
-        ApiConst.requesOtp, 
+        ApiConst.requesOtp,
         data: {'phone': phone},
       );
       print("Api response =response.data;// =======>>>>${response.data}");
-      
+
       return ApiResponse.success(response.data);
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
@@ -543,15 +550,19 @@ class ApiClient {
     }
   }
 
-  Future<ApiResponse<T>> registerUser<T>(String fName,String lName,String phone) async {
+  Future<ApiResponse<T>> registerUser<T>(
+    String fName,
+    String lName,
+    String phone,
+  ) async {
     try {
       phone = phone.contains("+91") ? phone : "+91$phone";
       final response = await dio.post(
-        ApiConst.registerUser, 
+        ApiConst.registerUser,
         data: {"firstName": fName, "lastName": lName, "phone": phone},
       );
       print("Api response =register user// =======>>>>${response.data}");
-      
+
       return ApiResponse.success(response.data);
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
@@ -563,13 +574,13 @@ class ApiClient {
   Future<ApiResponse<T>> verifyOtp<T>(String phone, String otp) async {
     try {
       phone = phone.contains("+91") ? phone : "+91$phone";
-      final response = await dio.post(ApiConst.verifyOtp, data: {
-        'phone': phone,
-        'otp': otp,
-      });
+      final response = await dio.post(
+        ApiConst.verifyOtp,
+        data: {'phone': phone, 'otp': otp},
+      );
 
       final data = response.data;
-      
+
       // Save tokens and start periodic refresh
       if (data["data"]["accessToken"] != null) {
         await onLoginSuccess(
@@ -602,6 +613,32 @@ class ApiClient {
         return e.response?.data?['message'] ?? "An error occurred";
     }
   }
+
+  // Future<ApiResponse<T>> fetchwalletBalance<T>() async {
+  //   try {
+  //     final response = await dio.get(ApiConst.walletBalance);
+  //     print("Api response =wallet data// =======>>>>${response.data}");
+
+  //     return ApiResponse.success(response.data);
+  //   } on DioException catch (e) {
+  //     return ApiResponse.error(_handleDioError(e));
+  //   } catch (e) {
+  //     return ApiResponse.error("Unexpected error: $e");
+  //   }
+  // }
+
+  // Future<ApiResponse<T>> fetchTransactions<T>() async {
+  //   try {
+  //     final response = await ApiClient().dio.get(ApiConst.getTransactions);
+  //     print("Api response =transaction data// =======>>>>${response.data}");
+
+  //     return ApiResponse.success(response.data);
+  //   } on DioException catch (e) {
+  //     return ApiResponse.error(ApiClient()._handleDioError(e));
+  //   } catch (e) {
+  //     return ApiResponse.error("Unexpected error in fetchTransactions: $e");
+  //   }
+  // }
 }
 
 // Response wrapper class for better error handling

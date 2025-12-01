@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:ridebooking/repository/ApiConst.dart';
+import 'package:ridebooking/repository/ApiRepository.dart';
 import 'transaction_event.dart';
 import 'transaction_state.dart';
 import '../../models/transaction_model.dart';
@@ -32,8 +33,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       }
 
       // Fetch wallet balance and transactions concurrently
-      final walletBalance = await _fetchWalletBalance(token);
-      final transactions = await _fetchTransactionsFromAPI(token);
+      final walletBalance = await _fetchWalletBalance();
+      final transactions = await _fetchTransactionsFromAPI();
 
       emit(
         TransactionLoaded(
@@ -62,8 +63,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         return;
       }
 
-      final walletBalance = await _fetchWalletBalance(token);
-      final transactions = await _fetchTransactionsFromAPI(token);
+      final walletBalance = await _fetchWalletBalance();
+      final transactions = await _fetchTransactionsFromAPI();
 
       emit(
         TransactionLoaded(
@@ -76,24 +77,27 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     }
   }
 
-  Future<double> _fetchWalletBalance(String token) async {
+  Future<double> _fetchWalletBalance() async {
     try {
-      final response = await http.get(
-        Uri.parse('https://prodapi.hopzy.in/api/private/wallet'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+      final response = await ApiRepository.getAPI(
+        ApiConst.walletBalance,
+        basurl2: ApiConst.baseUrl2,
       );
 
+      print("Wallet API Response Status: ${response.statusCode}");
+      print("Wallet API Response Data: ${response.data}");
+
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data =
+            response.data; // Use .data instead of json.decode(response.body)
 
         if (data['status'] == 1 && data['data'] != null) {
           return double.tryParse(data['data']['balance']?.toString() ?? '0') ??
               0.0;
         } else {
-          throw Exception('Invalid wallet balance response format');
+          throw Exception(
+            'Invalid wallet balance response format: ${data['message'] ?? 'Unknown error'}',
+          );
         }
       } else {
         throw Exception(
@@ -101,43 +105,56 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         );
       }
     } catch (e) {
+      print("Wallet balance error details: $e");
       throw Exception('Network error while fetching wallet balance: $e');
     }
   }
 
-  Future<List<Transaction>> _fetchTransactionsFromAPI(String token) async {
+  Future<List<Transaction>> _fetchTransactionsFromAPI() async {
     try {
-      final response = await http.get(
-        Uri.parse(
-          'https://prodapi.hopzy.in/api/private/wallet/transactions?limit=500&page=1',
-        ),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+      final response = await ApiRepository.getAPI(
+        ApiConst.getTransactions,
+        basurl2: ApiConst.baseUrl2,
       );
 
+      print("Transactions API Response Status: ${response.statusCode}");
+      print("Transactions API Response Data: ${response.data}");
+
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data =
+            response.data; // Use .data instead of json.decode(response.body)
 
         List<Transaction> transactions = [];
 
-        if (data['status'] == 1 &&
-            data['data'] != null &&
-            data['data']['transactions'] != null) {
-          for (var item in data['data']['transactions']) {
-            transactions.add(Transaction.fromJson(item));
+        if (data['status'] == 1) {
+          if (data['data'] != null && data['data']['transactions'] != null) {
+            for (var item in data['data']['transactions']) {
+              try {
+                transactions.add(Transaction.fromJson(item));
+              } catch (parseError) {
+                print("Failed to parse transaction: $item, error: $parseError");
+                // Continue with other transactions
+              }
+            }
+          } else {
+            print("No transactions found in response");
           }
+        } else {
+          throw Exception(
+            'API Error: ${data['message'] ?? 'Unknown error'} (Status: ${data['status']})',
+          );
         }
 
         // Sort transactions by date (newest first)
         transactions.sort((a, b) => b.date.compareTo(a.date));
+        print("Successfully parsed ${transactions.length} transactions");
 
         return transactions;
       } else {
         throw Exception('Failed to load transactions: ${response.statusCode}');
       }
     } catch (e) {
+      print("Transactions fetch error details: $e");
       throw Exception('Network error while fetching transactions: $e');
     }
   }
