@@ -39,65 +39,59 @@ class CustomBottomNavBar extends StatelessWidget {
             activeIndex: selectedIndex,
             onTap: onItemTapped,
             circleColor: AppColors.primaryBlue,
-            height: 60,
+            height: 70,
             circleWidth: 50,
+            levels: ["Home", "Booking", "Tickets", "Account"],
             // circlePadding: const EdgeInsets.only(top: 5),
             activeIcons: [
-              Center(
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  // alignment: Alignment.center,
-                  child: const Icon(Icons.home, color: Colors.white, size: 22),
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                child: const Icon(Icons.home, color: Colors.white, size: 22),
+              ),
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.list_alt_rounded,
+                  color: Colors.white,
+                  size: 22,
                 ),
               ),
-              Center(
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.list_alt_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
+
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.airplane_ticket,
+                  color: Colors.white,
+                  size: 22,
                 ),
               ),
-              Center(
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.airplane_ticket,
-                    color: Colors.white,
-                    size: 22,
-                  ),
-                ),
-              ),
-              Center(
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.account_circle_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.account_circle_rounded,
+                  color: Colors.white,
+                  size: 22,
                 ),
               ),
             ],
             inactiveIcons: [
               Container(
-                width: 60,
-                height: 60,
+                width: 40,
+                height: 40,
                 alignment: Alignment.center,
                 child: const Icon(Icons.home, color: Colors.black, size: 22),
               ),
               Container(
-                width: 60,
-                height: 60,
+                width: 40,
+                height: 40,
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.list_alt_rounded,
@@ -106,8 +100,8 @@ class CustomBottomNavBar extends StatelessWidget {
                 ),
               ),
               Container(
-                width: 60,
-                height: 60,
+                width: 40,
+                height: 40,
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.airplane_ticket,
@@ -116,8 +110,8 @@ class CustomBottomNavBar extends StatelessWidget {
                 ),
               ),
               Container(
-                width: 60,
-                height: 60,
+                width: 40,
+                height: 40,
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.account_circle_rounded,

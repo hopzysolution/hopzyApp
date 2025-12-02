@@ -57,6 +57,7 @@ class BusBookingApp extends StatelessWidget {
       initialRoute: Routes.splash,
       themeMode: ThemeMode.system,
 
+      // debugShowCheckedModeBanner: false,
       builder: (context, child) {
         if (child == null) {
           return const Center(child: Text("Error: Failed to load route."));
