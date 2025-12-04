@@ -30,48 +30,28 @@ void main() async {
 class BusBookingApp extends StatelessWidget {
   const BusBookingApp({Key? key}) : super(key: key);
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   //original Flow
-  //   return MaterialApp(
-  //     title: 'Hopzy',
-  //     debugShowCheckedModeBanner: false,
-  //     theme: AppTheme.lightTheme,
-  //     darkTheme: AppTheme.darkTheme,
-  //     onGenerateRoute: Routes.onCreateRoute,
-  //     initialRoute: Routes.splash,
-  //     themeMode: ThemeMode.system, // or ThemeMode.light / dark
-  //     builder: (context, child) {
-  //       final mediaQuery = MediaQuery.of(context);
-  //       return MediaQuery(
-  //         data: mediaQuery.copyWith(textScaleFactor: 1.0),
-  //         child: child!,
-  //       );
-  //     },
-  //   );
   @override
   Widget build(BuildContext context) {
     //original Flow
     return MaterialApp(
+      title: 'Hopzy',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       onGenerateRoute: Routes.onCreateRoute,
       initialRoute: Routes.splash,
-      themeMode: ThemeMode.system,
-
+      themeMode: ThemeMode.system, // or ThemeMode.light / dark
       // debugShowCheckedModeBanner: false,
       builder: (context, child) {
-        if (child == null) {
-          return const Center(child: Text("Error: Failed to load route."));
-        }
-
         final mediaQuery = MediaQuery.of(context);
         return MediaQuery(
           data: mediaQuery.copyWith(textScaleFactor: 1.0),
-          child: child, // Removed '!' since we checked for null above
+          child: child!,
         );
       },
     );
 
-    //webvie Flow
+    //webview Flow
     //  return MaterialApp(
     //   title: 'Hopzy',
     //   debugShowCheckedModeBanner: false,
