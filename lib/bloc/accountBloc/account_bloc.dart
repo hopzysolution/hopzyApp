@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ridebooking/bloc/accountBloc/account_state.dart';
 import 'package:ridebooking/models/profile_data_model.dart';
@@ -13,13 +15,15 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
 
   AccountBloc() : super(AccountInitial()) {
     on<FetchUserProfileEvent>(_onFetchUserProfile);
+    on<UpdateProfileEvent>(_onUpdateProfile);
     on<LogoutEvent>(_onLogout);
   }
 
   Future<void> _onFetchUserProfile(
     FetchUserProfileEvent event,
     Emitter<AccountState> emit,
-  ) async {
+  ) async
+  {
     try {
       emit(AccountLoading());
 
@@ -60,7 +64,42 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       emit(AccountError("An error occurred: ${e.toString()}"));
     }
   }
+  Future<void> _onUpdateProfile(
+      UpdateProfileEvent event,
+      Emitter<AccountState> emit,
+      ) async {
+    emit(ProfileUpdateLoading());
 
+    try {
+
+      final formData = {
+        'userId': event.userId,
+        'firstName': event.firstName,
+        'lastName': event.lastName,
+        'email': event.email,
+        'state': event.state,
+      };
+
+      var response = await ApiRepository.postAPI(
+        ApiConst.updateProfileApi,
+        formData,
+        basurl2: ApiConst.baseUrl2,
+      );
+
+      if (response.statusCode == 200) {
+
+        // final data = jsonDecode(response.body);
+        emit(ProfileUpdateSuccess('Profile updated successfully'));
+
+        // Refresh profile data
+        add(FetchUserProfileEvent());
+      } else {
+        emit(ProfileUpdateError('Failed to update profile'));
+      }
+    } catch (e) {
+      emit(ProfileUpdateError('Error: ${e.toString()}'));
+    }
+  }
   Future<void> _onLogout(LogoutEvent event, Emitter<AccountState> emit) async {
     try {
       await Session().clearAllData();

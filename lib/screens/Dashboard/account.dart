@@ -416,6 +416,27 @@ class _AccountState extends State<Account> {
                           Icons.account_balance_wallet,
                           "Hopzy Account",
                           "Manage your account details",
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (dialogContext) => BlocProvider.value(
+                                value: context.read<AccountBloc>(),
+                                child: EditProfileDialog(
+                                  userId:
+                                      profile.data?.user?.sId ??
+                                      '', // Replace with your actual userId field
+                                  currentFirstName:
+                                      profile.data?.user?.firstName ?? '',
+                                  currentLastName:
+                                      profile.data?.user?.lastName ?? '',
+                                  currentEmail: profile.data?.user?.email ?? '',
+                                  currentState:
+                                      profile.data?.user?.state ??
+                                      '', // Add state field to your model if not present
+                                ),
+                              ),
+                            );
+                          },
                         ),
                         _divider(),
                         _menuTile(

@@ -65,6 +65,7 @@ dependencies:
   url_launcher: ^6.2.5
   payu_checkoutpro_flutter: ^1.3.4
   circle_nav_bar: ^2.2.0
+  toggle_switch: ^2.3.0
 
 dev_dependencies:
   flutter_test:
