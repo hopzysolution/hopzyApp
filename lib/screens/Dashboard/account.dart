@@ -34,6 +34,7 @@ import '../../models/profile_data_model.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/route_generate.dart';
 import '../../utils/session.dart';
+import '../../widgets/edit_profile.dart';
 // Import your booking_bloc and ProfileDataModel files here
 // import 'path/to/booking_bloc.dart';
 // import 'path/to/profile_data_model.dart';
@@ -367,6 +368,21 @@ class _AccountState extends State<Account> {
                           Icons.account_balance_wallet,
                           "Hopzy Account",
                           "Manage your account details",
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (dialogContext) => BlocProvider.value(
+                                value: context.read<AccountBloc>(),
+                                child: EditProfileDialog(
+                                  userId: profile.data?.user?.sId ?? '', // Replace with your actual userId field
+                                  currentFirstName: profile.data?.user?.firstName ?? '',
+                                  currentLastName: profile.data?.user?.lastName ?? '',
+                                  currentEmail: profile.data?.user?.email ?? '',
+                                  currentState: profile.data?.user?.state ??'', // Add state field to your model if not present
+                                ),
+                              ),
+                            );
+                          },
                         ),
                         _divider(),
                         _menuTile(

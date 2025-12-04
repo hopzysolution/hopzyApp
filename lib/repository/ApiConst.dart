@@ -36,6 +36,8 @@ class ApiConst {
   static const String getSeatLayout= "api/public/layout" ;//"GetSeatLayout/apiagent";
 
   static const String getProfileApi="api/public/get-profile";
+  static const String updateProfileApi="api/auth/update-profile";
+
 
   static const String getTentativeBooking ="api/public/tentativeBooking";
 

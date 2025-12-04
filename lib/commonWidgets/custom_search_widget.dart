@@ -101,89 +101,220 @@ class CustomSearchWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
+          //Old
           // Date Picker Row
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.start,
+          //   children: [
+          //     // Date Picker Button
+          //     Expanded(
+          //       child: GestureDetector(
+          //         onTap: () async {
+          //           final DateTime? picked = await showDatePicker(
+          //             context: context,
+          //             initialDate: selectedDate,
+          //             firstDate: DateTime.now(),
+          //             lastDate: DateTime.now().add(const Duration(days: 30)),
+          //           );
+          //           if (picked != null) {
+          //             final DateFormat formatter = DateFormat('yyyy-MM-dd');
+          //             globals.selectedDate = formatter.format(picked);
+          //             onDateSelected(picked);
+          //           }
+          //         },
+          //         child: Container(
+          //           padding: const EdgeInsets.symmetric(
+          //             horizontal: 8,
+          //             vertical: 10,
+          //           ),
+          //           decoration: BoxDecoration(
+          //             border: Border.all(color: Colors.grey.shade300),
+          //             borderRadius: BorderRadius.circular(8),
+          //             color: Colors.grey.shade100,
+          //           ),
+          //           child: Row(
+          //             children: [
+          //               Icon(
+          //                 Icons.calendar_today,
+          //                 color: AppColors.vibrent,
+          //                 size: 12,
+          //               ),
+          //               const SizedBox(width: 8),
+          //               Text(
+          //                 DateFormat('dd MMM yyyy').format(selectedDate),
+          //                 style: const TextStyle(
+          //                   fontSize: 12,
+          //                   fontWeight: FontWeight.w500,
+          //                   color: AppColors.primaryBlue,
+          //                 ),
+          //               ),
+          //             ],
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //     const SizedBox(width: 5),
+          //     // Today Button
+          //     Flexible(
+          //       flex: 1,
+          //       child: CustomActionButton(
+          //         borderColor: AppColors.primaryBlue,
+          //         backgroundColor: Colors.white,
+          //         textColor: AppColors.neutral900,
+          //         onPressed: () {
+          //           globals.selectedDate = Utils.todaysDate();
+          //           onDateSelected(DateTime.now());
+          //         },
+          //         text: "Today",
+          //       ),
+          //     ),
+          //     const SizedBox(width: 5),
+          //     // Tomorrow Button
+          //     Flexible(
+          //       flex: 1,
+          //       child: CustomActionButton(
+          //         borderColor: AppColors.primaryBlue,
+          //         backgroundColor: Colors.white,
+          //         textColor: AppColors.neutral900,
+          //         onPressed: () {
+          //           globals.selectedDate = Utils.futureDate();
+          //           onDateSelected(DateTime.now().add(Duration(days: 1)));
+          //         },
+          //         text: "Tomorrow",
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          //new
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              // Date Picker Button
               Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    final DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: selectedDate,
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(const Duration(days: 30)),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    const int daysCount = 6; // at least 6 dates
+                    const double monthBoxWidth = 70;
+
+                    // start strip from the selected date
+                    final now = DateTime.now();
+                    final DateTime baseDate = DateTime(
+                      now.year,
+                      now.month,
+                      now.day,
                     );
-                    if (picked != null) {
-                      final DateFormat formatter = DateFormat('yyyy-MM-dd');
-                      globals.selectedDate = formatter.format(picked);
-                      onDateSelected(picked);
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.grey.shade100,
-                    ),
-                    child: Row(
+
+                    bool isSameDay(DateTime a, DateTime b) =>
+                        a.year == b.year && a.month == b.month && a.day == b.day;
+
+                    final double itemWidth =
+                        (constraints.maxWidth - monthBoxWidth - 8) / daysCount;
+
+                    return Row(
                       children: [
-                        Icon(
-                          Icons.calendar_today,
-                          color: AppColors.vibrent,
-                          size: 12,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          DateFormat('dd MMM yyyy').format(selectedDate),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.primaryBlue,
+                        // 6 date items
+                        ...List.generate(daysCount, (index) {
+                          final DateTime date = baseDate.add(Duration(days: index));
+                          final bool isSelected = isSameDay(date, selectedDate);
+
+                          return SizedBox(
+                            width: itemWidth,
+                            child: GestureDetector(
+                              onTap: () {
+                                final formatter = DateFormat('yyyy-MM-dd');
+                                globals.selectedDate = formatter.format(date);
+                                onDateSelected(date);
+                              },
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // date in circle
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? AppColors.vibrent : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      DateFormat('dd').format(date),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : AppColors.primaryBlue,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  // day below (FRI, SAT…)
+                                  Text(
+                                    DateFormat('EEE').format(date).toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+
+                        const SizedBox(width: 4),
+
+                        // Month + Year button (opens calendar)
+                        GestureDetector(
+                          onTap: () async {
+                            final DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: selectedDate,
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime.now().add(const Duration(days: 30)),
+                            );
+                            if (picked != null) {
+                              final formatter = DateFormat('yyyy-MM-dd');
+                              globals.selectedDate = formatter.format(picked);
+                              onDateSelected(picked);
+                            }
+                          },
+                          child: Container(
+                            width: monthBoxWidth,
+                            padding:
+                            const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.grey.shade300),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  DateFormat('MMM').format(selectedDate).toUpperCase(),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  DateFormat('yyyy').format(selectedDate),
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 5),
-              // Today Button
-              Flexible(
-                flex: 1,
-                child: CustomActionButton(
-                  borderColor: AppColors.primaryBlue,
-                  backgroundColor: Colors.white,
-                  textColor: AppColors.neutral900,
-                  onPressed: () {
-                    globals.selectedDate = Utils.todaysDate();
-                    onDateSelected(DateTime.now());
+                    );
                   },
-                  text: "Today",
-                ),
-              ),
-              const SizedBox(width: 5),
-              // Tomorrow Button
-              Flexible(
-                flex: 1,
-                child: CustomActionButton(
-                  borderColor: AppColors.primaryBlue,
-                  backgroundColor: Colors.white,
-                  textColor: AppColors.neutral900,
-                  onPressed: () {
-                    globals.selectedDate = Utils.futureDate();
-                    onDateSelected(DateTime.now().add(Duration(days: 1)));
-                  },
-                  text: "Tomorrow",
                 ),
               ),
             ],
           ),
+
           const SizedBox(height: 20),
           // Search Button
           CustomActionButton(

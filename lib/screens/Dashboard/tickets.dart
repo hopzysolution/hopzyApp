@@ -5,232 +5,321 @@ import 'package:ridebooking/bloc/booking_list_bloc/booking_list_bloc.dart';
 import 'package:ridebooking/bloc/booking_list_bloc/booking_list_event.dart';
 import 'package:ridebooking/bloc/booking_list_bloc/booking_list_state.dart';
 import 'package:ridebooking/utils/toast_messages.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../models/passenger_model.dart';
 
 class Tickets extends StatefulWidget {
-   Tickets({super.key});
+  Tickets({super.key});
 
   @override
   State<Tickets> createState() => _TicketsState();
 }
 
 class _TicketsState extends State<Tickets> {
+  int _selectedIndex = 0; // 0 = All, 1 = Upcoming, 2 = Cancelled
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       body: BlocProvider(
         create: (context) => BookingListBloc()..add(FetchBookingsEvent()),
-        child: BlocConsumer<BookingListBloc, BookingListState>(
-          listener: (context, state) {
-            if (state is BookingCancelledSuccess) {
-              ToastMessage().showSuccessToast(state.message);
-            } else if (state is BookingListFailure) {
-              ToastMessage().showErrorToast(state.error);
-            }
-            // else if (state is CancelDetailsLoaded) {
-            //   final parentContext = context;
-            //   showDialog(
-            //     context: parentContext,
-            //     builder: (dialogContext) {
-            //       List<String> selectedSeats = []; // ✅ Stores selected seat numbers
-            //       final passengers = state.booking?.passengers ?? [];
-            //
-            //       return StatefulBuilder(
-            //         builder: (context, setState) => AlertDialog(
-            //           title: const Text('Cancel Booking'),
-            //           content: Column(
-            //             mainAxisSize: MainAxisSize.min,
-            //             crossAxisAlignment: CrossAxisAlignment.start,
-            //             children: [
-            //               Text('PNR: ${state.pnr}'),
-            //               Text('Total Seat: ${passengers.length}'),
-            //               const SizedBox(height: 8),
-            //
-            //               // ✅ If more than 1 passenger, show checkbox list
-            //               if (passengers.length > 1) ...[
-            //                 Row(
-            //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //                   children: const [
-            //                     Text(
-            //                       'Select',
-            //                       style: TextStyle(
-            //                         color: Colors.blue, // Primary Blue
-            //                         fontWeight: FontWeight.bold,
-            //                       ),
-            //                     ),
-            //                     Text(
-            //                       'Name',
-            //                       style: TextStyle(
-            //                         color: Colors.blue,
-            //                         fontWeight: FontWeight.bold,
-            //                       ),
-            //                     ),
-            //                     Text(
-            //                       'Seat No',
-            //                       style: TextStyle(
-            //                         color: Colors.blue,
-            //                         fontWeight: FontWeight.bold,
-            //                       ),
-            //                     ),
-            //                   ],
-            //                 ),
-            //                 const Divider(),
-            //
-            //                 // ✅ Checkbox list
-            //                 ...passengers.map((p) {
-            //                   final isSelected = selectedSeats.contains(p.seatNo);
-            //                   return Row(
-            //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //                     children: [
-            //                       Checkbox(
-            //                         value: isSelected,
-            //                         onChanged: (checked) {
-            //                           setState(() {
-            //                             if (checked == true) {
-            //                               selectedSeats.add(p.seatNo);
-            //                             } else {
-            //                               selectedSeats.remove(p.seatNo);
-            //                             }
-            //                           });
-            //                         },
-            //                       ),
-            //                       Expanded(child: Text(p.name)),
-            //                       Text(p.seatNo.toString()),
-            //                     ],
-            //                   );
-            //                 }).toList(),
-            //               ],
-            //
-            //               // ✅ If only 1 passenger, show normal text
-            //               if (passengers.length == 1)
-            //                 Text('Passenger: ${passengers.first.name} -> Seat No: ${passengers.first.seatNo}'),
-            //
-            //               const SizedBox(height: 12),
-            //               Text('Ticket Fare: ₹${state.cancelDetails.ticketFare}'),
-            //               Text(
-            //                 'Cancellation Charge: ₹${state.cancelDetails.cancellationCharge.toStringAsFixed(2)}',
-            //               ),
-            //               Text(
-            //                 'Refund Amount: ₹${state.cancelDetails.refundAmount.toStringAsFixed(2)}',
-            //                 style: const TextStyle(fontWeight: FontWeight.bold),
-            //               ),
-            //               const SizedBox(height: 16),
-            //               const Text(
-            //                 'Do you want to proceed with cancellation?',
-            //                 style: TextStyle(fontWeight: FontWeight.w500),
-            //               ),
-            //             ],
-            //           ),
-            //           actions: [
-            //             TextButton(
-            //               onPressed: () => Navigator.pop(dialogContext),
-            //               child: const Text('No'),
-            //             ),
-            //             TextButton(
-            //               onPressed: () {
-            //                 final seatList = passengers.length > 1
-            //                     ? selectedSeats
-            //                     : [passengers.first.seatNo]; // ✅ Handle single passenger case
-            //
-            //                 if (seatList.isEmpty) {
-            //                   ScaffoldMessenger.of(parentContext).showSnackBar(
-            //                     const SnackBar(content: Text('Please select at least one seat to cancel.')),
-            //                   );
-            //                   return;
-            //                 }
-            //
-            //                 parentContext.read<BookingListBloc>().add(
-            //                   CancelBookingEvent(
-            //                     state.pnr!,
-            //                     seatList, // ✅ Pass selected seat numbers as list
-            //                   ),
-            //                 );
-            //                 Navigator.pop(dialogContext);
-            //               },
-            //               style: TextButton.styleFrom(
-            //                 foregroundColor: Theme.of(context).colorScheme.error,
-            //               ),
-            //               child: const Text('Yes, Cancel'),
-            //             ),
-            //           ],
-            //         ),
-            //       );
-            //     },
-            //   );
-            //
-            // }
-          },
-          builder: (context, state) {
-            if (state is BookingListLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is BookingListLoaded) {
-              if (state.bookings.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.confirmation_number_outlined,
-                        size: 80,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'No bookings found',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Your tickets will appear here',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return RefreshIndicator(
-                onRefresh: () async {
-                  context.read<BookingListBloc>().add(FetchBookingsEvent());
+        child: Column(
+          children: [
+            const SizedBox(height: 8),
+            Center(
+              child: ToggleSwitch(
+                minWidth: MediaQuery.of(context).size.width * 0.3,
+                initialLabelIndex: _selectedIndex,
+                totalSwitches: 3,
+                labels: const ['All', 'Upcoming', 'Cancelled'],
+                onToggle: (index) {
+                  setState(() {
+                    _selectedIndex = index!;
+                  });
                 },
-                child: ListView.builder(
-                  padding:  EdgeInsets.all(16.0),
-                  itemCount: state.bookings.length,
-                  itemBuilder: (context, index) {
-                    final booking = state.bookings[index];
-                    return _buildTicketCard(context, booking);
-                  },
-                ),
-              );
-            } else if (state is BookingListFailure) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      state.error,
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => context.read<BookingListBloc>().add(
-                        FetchBookingsEvent(),
+              ),
+            ),
+
+            Expanded(
+              child: BlocConsumer<BookingListBloc, BookingListState>(
+                listener: (context, state) {
+                  if (state is BookingCancelledSuccess) {
+                    ToastMessage().showSuccessToast(state.message);
+                  } else if (state is BookingListFailure) {
+                    ToastMessage().showErrorToast(state.error);
+                  }
+                  // else if (state is CancelDetailsLoaded) {
+                  //   final parentContext = context;
+                  //   showDialog(
+                  //     context: parentContext,
+                  //     builder: (dialogContext) {
+                  //       List<String> selectedSeats = []; // ✅ Stores selected seat numbers
+                  //       final passengers = state.booking?.passengers ?? [];
+                  //
+                  //       return StatefulBuilder(
+                  //         builder: (context, setState) => AlertDialog(
+                  //           title: const Text('Cancel Booking'),
+                  //           content: Column(
+                  //             mainAxisSize: MainAxisSize.min,
+                  //             crossAxisAlignment: CrossAxisAlignment.start,
+                  //             children: [
+                  //               Text('PNR: ${state.pnr}'),
+                  //               Text('Total Seat: ${passengers.length}'),
+                  //               const SizedBox(height: 8),
+                  //
+                  //               // ✅ If more than 1 passenger, show checkbox list
+                  //               if (passengers.length > 1) ...[
+                  //                 Row(
+                  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //                   children: const [
+                  //                     Text(
+                  //                       'Select',
+                  //                       style: TextStyle(
+                  //                         color: Colors.blue, // Primary Blue
+                  //                         fontWeight: FontWeight.bold,
+                  //                       ),
+                  //                     ),
+                  //                     Text(
+                  //                       'Name',
+                  //                       style: TextStyle(
+                  //                         color: Colors.blue,
+                  //                         fontWeight: FontWeight.bold,
+                  //                       ),
+                  //                     ),
+                  //                     Text(
+                  //                       'Seat No',
+                  //                       style: TextStyle(
+                  //                         color: Colors.blue,
+                  //                         fontWeight: FontWeight.bold,
+                  //                       ),
+                  //                     ),
+                  //                   ],
+                  //                 ),
+                  //                 const Divider(),
+                  //
+                  //                 // ✅ Checkbox list
+                  //                 ...passengers.map((p) {
+                  //                   final isSelected = selectedSeats.contains(p.seatNo);
+                  //                   return Row(
+                  //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //                     children: [
+                  //                       Checkbox(
+                  //                         value: isSelected,
+                  //                         onChanged: (checked) {
+                  //                           setState(() {
+                  //                             if (checked == true) {
+                  //                               selectedSeats.add(p.seatNo);
+                  //                             } else {
+                  //                               selectedSeats.remove(p.seatNo);
+                  //                             }
+                  //                           });
+                  //                         },
+                  //                       ),
+                  //                       Expanded(child: Text(p.name)),
+                  //                       Text(p.seatNo.toString()),
+                  //                     ],
+                  //                   );
+                  //                 }).toList(),
+                  //               ],
+                  //
+                  //               // ✅ If only 1 passenger, show normal text
+                  //               if (passengers.length == 1)
+                  //                 Text('Passenger: ${passengers.first.name} -> Seat No: ${passengers.first.seatNo}'),
+                  //
+                  //               const SizedBox(height: 12),
+                  //               Text('Ticket Fare: ₹${state.cancelDetails.ticketFare}'),
+                  //               Text(
+                  //                 'Cancellation Charge: ₹${state.cancelDetails.cancellationCharge.toStringAsFixed(2)}',
+                  //               ),
+                  //               Text(
+                  //                 'Refund Amount: ₹${state.cancelDetails.refundAmount.toStringAsFixed(2)}',
+                  //                 style: const TextStyle(fontWeight: FontWeight.bold),
+                  //               ),
+                  //               const SizedBox(height: 16),
+                  //               const Text(
+                  //                 'Do you want to proceed with cancellation?',
+                  //                 style: TextStyle(fontWeight: FontWeight.w500),
+                  //               ),
+                  //             ],
+                  //           ),
+                  //           actions: [
+                  //             TextButton(
+                  //               onPressed: () => Navigator.pop(dialogContext),
+                  //               child: const Text('No'),
+                  //             ),
+                  //             TextButton(
+                  //               onPressed: () {
+                  //                 final seatList = passengers.length > 1
+                  //                     ? selectedSeats
+                  //                     : [passengers.first.seatNo]; // ✅ Handle single passenger case
+                  //
+                  //                 if (seatList.isEmpty) {
+                  //                   ScaffoldMessenger.of(parentContext).showSnackBar(
+                  //                     const SnackBar(content: Text('Please select at least one seat to cancel.')),
+                  //                   );
+                  //                   return;
+                  //                 }
+                  //
+                  //                 parentContext.read<BookingListBloc>().add(
+                  //                   CancelBookingEvent(
+                  //                     state.pnr!,
+                  //                     seatList, // ✅ Pass selected seat numbers as list
+                  //                   ),
+                  //                 );
+                  //                 Navigator.pop(dialogContext);
+                  //               },
+                  //               style: TextButton.styleFrom(
+                  //                 foregroundColor: Theme.of(context).colorScheme.error,
+                  //               ),
+                  //               child: const Text('Yes, Cancel'),
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       );
+                  //     },
+                  //   );
+                  //
+                  // }
+                },
+                builder: (context, state) {
+                  if (state is BookingListLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is BookingListLoaded) {
+                    if (state.bookings.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.confirmation_number_outlined,
+                              size: 80,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'No bookings found',
+                              style: TextStyle(fontSize: 18, color: Colors.grey),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Your tickets will appear here',
+                              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    // put this inside your build where you have access to `state`
+
+                    final allBookings = state.bookings;
+
+                    // filter list based on toggle index
+                    List<Booking> filteredBookings;
+                    if (_selectedIndex == 0) {
+                      // All
+                      filteredBookings = allBookings
+                          .where((b){
+
+                        final date=DateTime.parse(b.bookedAt);
+                        final today=DateTime.now();
+                        final bookingDate=DateTime(date.year,date.month,date.day);
+                        final currentDate=DateTime(today.year,today.month,today.day);
+                        return bookingDate.isBefore(currentDate);
+                      }).toList();
+                    } else if (_selectedIndex == 1) {
+                      // Upcoming
+                      filteredBookings = allBookings
+                          .where((b){
+                            if(b.status!='confirmed') return false;
+                            final date=DateTime.parse(b.bookedAt);
+                            final today=DateTime.now();
+                            final bookingDate=DateTime(date.year,date.month,date.day);
+                            final currentDate=DateTime(today.year,today.month,today.day);
+                            return bookingDate.isAtSameMomentAs(currentDate)||bookingDate.isAfter(currentDate);
+                      }).toList();
+                    } else {
+                      // Cancelled
+                      filteredBookings = allBookings
+                          .where((b) => b.status == 'cancelled')
+                          .toList();
+                    }
+
+                    return Column(
+                      children: [
+                        // const SizedBox(height: 8),
+                        // Center(
+                        //   child: ToggleSwitch(
+                        //     minWidth: MediaQuery.of(context).size.width * 0.3,
+                        //     initialLabelIndex: _selectedIndex,
+                        //     totalSwitches: 3,
+                        //     labels: const ['All', 'Upcoming', 'Cancelled'],
+                        //     onToggle: (index) {
+                        //       setState(() {
+                        //         _selectedIndex = index!;
+                        //       });
+                        //     },
+                        //   ),
+                        // ),
+
+                        // Toggle at top, centered
+
+
+                        const SizedBox(height: 8),
+
+                        // List with RefreshIndicator
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: () async {
+                              context.read<BookingListBloc>().add(
+                                FetchBookingsEvent(),
+                              );
+                            },
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16.0),
+                              itemCount: filteredBookings.length,
+                              itemBuilder: (context, index) {
+                                final booking = filteredBookings[index];
+                                return _buildTicketCard(context, booking);
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  } else if (state is BookingListFailure) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            state.error,
+                            style: const TextStyle(fontSize: 16, color: Colors.grey),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => context.read<BookingListBloc>().add(
+                              FetchBookingsEvent(),
+                            ),
+                            child: const Text('Retry'),
+                          ),
+                        ],
                       ),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return const Center(child: Text("Tickets"));
-          },
+                    );
+                  }
+                  return const Center(child: Text("Tickets"));
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -280,8 +369,11 @@ class _TicketsState extends State<Tickets> {
                       Expanded(
                         child: Row(
                           children: [
-                            const Icon(Icons.directions_bus,
-                                color: Colors.white, size: 24),
+                            const Icon(
+                              Icons.directions_bus,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -300,7 +392,9 @@ class _TicketsState extends State<Tickets> {
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: booking.status == 'confirmed'
                               ? Colors.green
@@ -361,8 +455,11 @@ class _TicketsState extends State<Tickets> {
                       // Arrow
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Icon(Icons.arrow_forward,
-                            color: Colors.white, size: 24),
+                        child: Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                          size: 24,
+                        ),
                       ),
 
                       Expanded(
@@ -418,7 +515,7 @@ class _TicketsState extends State<Tickets> {
                       return Row(
                         children: List.generate(
                           (constraints.maxWidth / 8).floor(),
-                              (index) => Expanded(
+                          (index) => Expanded(
                             child: Container(
                               margin: const EdgeInsets.symmetric(horizontal: 2),
                               height: 1,
@@ -468,13 +565,14 @@ class _TicketsState extends State<Tickets> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildInfoItem(
-                          Icons.calendar_today, 'Date', formattedDate),
+                        Icons.calendar_today,
+                        'Date',
+                        formattedDate,
+                      ),
                       _buildInfoItem(
                         Icons.event_seat,
                         'Seat',
-                        booking.passengers
-                            .map((p) => p.seatNo)
-                            .join(', '),
+                        booking.passengers.map((p) => p.seatNo).join(', '),
                       ),
                     ],
                   ),
@@ -524,7 +622,6 @@ class _TicketsState extends State<Tickets> {
 
                   // View Details Button or Cancel Status
                   if (booking.status == 'confirmed')
-
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -543,28 +640,42 @@ class _TicketsState extends State<Tickets> {
                                   content: SingleChildScrollView(
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text('PNR: ${booking.pnr}'),
-                                        Text('Total Seats: ${passengers.length}'),
+                                        Text(
+                                          'Total Seats: ${passengers.length}',
+                                        ),
                                         const SizedBox(height: 8),
 
                                         if (passengers.length > 1) ...[
                                           const Text(
                                             'Select seats to cancel:',
-                                            style: TextStyle(fontWeight: FontWeight.w600),
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                           const SizedBox(height: 8),
 
                                           ...passengers.map((p) {
-                                            final isCancelled = p.status.toLowerCase() == 'cancelled';
-                                            final isSelected = selectedSeats.contains(p.seatNo);
+                                            final isCancelled =
+                                                p.status.toLowerCase() ==
+                                                'cancelled';
+                                            final isSelected = selectedSeats
+                                                .contains(p.seatNo);
 
                                             return Container(
-                                              margin: const EdgeInsets.symmetric(vertical: 4),
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 4,
+                                                  ),
                                               decoration: BoxDecoration(
-                                                color: isCancelled ? Colors.red[50] : Colors.transparent,
-                                                borderRadius: BorderRadius.circular(6),
+                                                color: isCancelled
+                                                    ? Colors.red[50]
+                                                    : Colors.transparent,
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
                                               ),
                                               child: Row(
                                                 children: [
@@ -575,30 +686,43 @@ class _TicketsState extends State<Tickets> {
                                                       onChanged: (val) {
                                                         setState(() {
                                                           if (val == true) {
-                                                            selectedSeats.add(p.seatNo);
+                                                            selectedSeats.add(
+                                                              p.seatNo,
+                                                            );
                                                           } else {
-                                                            selectedSeats.remove(p.seatNo);
+                                                            selectedSeats
+                                                                .remove(
+                                                                  p.seatNo,
+                                                                );
                                                           }
                                                         });
                                                       },
                                                     )
                                                   else
-                                                    const SizedBox(width: 48), // keeps layout aligned
-
+                                                    const SizedBox(
+                                                      width: 48,
+                                                    ), // keeps layout aligned
                                                   // Passenger name and seat
                                                   Expanded(
                                                     child: Text(
                                                       '${p.name} (Seat ${p.seatNo})',
-                                                      style: const TextStyle(fontSize: 14),
+                                                      style: const TextStyle(
+                                                        fontSize: 14,
+                                                      ),
                                                     ),
                                                   ),
 
                                                   // ✅ Status label
                                                   Text(
-                                                    isCancelled ? 'Cancelled' : 'Active',
+                                                    isCancelled
+                                                        ? 'Cancelled'
+                                                        : 'Active',
                                                     style: TextStyle(
-                                                      color: isCancelled ? Colors.red : Colors.green,
-                                                      fontWeight: FontWeight.bold,
+                                                      color: isCancelled
+                                                          ? Colors.red
+                                                          : Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                   ),
                                                 ],
@@ -614,14 +738,17 @@ class _TicketsState extends State<Tickets> {
                                         const SizedBox(height: 16),
                                         const Text(
                                           'Do you want to proceed with cancellation?',
-                                          style: TextStyle(fontWeight: FontWeight.w500),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ),
                                   actions: [
                                     TextButton(
-                                      onPressed: () => Navigator.pop(dialogContext),
+                                      onPressed: () =>
+                                          Navigator.pop(dialogContext),
                                       child: const Text('No'),
                                     ),
                                     TextButton(
@@ -631,35 +758,55 @@ class _TicketsState extends State<Tickets> {
                                             : [passengers.first.seatNo];
 
                                         if (seatList.isEmpty) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Please select at least one seat.')),
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Please select at least one seat.',
+                                              ),
+                                            ),
                                           );
                                           return;
                                         }
 
-                                        print("This is the seat list${seatList.join(',')}");
-
+                                        print(
+                                          "This is the seat list${seatList.join(',')}",
+                                        );
 
                                         // Step 2️⃣ — Call both FetchCancelDetails and CancelBookingEvent
-                                        final bloc = parentContext.read<BookingListBloc>();
+                                        final bloc = parentContext
+                                            .read<BookingListBloc>();
                                         final pnr = booking.pnr;
                                         final ticketId = booking.ticketId;
 
-                                        bloc.add(FetchCancelDetailsEvent(
-                                          pnr,
-                                          seatList.join(','),
-                                          ticketId,
-                                          booking,
-                                        ));
+                                        bloc.add(
+                                          FetchCancelDetailsEvent(
+                                            pnr,
+                                            seatList.join(','),
+                                            ticketId,
+                                            booking,
+                                          ),
+                                        );
 
                                         // Small delay to ensure cancel details fetched
-                                        Future.delayed(const Duration(milliseconds: 700), () {
-                                          bloc.add(CancelBookingEvent(pnr, seatList.join(',')));
-                                        });
+                                        Future.delayed(
+                                          const Duration(milliseconds: 700),
+                                          () {
+                                            bloc.add(
+                                              CancelBookingEvent(
+                                                pnr,
+                                                seatList.join(','),
+                                              ),
+                                            );
+                                          },
+                                        );
                                         Navigator.pop(dialogContext);
                                       },
                                       style: TextButton.styleFrom(
-                                        foregroundColor: Theme.of(context).colorScheme.error,
+                                        foregroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
                                       ),
                                       child: const Text('Yes, Cancel'),
                                     ),
@@ -679,7 +826,11 @@ class _TicketsState extends State<Tickets> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
-                            Icon(Icons.cancel_outlined, size: 18, color: Colors.white),
+                            Icon(
+                              Icons.cancel_outlined,
+                              size: 18,
+                              color: Colors.white,
+                            ),
                             SizedBox(width: 6),
                             Text(
                               'Cancel Booking',
@@ -693,7 +844,6 @@ class _TicketsState extends State<Tickets> {
                         ),
                       ),
                     )
-
                   else
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -805,10 +955,7 @@ class _TicketsState extends State<Tickets> {
                 children: [
                   const Text(
                     'Booking Details',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -819,33 +966,27 @@ class _TicketsState extends State<Tickets> {
               const Divider(height: 30),
 
               // Journey Details
-              _buildDetailSection(
-                'Journey Information',
-                [
-                  _buildDetailRow('From', booking.from ?? 'N/A'),
-                  _buildDetailRow(
-                      'Boarding Point', booking.boardingPointName),
-                  _buildDetailRow('To', booking.to ?? 'N/A'),
-                  _buildDetailRow('Dropping Point',
-                      booking.droppingPoint?['name'] ?? 'N/A'),
-                  _buildDetailRow('Bus Type', booking.bustype ?? 'N/A'),
-                ],
-              ),
+              _buildDetailSection('Journey Information', [
+                _buildDetailRow('From', booking.from ?? 'N/A'),
+                _buildDetailRow('Boarding Point', booking.boardingPointName),
+                _buildDetailRow('To', booking.to ?? 'N/A'),
+                _buildDetailRow(
+                  'Dropping Point',
+                  booking.droppingPoint?['name'] ?? 'N/A',
+                ),
+                _buildDetailRow('Bus Type', booking.bustype ?? 'N/A'),
+              ]),
 
               const SizedBox(height: 20),
 
               // Booking Details
-              _buildDetailSection(
-                'Booking Information',
-                [
-                  _buildDetailRow('Ticket ID', booking.ticketId),
-                  if (booking.pnr.isNotEmpty)
-                    _buildDetailRow('PNR', booking.pnr),
-                  _buildDetailRow('Booking Date', formattedDate),
-                  _buildDetailRow('Booking Time', formattedTime),
-                  _buildDetailRow('Status', booking.status.toUpperCase()),
-                ],
-              ),
+              _buildDetailSection('Booking Information', [
+                _buildDetailRow('Ticket ID', booking.ticketId),
+                if (booking.pnr.isNotEmpty) _buildDetailRow('PNR', booking.pnr),
+                _buildDetailRow('Booking Date', formattedDate),
+                _buildDetailRow('Booking Time', formattedTime),
+                _buildDetailRow('Status', booking.status.toUpperCase()),
+              ]),
 
               const SizedBox(height: 20),
 
@@ -860,12 +1001,9 @@ class _TicketsState extends State<Tickets> {
               const SizedBox(height: 20),
 
               // Fare Details
-              _buildDetailSection(
-                'Fare Details',
-                [
-                  _buildDetailRow('Total Fare', '₹${booking.totalFare}'),
-                ],
-              ),
+              _buildDetailSection('Fare Details', [
+                _buildDetailRow('Total Fare', '₹${booking.totalFare}'),
+              ]),
 
               const SizedBox(height: 20),
 
@@ -914,10 +1052,7 @@ class _TicketsState extends State<Tickets> {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         Container(
@@ -927,9 +1062,7 @@ class _TicketsState extends State<Tickets> {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey[200]!),
           ),
-          child: Column(
-            children: children,
-          ),
+          child: Column(children: children),
         ),
       ],
     );
@@ -941,20 +1074,11 @@ class _TicketsState extends State<Tickets> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
           Flexible(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               textAlign: TextAlign.end,
             ),
           ),

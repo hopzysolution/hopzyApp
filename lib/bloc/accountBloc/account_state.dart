@@ -19,3 +19,15 @@ class AccountError extends AccountState{
 }
 
 class AccountLogout extends AccountState{}
+
+class ProfileUpdateLoading extends AccountState {}
+
+class ProfileUpdateSuccess extends AccountState {
+  final String message;
+  ProfileUpdateSuccess(this.message);
+}
+
+class ProfileUpdateError extends AccountState {
+  final String message;
+  ProfileUpdateError(this.message);
+}

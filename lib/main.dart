@@ -38,34 +38,34 @@ class BusBookingApp extends StatelessWidget {
   Widget build(BuildContext context) {
 
     //original Flow
-    // return MaterialApp(
-    //
-    //   title: 'Hopzy',
-    //   debugShowCheckedModeBanner: false,
-    //   theme: AppTheme.lightTheme,
-    //   darkTheme: AppTheme.darkTheme,
-    //   onGenerateRoute: Routes.onCreateRoute,
-    //     initialRoute: Routes.splash,
-    //   themeMode: ThemeMode.system, // or ThemeMode.light / dark
-    //   builder: (context, child) {
-    //     final mediaQuery = MediaQuery.of(context);
-    //     return MediaQuery(
-    //       data: mediaQuery.copyWith(textScaleFactor: 1.0),
-    //       child: child!,
-    //     );
-    //   },
-    // );
+    return MaterialApp(
+
+      title: 'Hopzy',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      onGenerateRoute: Routes.onCreateRoute,
+        initialRoute: Routes.splash,
+      themeMode: ThemeMode.system, // or ThemeMode.light / dark
+      builder: (context, child) {
+        final mediaQuery = MediaQuery.of(context);
+        return MediaQuery(
+          data: mediaQuery.copyWith(textScaleFactor: 1.0),
+          child: child!,
+        );
+      },
+    );
 
 
     //webvie Flow
-     return MaterialApp(
-      title: 'Hopzy',
-      debugShowCheckedModeBanner: false,
-       home: Scaffold(
-         body: SafeArea(
-             child: WebViewPagesScreen(titleMain: "Hopzy", urlToLoad: "https://www.hopzy.in/", bodyTags: "",)),
-       ),
-     );
+    //  return MaterialApp(
+    //   title: 'Hopzy',
+    //   debugShowCheckedModeBanner: false,
+    //    home: Scaffold(
+    //      body: SafeArea(
+    //          child: WebViewPagesScreen(titleMain: "Hopzy", urlToLoad: "https://www.hopzy.in/", bodyTags: "",)),
+    //    ),
+    //  );
 
   }
 }
