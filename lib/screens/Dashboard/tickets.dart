@@ -22,7 +22,6 @@ class _TicketsState extends State<Tickets> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: BlocProvider(
         create: (context) => BookingListBloc()..add(FetchBookingsEvent()),
         child: Column(
@@ -200,12 +199,18 @@ class _TicketsState extends State<Tickets> {
                             const SizedBox(height: 16),
                             const Text(
                               'No bookings found',
-                              style: TextStyle(fontSize: 18, color: Colors.grey),
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Your tickets will appear here',
-                              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ],
                         ),
@@ -219,25 +224,39 @@ class _TicketsState extends State<Tickets> {
                     List<Booking> filteredBookings;
                     if (_selectedIndex == 0) {
                       // All
-                      filteredBookings = allBookings
-                          .where((b){
-
-                        final date=DateTime.parse(b.bookedAt);
-                        final today=DateTime.now();
-                        final bookingDate=DateTime(date.year,date.month,date.day);
-                        final currentDate=DateTime(today.year,today.month,today.day);
+                      filteredBookings = allBookings.where((b) {
+                        final date = DateTime.parse(b.bookedAt);
+                        final today = DateTime.now();
+                        final bookingDate = DateTime(
+                          date.year,
+                          date.month,
+                          date.day,
+                        );
+                        final currentDate = DateTime(
+                          today.year,
+                          today.month,
+                          today.day,
+                        );
                         return bookingDate.isBefore(currentDate);
                       }).toList();
                     } else if (_selectedIndex == 1) {
                       // Upcoming
-                      filteredBookings = allBookings
-                          .where((b){
-                            if(b.status!='confirmed') return false;
-                            final date=DateTime.parse(b.bookedAt);
-                            final today=DateTime.now();
-                            final bookingDate=DateTime(date.year,date.month,date.day);
-                            final currentDate=DateTime(today.year,today.month,today.day);
-                            return bookingDate.isAtSameMomentAs(currentDate)||bookingDate.isAfter(currentDate);
+                      filteredBookings = allBookings.where((b) {
+                        if (b.status != 'confirmed') return false;
+                        final date = DateTime.parse(b.bookedAt);
+                        final today = DateTime.now();
+                        final bookingDate = DateTime(
+                          date.year,
+                          date.month,
+                          date.day,
+                        );
+                        final currentDate = DateTime(
+                          today.year,
+                          today.month,
+                          today.day,
+                        );
+                        return bookingDate.isAtSameMomentAs(currentDate) ||
+                            bookingDate.isAfter(currentDate);
                       }).toList();
                     } else {
                       // Cancelled
@@ -264,8 +283,6 @@ class _TicketsState extends State<Tickets> {
                         // ),
 
                         // Toggle at top, centered
-
-
                         const SizedBox(height: 8),
 
                         // List with RefreshIndicator
@@ -301,14 +318,17 @@ class _TicketsState extends State<Tickets> {
                           const SizedBox(height: 16),
                           Text(
                             state.error,
-                            style: const TextStyle(fontSize: 16, color: Colors.grey),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            onPressed: () => context.read<BookingListBloc>().add(
-                              FetchBookingsEvent(),
-                            ),
+                            onPressed: () => context
+                                .read<BookingListBloc>()
+                                .add(FetchBookingsEvent()),
                             child: const Text('Retry'),
                           ),
                         ],

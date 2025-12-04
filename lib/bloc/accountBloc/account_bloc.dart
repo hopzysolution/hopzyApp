@@ -22,8 +22,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   Future<void> _onFetchUserProfile(
     FetchUserProfileEvent event,
     Emitter<AccountState> emit,
-  ) async
-  {
+  ) async {
     try {
       emit(AccountLoading());
 
@@ -64,14 +63,14 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       emit(AccountError("An error occurred: ${e.toString()}"));
     }
   }
+
   Future<void> _onUpdateProfile(
-      UpdateProfileEvent event,
-      Emitter<AccountState> emit,
-      ) async {
+    UpdateProfileEvent event,
+    Emitter<AccountState> emit,
+  ) async {
     emit(ProfileUpdateLoading());
 
     try {
-
       final formData = {
         'userId': event.userId,
         'firstName': event.firstName,
@@ -81,13 +80,12 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       };
 
       var response = await ApiRepository.postAPI(
-        ApiConst.updateProfileApi,
+        ApiConst.getProfileApi,
         formData,
         basurl2: ApiConst.baseUrl2,
       );
 
       if (response.statusCode == 200) {
-
         // final data = jsonDecode(response.body);
         emit(ProfileUpdateSuccess('Profile updated successfully'));
 
@@ -100,19 +98,19 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       emit(ProfileUpdateError('Error: ${e.toString()}'));
     }
   }
+
   Future<void> _onLogout(LogoutEvent event, Emitter<AccountState> emit) async {
     try {
       await Session().clearAllData();
 
-      profileDataModel = null;   // <-- clear memory state
+      profileDataModel = null; // <-- clear memory state
       phone = null;
 
-      emit(AccountLogout());     // Emit logout state
-      emit(AccountInitial());    // Reset default state
+      emit(AccountLogout()); // Emit logout state
+      emit(AccountInitial()); // Reset default state
     } catch (e) {
       print("Error in logout: $e");
       emit(AccountError("Logout failed"));
     }
   }
-
 }
