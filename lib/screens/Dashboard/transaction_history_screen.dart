@@ -17,12 +17,36 @@ class TransactionHistoryScreen extends StatefulWidget {
 }
 
 class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
+  // ========== FILTER CHIP FEATURE (Added on Dec 7, 2025) ==========
+  int _selectedFilterIndex = 0; // 0: All, 1: Credit, 2: Debit
+  // ================================================================
+
   @override
   void initState() {
     super.initState();
     // Fetch real transactions when screen loads
     context.read<TransactionBloc>().add(FetchTransactionsEvent());
   }
+
+  // ========== FILTER CHIP FEATURE (Added on Dec 7, 2025) ==========
+  // Filter transactions based on selected chip
+  List<Transaction> _filterTransactions(List<Transaction> transactions) {
+    switch (_selectedFilterIndex) {
+      case 0: // All
+        return transactions;
+      case 1: // Credit
+        return transactions
+            .where((t) => t.type == TransactionType.credit)
+            .toList();
+      case 2: // Debit
+        return transactions
+            .where((t) => t.type == TransactionType.debit)
+            .toList();
+      default:
+        return transactions;
+    }
+  }
+  // ================================================================
 
   @override
   Widget build(BuildContext context) {
@@ -37,32 +61,110 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
-      body: BlocBuilder<TransactionBloc, TransactionState>(
-        builder: (context, state) {
-          if (state is TransactionLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.blue),
-            );
-          }
+      body: Column(
+        children: [
+          // ========== FILTER CHIP FEATURE (Added on Dec 7, 2025) ==========
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: Colors.white,
+            child: Row(
+              children: [
+                _buildFilterChip('All', 0),
+                const SizedBox(width: 8),
+                _buildFilterChip('Credit', 1),
+                const SizedBox(width: 8),
+                _buildFilterChip('Debit', 2),
+              ],
+            ),
+          ),
 
-          if (state is TransactionError) {
-            return _buildErrorState(state.message);
-          }
+          // ================================================================
+          Expanded(
+            child: BlocBuilder<TransactionBloc, TransactionState>(
+              builder: (context, state) {
+                if (state is TransactionLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.blue),
+                  );
+                }
 
-          if (state is TransactionLoaded) {
-            return RefreshIndicator(
-              onRefresh: () async {
-                context.read<TransactionBloc>().add(RefreshTransactionsEvent());
+                if (state is TransactionError) {
+                  return _buildErrorState(state.message);
+                }
+
+                if (state is TransactionLoaded) {
+                  final filteredTransactions = _filterTransactions(
+                    state.transactions,
+                  );
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<TransactionBloc>().add(
+                        RefreshTransactionsEvent(),
+                      );
+                    },
+                    child: _buildTransactionList(filteredTransactions),
+                  );
+                }
+
+                return _buildEmptyState();
               },
-              child: _buildTransactionList(state.transactions),
-            );
-          }
-
-          return _buildEmptyState();
-        },
+            ),
+          ),
+        ],
       ),
     );
   }
+
+  // ========== FILTER CHIP FEATURE (Added on Dec 7, 2025) ==========
+  Widget _buildFilterChip(String label, int index) {
+    final isSelected = _selectedFilterIndex == index;
+    Color chipColor;
+    Color textColor;
+
+    if (isSelected) {
+      if (index == 1) {
+        chipColor = Colors.green;
+        textColor = Colors.white;
+      } else if (index == 2) {
+        chipColor = Colors.red;
+        textColor = Colors.white;
+      } else {
+        chipColor = Colors.blue;
+        textColor = Colors.white;
+      }
+    } else {
+      chipColor = Colors.grey[200]!;
+      textColor = Colors.grey[700]!;
+    }
+
+    return Expanded(
+      child: FilterChip(
+        label: SizedBox(
+          width: double.infinity,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: textColor,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            ),
+          ),
+        ),
+        selected: isSelected,
+        onSelected: (selected) {
+          setState(() {
+            _selectedFilterIndex = index;
+          });
+        },
+        backgroundColor: chipColor,
+        selectedColor: chipColor,
+        checkmarkColor: textColor,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+  // ================================================================
 
   Widget _buildErrorState(String message) {
     return Center(
@@ -121,14 +223,35 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   }
 
   Widget _buildEmptyState() {
+    String message;
+    IconData icon;
+    String subtitle;
+
+    switch (_selectedFilterIndex) {
+      case 1: // Credit
+        message = "No credit transactions";
+        icon = Icons.arrow_downward;
+        subtitle = "Your credit transactions will appear here";
+        break;
+      case 2: // Debit
+        message = "No debit transactions";
+        icon = Icons.arrow_upward;
+        subtitle = "Your debit transactions will appear here";
+        break;
+      default: // All
+        message = "No transactions yet";
+        icon = Icons.receipt_long_outlined;
+        subtitle = "Your transactions will appear here";
+    }
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey[400]),
+          Icon(icon, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
-            "No transactions yet",
+            message,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -137,7 +260,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            "Your transactions will appear here",
+            subtitle,
             style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],

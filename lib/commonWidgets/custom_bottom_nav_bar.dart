@@ -87,7 +87,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 width: 40,
                 height: 40,
                 alignment: Alignment.center,
-                child: const Icon(Icons.home, color: Colors.black, size: 22),
+                child: const Icon(Icons.home, color: Colors.white, size: 22),
               ),
               Container(
                 width: 40,
@@ -95,7 +95,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.list_alt_rounded,
-                  color: Colors.black,
+                  color: Colors.white,
                   size: 22,
                 ),
               ),
@@ -105,7 +105,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.airplane_ticket,
-                  color: Colors.black,
+                  color: Colors.white,
                   size: 22,
                 ),
               ),
@@ -115,7 +115,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.account_circle_rounded,
-                  color: Colors.black,
+                  color: Colors.white,
                   size: 22,
                 ),
               ),

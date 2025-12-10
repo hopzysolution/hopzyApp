@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ridebooking/screens/Dashboard/dashboard_screen.dart';
 import 'transaction_history_screen.dart';
 import '../../bloc/transactionBloc/transaction_bloc.dart';
 import '../../bloc/transactionBloc/transaction_event.dart';
@@ -17,6 +18,8 @@ class WalletScreen extends StatefulWidget {
 
 class _WalletScreenState extends State<WalletScreen> {
   bool showBalance = true;
+  // Added on Dec 7, 2025 - Dropdown filter for transactions
+  String _selectedWalletFilter = 'All'; // 'All', 'Credit', 'Debit'
 
   @override
   void initState() {
@@ -169,18 +172,26 @@ class _WalletScreenState extends State<WalletScreen> {
             },
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              "Hopzy Wallet",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => DashboardScreen()),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                "Reedem Wallet",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -290,11 +301,101 @@ class _WalletScreenState extends State<WalletScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Added on Dec 7, 2025 - Header with dropdown filter
           Padding(
             padding: const EdgeInsets.all(16),
-            child: const Text(
-              "Recent Transactions",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Recent Transactions",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                // Added on Dec 7, 2025 - Dropdown for filtering transactions
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.green.shade400, Colors.green.shade600],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: DropdownButton<String>(
+                    value: _selectedWalletFilter,
+                    underline: const SizedBox(),
+                    isDense: true,
+                    dropdownColor: Colors.white,
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'All',
+                        child: Text(
+                          'All',
+                          style: TextStyle(color: Colors.black87),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Credit',
+                        child: Text(
+                          'Credit',
+                          style: TextStyle(color: Colors.black87),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Debit',
+                        child: Text(
+                          'Debit',
+                          style: TextStyle(color: Colors.black87),
+                        ),
+                      ),
+                    ],
+                    selectedItemBuilder: (BuildContext context) {
+                      return ['All', 'Credit', 'Debit'].map<Widget>((
+                        String item,
+                      ) {
+                        return Center(
+                          child: Text(
+                            item,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        );
+                      }).toList();
+                    },
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedWalletFilter = newValue;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
           const Divider(height: 1),
@@ -340,7 +441,27 @@ class _WalletScreenState extends State<WalletScreen> {
               }
 
               if (state is TransactionLoaded) {
-                final recentTransactions = state.transactions.take(5).toList();
+                List<Transaction> filteredTransactions = state.transactions;
+
+                switch (_selectedWalletFilter) {
+                  case 'Credit':
+                    filteredTransactions = state.transactions
+                        .where((t) => t.type == TransactionType.credit)
+                        .toList();
+                    break;
+                  case 'Debit':
+                    filteredTransactions = state.transactions
+                        .where((t) => t.type == TransactionType.debit)
+                        .toList();
+                    break;
+                  case 'All':
+                  default:
+                    filteredTransactions = state.transactions;
+                }
+
+                final recentTransactions = filteredTransactions
+                    .take(5)
+                    .toList();
 
                 if (recentTransactions.isEmpty) {
                   return _buildEmptyState();
@@ -372,7 +493,13 @@ class _WalletScreenState extends State<WalletScreen> {
       padding: const EdgeInsets.all(32),
       child: Column(
         children: [
-          Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey[400]),
+          Center(
+            child: Icon(
+              Icons.receipt_long_outlined,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+          ),
           const SizedBox(height: 16),
           Text(
             "No transactions yet",

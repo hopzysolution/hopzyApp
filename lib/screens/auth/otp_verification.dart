@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import 'package:ridebooking/Animations/animated_logo.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/route_generate.dart';
@@ -13,7 +14,7 @@ class OtpVerification extends StatefulWidget {
   final String? mobileNumber;
 
   const OtpVerification({
-    Key? key, 
+    Key? key,
     this.onCompleted,
     this.firstName,
     this.lastName,
@@ -24,23 +25,25 @@ class OtpVerification extends StatefulWidget {
   State<OtpVerification> createState() => _OtpVerificationState();
 }
 
-class _OtpVerificationState extends State<OtpVerification> 
-    with TickerProviderStateMixin {
+class _OtpVerificationState extends State<OtpVerification>
+    with TickerProviderStateMixin, CodeAutoFill {
   // Controllers and Focus Nodes
-  final List<TextEditingController> _controllers =
-      List.generate(6, (index) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(
+    6,
+    (index) => TextEditingController(),
+  );
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
-  
+
   // Animation Controllers
   late AnimationController _slideController;
   late AnimationController _pulseController;
   late AnimationController _shakeController;
-  
+
   // Animations
   late Animation<Offset> _slideAnimation;
   late Animation<double> _pulseAnimation;
   late Animation<double> _shakeAnimation;
-  
+
   // Timer and State
   Timer? _timer;
   int _secondsRemaining = 60;
@@ -53,6 +56,25 @@ class _OtpVerificationState extends State<OtpVerification>
     _initializeAnimations();
     _setupFocusListeners();
     _startCountdown();
+    _listenForSms();
+  }
+
+  void _listenForSms() async {
+    await SmsAutoFill().listenForCode();
+  }
+
+  @override
+  void codeUpdated() {
+    if (code != null && code!.length == 6) {
+      setState(() {
+        for (int i = 0; i < 6; i++) {
+          _controllers[i].text = code![i];
+        }
+      });
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _verifyOtp();
+      });
+    }
   }
 
   void _initializeAnimations() {
@@ -60,40 +82,29 @@ class _OtpVerificationState extends State<OtpVerification>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _shakeController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
 
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
-    _shakeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _shakeController,
-      curve: Curves.elasticIn,
-    ));
+    _shakeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _shakeController, curve: Curves.elasticIn),
+    );
 
     _slideController.forward();
     _pulseController.repeat(reverse: true);
@@ -111,25 +122,26 @@ class _OtpVerificationState extends State<OtpVerification>
 
   @override
   void dispose() {
+    SmsAutoFill().unregisterListener();
     _slideController.dispose();
     _pulseController.dispose();
     _shakeController.dispose();
     _timer?.cancel();
-    
+
     for (var controller in _controllers) {
       controller.dispose();
     }
     for (var focusNode in _focusNodes) {
       focusNode.dispose();
     }
-    
+
     super.dispose();
   }
 
   void _onTextChanged(int index, String value) {
     if (value.isNotEmpty) {
       HapticFeedback.lightImpact();
-      
+
       if (index < 5) {
         FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
       } else {
@@ -154,7 +166,7 @@ class _OtpVerificationState extends State<OtpVerification>
     if (finalInput.length == 6) {
       setState(() => _isVerifying = true);
       HapticFeedback.mediumImpact();
-      
+
       // Simulate verification delay
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
@@ -199,21 +211,21 @@ class _OtpVerificationState extends State<OtpVerification>
   void _resendOtp() {
     HapticFeedback.mediumImpact();
     _startCountdown();
-    
+
     // Clear existing input
     for (var controller in _controllers) {
       controller.clear();
     }
-    
+
     // Focus first field
     _focusNodes[0].requestFocus();
-    
+
     ToastMessage().showToast("OTP resent to +91${widget.mobileNumber}");
   }
 
   void _changePhoneNumber() {
     HapticFeedback.selectionClick();
-    String route = widget.firstName != null 
+    String route = widget.firstName != null
         ? Routes.demoScreen
         : Routes.loginWithOtpScreen;
     Navigator.pushNamed(context, route);
@@ -245,10 +257,7 @@ class _OtpVerificationState extends State<OtpVerification>
               child: Column(
                 children: [
                   const SizedBox(height: 40),
-                  AnimatedLogo(
-    size: 140,
-    padding: EdgeInsets.all(8),
-  ),
+                  AnimatedLogo(size: 140, padding: EdgeInsets.all(8)),
                   const SizedBox(height: 60),
                   _buildHeader(),
                   const SizedBox(height: 40),
@@ -266,8 +275,6 @@ class _OtpVerificationState extends State<OtpVerification>
       ),
     );
   }
-
-  
 
   Widget _buildHeader() {
     return Column(
@@ -315,18 +322,16 @@ class _OtpVerificationState extends State<OtpVerification>
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.15),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.3)),
           ),
           child: Text(
-            // "+91 
+            // "+91
             "${widget.mobileNumber}",
             style: TextTheme.of(context).bodyMedium?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
-            ), 
+            ),
             // TextStyle(
             //   fontSize: 18,
             //   fontWeight: FontWeight.w600,
@@ -338,74 +343,72 @@ class _OtpVerificationState extends State<OtpVerification>
       ],
     );
   }
+
   Widget _buildOtpInputFields() {
-  return RawKeyboardListener(
-    focusNode: FocusNode(), // Needed to capture key events
-    onKey: (event) {
-      if (event is RawKeyDownEvent &&
-          event.logicalKey == LogicalKeyboardKey.backspace) {
-        _handleGlobalBackspace();
-      }
-    },
-    child: AnimatedBuilder(
-      animation: _shakeAnimation,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(
-              _shakeAnimation.value * 10 * (1 - _shakeAnimation.value), 0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+    return RawKeyboardListener(
+      focusNode: FocusNode(), // Needed to capture key events
+      onKey: (event) {
+        if (event is RawKeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.backspace) {
+          _handleGlobalBackspace();
+        }
+      },
+      child: AnimatedBuilder(
+        animation: _shakeAnimation,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(
+              _shakeAnimation.value * 10 * (1 - _shakeAnimation.value),
+              0,
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withOpacity(0.2)),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(
+                      6,
+                      (index) => _buildOtpField(index),
+                    ),
+                  ),
+                  if (_isVerifying) ...[
+                    const SizedBox(height: 20),
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 2,
+                    ),
+                  ],
+                ],
               ),
             ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(6, (index) => _buildOtpField(index)),
-                ),
-                if (_isVerifying) ...[
-                  const SizedBox(height: 20),
-                  const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeWidth: 2,
-                  ),
-                ],
-              ],
-            ),
-          ),
-        );
-      },
-    ),
-  );
-}
-
+          );
+        },
+      ),
+    );
+  }
 
   void _handleGlobalBackspace() {
-  for (int i = _controllers.length - 1; i >= 0; i--) {
-    if (_controllers[i].text.isNotEmpty) {
-      setState(() {
-        _controllers[i].clear();
-      });
-      _focusNodes[i].requestFocus();
-      break;
+    for (int i = _controllers.length - 1; i >= 0; i--) {
+      if (_controllers[i].text.isNotEmpty) {
+        setState(() {
+          _controllers[i].clear();
+        });
+        _focusNodes[i].requestFocus();
+        break;
+      }
     }
   }
-}
-
-
-
-
-
 
   Widget _buildOtpField(int index) {
     bool hasValue = _controllers[index].text.isNotEmpty;
     bool hasFocus = _focusNodes[index].hasFocus;
-    
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       width: 48,
@@ -414,11 +417,11 @@ class _OtpVerificationState extends State<OtpVerification>
         color: hasValue ? Colors.white : Colors.white.withOpacity(0.9),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: hasFocus 
+          color: hasFocus
               ? AppColors.primaryBlueDark
-              : hasValue 
-                  ? Colors.green.shade400
-                  : Colors.grey.shade300,
+              : hasValue
+              ? Colors.green.shade400
+              : Colors.grey.shade300,
           width: hasFocus ? 2 : 1.5,
         ),
         boxShadow: [
@@ -457,12 +460,11 @@ class _OtpVerificationState extends State<OtpVerification>
       ),
     );
   }
+
   Widget _buildResendSection() {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
-      child: _canResend
-          ? _buildResendButton()
-          : _buildCountdownText(),
+      child: _canResend ? _buildResendButton() : _buildCountdownText(),
     );
   }
 
@@ -476,16 +478,10 @@ class _OtpVerificationState extends State<OtpVerification>
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: Colors.white.withOpacity(0.3),
-            ),
+            side: BorderSide(color: Colors.white.withOpacity(0.3)),
           ),
         ),
-        icon: const Icon(
-          Icons.refresh,
-          color: Colors.white,
-          size: 20,
-        ),
+        icon: const Icon(Icons.refresh, color: Colors.white, size: 20),
         label: Text(
           "Didn't receive the code? Resend",
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -510,18 +506,12 @@ class _OtpVerificationState extends State<OtpVerification>
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.2),
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.timer,
-            color: Colors.white.withOpacity(0.8),
-            size: 20,
-          ),
+          Icon(Icons.timer, color: Colors.white.withOpacity(0.8), size: 20),
           const SizedBox(width: 8),
           Text(
             "Resend code in $_secondsRemaining seconds",
@@ -551,17 +541,11 @@ class _OtpVerificationState extends State<OtpVerification>
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: Colors.white.withOpacity(0.3),
-            ),
+            side: BorderSide(color: Colors.white.withOpacity(0.3)),
           ),
         ),
-        icon: const Icon(
-          Icons.arrow_back,
-          color: Colors.white,
-          size: 20,
-        ),
-        label:  Text(
+        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+        label: Text(
           "Change phone number",
           style: TextTheme.of(context).bodyMedium?.copyWith(
             color: Colors.white,
