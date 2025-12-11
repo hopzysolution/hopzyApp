@@ -441,7 +441,7 @@ class _AccountState extends State<Account> {
                         _divider(),
                         _menuTile(
                           Icons.star_outline,
-                          "Rate Us",
+                          "Help Us",
                           "Share your feedback",
                         ),
                         _divider(),

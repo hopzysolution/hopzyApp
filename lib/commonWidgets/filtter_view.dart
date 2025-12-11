@@ -18,11 +18,11 @@ class _FilterRowViewState extends State<FilterRowView> {
   bool isSleeperSelected = false;
   bool isNonACSelected = false;
 
-  // Time filter states
-  bool isEarlyMorningSelected = false;
-  bool isMorningSelected = false;
-  bool isAfternoonSelected = false;
-  bool isEveningSelected = false;
+  // Time filter states - Shift-based filtering (Dec 10, 2025)
+  bool isMorningSelected = false; // 6 AM - 12 PM
+  bool isAfternoonSelected = false; // 12 PM - 6 PM
+  bool isEveningSelected = false; // 6 PM - 12 AM
+  bool isNightSelected = false; // 12 AM - 6 AM
 
   String _selectedTab = "Bus Type";
 
@@ -77,10 +77,61 @@ class _FilterRowViewState extends State<FilterRowView> {
   String _formatDepartureTime(String deptime) {
     try {
       DateTime dateTime = DateTime.parse(deptime);
-      return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
+      int hour = dateTime.hour;
+      int minute = dateTime.minute;
+
+      // Convert to 12-hour format with AM/PM
+      String period = hour >= 12 ? 'PM' : 'AM';
+      int displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+
+      return "${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period";
     } catch (e) {
       return deptime;
     }
+  }
+
+  // Helper to get shift name from departure time (Dec 10, 2025)
+  String _getTimeShift(String deptime) {
+    try {
+      DateTime dateTime = DateTime.parse(deptime);
+      int hour = dateTime.hour;
+
+      if (hour >= 6 && hour < 12) return 'Morning (6 AM - 12 PM)';
+      if (hour >= 12 && hour < 18) return 'Afternoon (12 PM - 6 PM)';
+      if (hour >= 18 && hour < 24) return 'Evening (6 PM - 12 AM)';
+      return 'Night (12 AM - 6 AM)';
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
+
+  // Helper to get shift icon (Dec 10, 2025)
+  Widget _getShiftIcon(String shift) {
+    IconData icon;
+    Color color;
+
+    if (shift.contains('Morning')) {
+      icon = Icons.wb_sunny;
+      color = Colors.orange;
+    } else if (shift.contains('Afternoon')) {
+      icon = Icons.wb_twilight;
+      color = Colors.deepOrange;
+    } else if (shift.contains('Evening')) {
+      icon = Icons.nights_stay;
+      color = Colors.indigo;
+    } else {
+      icon = Icons.nightlight;
+      color = Colors.deepPurple;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: color, size: 24),
+    );
   }
 
   Widget _buildFareRangeContent(StateSetter setModalState) {
@@ -171,11 +222,11 @@ class _FilterRowViewState extends State<FilterRowView> {
       }).toList();
     }
 
-    // Apply time filters
-    if (isEarlyMorningSelected ||
-        isMorningSelected ||
+    // Apply time filters - Shift-based filtering (Dec 10, 2025)
+    if (isMorningSelected ||
         isAfternoonSelected ||
-        isEveningSelected) {
+        isEveningSelected ||
+        isNightSelected) {
       filteredTrips = filteredTrips.where((trip) {
         if (trip.deptime == null) return false;
 
@@ -183,10 +234,10 @@ class _FilterRowViewState extends State<FilterRowView> {
           DateTime depTime = DateTime.parse(trip.deptime!);
           int hour = depTime.hour;
 
-          if (isEarlyMorningSelected && hour >= 0 && hour < 6) return true;
           if (isMorningSelected && hour >= 6 && hour < 12) return true;
           if (isAfternoonSelected && hour >= 12 && hour < 18) return true;
           if (isEveningSelected && hour >= 18 && hour < 24) return true;
+          if (isNightSelected && hour >= 0 && hour < 6) return true;
 
           return false;
         } catch (e) {
@@ -219,11 +270,30 @@ class _FilterRowViewState extends State<FilterRowView> {
       }).toList();
     }
 
-    // Apply departure time filter
+    // Apply departure time filter - Updated to use shift-based filtering (Dec 10, 2025)
     if (selectedDepartureTimes.isNotEmpty) {
       filteredTrips = filteredTrips.where((trip) {
         if (trip.deptime == null) return false;
-        return selectedDepartureTimes.contains(trip.deptime);
+
+        try {
+          DateTime depTime = DateTime.parse(trip.deptime!);
+          int hour = depTime.hour;
+
+          // Check if trip matches any selected shift
+          for (String shift in selectedDepartureTimes) {
+            if (shift == 'Morning (6 AM - 12 PM)' && hour >= 6 && hour < 12)
+              return true;
+            if (shift == 'Afternoon (12 PM - 6 PM)' && hour >= 12 && hour < 18)
+              return true;
+            if (shift == 'Evening (6 PM - 12 AM)' && hour >= 18 && hour < 24)
+              return true;
+            if (shift == 'Night (12 AM - 6 AM)' && hour >= 0 && hour < 6)
+              return true;
+          }
+          return false;
+        } catch (e) {
+          return false;
+        }
       }).toList();
     }
 
@@ -287,10 +357,10 @@ class _FilterRowViewState extends State<FilterRowView> {
       isACSelected = false;
       isSleeperSelected = false;
       isNonACSelected = false;
-      isEarlyMorningSelected = false;
       isMorningSelected = false;
       isAfternoonSelected = false;
       isEveningSelected = false;
+      isNightSelected = false;
       selectedSort = null;
       selectedBusTypes.clear();
       selectedBoardingPoints.clear();
@@ -366,10 +436,10 @@ class _FilterRowViewState extends State<FilterRowView> {
               label: 'Time',
               icon: Icons.access_time,
               isSelected:
-                  isEarlyMorningSelected ||
                   isMorningSelected ||
                   isAfternoonSelected ||
-                  isEveningSelected,
+                  isEveningSelected ||
+                  isNightSelected,
               onTap: () {
                 _showTimeFilterDialog();
               },
@@ -443,67 +513,204 @@ class _FilterRowViewState extends State<FilterRowView> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Departure Time Shift',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
               const Text(
-                'Departure Time',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                'Select your preferred departure shift',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(height: 20),
-              _buildTimeSlot(
-                'Early Morning',
-                '12:00 AM - 6:00 AM',
-                isEarlyMorningSelected,
-                (value) {
-                  setModalState(() => isEarlyMorningSelected = value ?? false);
-                },
-              ),
-              _buildTimeSlot(
+              _buildTimeShiftCard(
                 'Morning',
                 '6:00 AM - 12:00 PM',
+                Icons.wb_sunny,
+                Colors.orange,
                 isMorningSelected,
                 (value) {
                   setModalState(() => isMorningSelected = value ?? false);
                 },
+                setModalState,
               ),
-              _buildTimeSlot(
+              const SizedBox(height: 12),
+              _buildTimeShiftCard(
                 'Afternoon',
                 '12:00 PM - 6:00 PM',
+                Icons.wb_twilight,
+                Colors.deepOrange,
                 isAfternoonSelected,
                 (value) {
                   setModalState(() => isAfternoonSelected = value ?? false);
                 },
+                setModalState,
               ),
-              _buildTimeSlot(
+              const SizedBox(height: 12),
+              _buildTimeShiftCard(
                 'Evening',
                 '6:00 PM - 12:00 AM',
+                Icons.nights_stay,
+                Colors.indigo,
                 isEveningSelected,
                 (value) {
                   setModalState(() => isEveningSelected = value ?? false);
                 },
+                setModalState,
+              ),
+              const SizedBox(height: 12),
+              _buildTimeShiftCard(
+                'Night',
+                '12:00 AM - 6:00 AM',
+                Icons.nightlight,
+                Colors.deepPurple,
+                isNightSelected,
+                (value) {
+                  setModalState(() => isNightSelected = value ?? false);
+                },
+                setModalState,
               ),
               const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {}); // Update main state
-                    _applyFilters();
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.shade600,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        setModalState(() {
+                          isMorningSelected = false;
+                          isAfternoonSelected = false;
+                          isEveningSelected = false;
+                          isNightSelected = false;
+                        });
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        side: BorderSide(color: Colors.grey.shade400),
+                      ),
+                      child: const Text(
+                        'Clear',
+                        style: TextStyle(color: Colors.black87),
+                      ),
                     ),
                   ),
-                  child: const Text(
-                    'Apply',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {}); // Update main state
+                        _applyFilters();
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue.shade600,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Apply Filter',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeShiftCard(
+    String title,
+    String time,
+    IconData icon,
+    Color color,
+    bool isSelected,
+    Function(bool?) onChanged,
+    StateSetter setModalState,
+  ) {
+    return InkWell(
+      onTap: () => onChanged(!isSelected),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.1) : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? color : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: color.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isSelected ? color : Colors.grey.shade200,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.white : Colors.grey.shade600,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      color: isSelected ? color : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    time,
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            Checkbox(
+              value: isSelected,
+              onChanged: onChanged,
+              activeColor: color,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -694,7 +901,15 @@ class _FilterRowViewState extends State<FilterRowView> {
       if (_selectedTab == "Bus Type") return busTypes.toList();
       if (_selectedTab == "Boarding") return boardingPoints.toList();
       if (_selectedTab == "Dropping") return droppingPoints.toList();
-      if (_selectedTab == "Departure") return departureTimes.toList();
+      if (_selectedTab == "Departure") {
+        // Return shift options instead of individual times (Dec 10, 2025)
+        return [
+          'Morning (6 AM - 12 PM)',
+          'Afternoon (12 PM - 6 PM)',
+          'Evening (6 PM - 12 AM)',
+          'Night (12 AM - 6 AM)',
+        ];
+      }
       return [];
     }
 
@@ -804,9 +1019,7 @@ class _FilterRowViewState extends State<FilterRowView> {
                                         ),
                                         child: ListTile(
                                           title: Text(
-                                            _selectedTab == "Departure"
-                                                ? _formatDepartureTime(item)
-                                                : item,
+                                            item,
                                             style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500,

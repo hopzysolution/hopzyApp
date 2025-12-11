@@ -17,7 +17,6 @@ class TransactionHistoryScreen extends StatefulWidget {
 }
 
 class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
-  // ========== FILTER CHIP FEATURE (Added on Dec 7, 2025) ==========
   int _selectedFilterIndex = 0; // 0: All, 1: Credit, 2: Debit
   // ================================================================
 
@@ -28,7 +27,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     context.read<TransactionBloc>().add(FetchTransactionsEvent());
   }
 
-  // ========== FILTER CHIP FEATURE (Added on Dec 7, 2025) ==========
   // Filter transactions based on selected chip
   List<Transaction> _filterTransactions(List<Transaction> transactions) {
     switch (_selectedFilterIndex) {
@@ -46,7 +44,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         return transactions;
     }
   }
-  // ================================================================
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +60,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       ),
       body: Column(
         children: [
-          // ========== FILTER CHIP FEATURE (Added on Dec 7, 2025) ==========
           Container(
             padding: const EdgeInsets.all(16),
             color: Colors.white,
@@ -77,8 +73,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               ],
             ),
           ),
-
-          // ================================================================
           Expanded(
             child: BlocBuilder<TransactionBloc, TransactionState>(
               builder: (context, state) {
@@ -115,7 +109,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     );
   }
 
-  // ========== FILTER CHIP FEATURE (Added on Dec 7, 2025) ==========
   Widget _buildFilterChip(String label, int index) {
     final isSelected = _selectedFilterIndex == index;
     Color chipColor;
@@ -164,7 +157,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       ),
     );
   }
-  // ================================================================
 
   Widget _buildErrorState(String message) {
     return Center(
