@@ -428,7 +428,10 @@ class TripListTile extends StatelessWidget {
                   // ),
                   buildInfoRow(
                     leftTitle: "BUS TYPE",
-                    leftValue: extractBusInfo(trip.busType),
+                    // OLD CODE (Dec 12, 2025 - BEFORE BUS TYPE NAME UPDATE):
+                    // leftValue: extractBusInfo(trip.busType),
+                    // NEW CODE (Dec 12, 2025 - SHOW ACTUAL BUS NAME):
+                    leftValue: trip.busType,
                     rightTitle: "DEPART",
                     rightValue: DateFormat.jm().format(trip.departureTime),
                     theme: theme,
@@ -562,29 +565,35 @@ class TripListTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // LEFT SIDE
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              leftTitle,
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: colorScheme.onSurfaceVariant,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                leftTitle,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              leftValue,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: colorScheme.onSurface,
+              const SizedBox(height: 2),
+              Text(
+                leftValue,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface,
+                ),
+                // Added on Dec 12, 2025 - Show ellipsis if text is too long
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+
+        const SizedBox(width: 8),
 
         // RIGHT SIDE
         Column(

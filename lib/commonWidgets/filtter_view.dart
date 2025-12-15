@@ -189,7 +189,7 @@ class _FilterRowViewState extends State<FilterRowView> {
 
     List<Trips> filteredTrips = List.from(widget.allTrips!);
 
-    // Apply bus type filters
+    // Apply bus type filters - Updated Dec 13, 2025 for category-based filtering
     if (isACSelected ||
         isSleeperSelected ||
         isNonACSelected ||
@@ -210,11 +210,44 @@ class _FilterRowViewState extends State<FilterRowView> {
           matchesQuickFilter = true;
         }
 
-        bool matchesAdvancedFilter =
-            selectedBusTypes.isEmpty ||
-            selectedBusTypes.any(
-              (type) => busType.contains(type.toLowerCase()),
-            );
+        // NEW CODE (Dec 13, 2025 - Category-based bus type filtering)
+        bool matchesAdvancedFilter = selectedBusTypes.isEmpty;
+
+        if (selectedBusTypes.isNotEmpty) {
+          for (String category in selectedBusTypes) {
+            if (category == 'AC' &&
+                busType.contains('ac') &&
+                !busType.contains('non')) {
+              matchesAdvancedFilter = true;
+              break;
+            }
+            if (category == 'Non-AC' &&
+                (busType.contains('non') || (!busType.contains('ac')))) {
+              matchesAdvancedFilter = true;
+              break;
+            }
+            if (category == 'Sleeper' &&
+                busType.contains('sleeper') &&
+                !busType.contains('seater')) {
+              matchesAdvancedFilter = true;
+              break;
+            }
+            if (category == 'Seater' &&
+                busType.contains('seater') &&
+                !busType.contains('sleeper')) {
+              matchesAdvancedFilter = true;
+              break;
+            }
+            if (category == 'Sleeper/Seater' &&
+                busType.contains('sleeper') &&
+                busType.contains('seater')) {
+              matchesAdvancedFilter = true;
+              break;
+            }
+          }
+        } else {
+          matchesAdvancedFilter = true;
+        }
 
         return (isACSelected || isSleeperSelected || isNonACSelected)
             ? matchesQuickFilter
@@ -376,76 +409,74 @@ class _FilterRowViewState extends State<FilterRowView> {
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: SingleChildScrollView(
+      child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            _buildFilterChip(
-              label: 'Filter',
-              icon: Icons.filter_list,
-              isSelected: false,
-              onTap: () {
-                _showFilterDialog();
-              },
-            ),
-            const SizedBox(width: 8),
-            _buildFilterChip(
-              label: 'Sort',
-              icon: Icons.sort,
-              isSelected: selectedSort != null,
-              onTap: () {
-                _showSortDialog();
-              },
-            ),
-            const SizedBox(width: 8),
-            _buildFilterChip(
-              label: 'AC',
-              isSelected: isACSelected,
-              onTap: () {
-                setState(() {
-                  isACSelected = !isACSelected;
-                });
-                _applyFilters();
-              },
-            ),
-            const SizedBox(width: 8),
-            _buildFilterChip(
-              label: 'Sleeper',
-              isSelected: isSleeperSelected,
-              onTap: () {
-                setState(() {
-                  isSleeperSelected = !isSleeperSelected;
-                });
-                _applyFilters();
-              },
-            ),
-            const SizedBox(width: 8),
-            _buildFilterChip(
-              label: 'Non AC',
-              isSelected: isNonACSelected,
-              onTap: () {
-                setState(() {
-                  isNonACSelected = !isNonACSelected;
-                });
-                _applyFilters();
-              },
-            ),
-            const SizedBox(width: 8),
-            _buildFilterChip(
-              label: 'Time',
-              icon: Icons.access_time,
-              isSelected:
-                  isMorningSelected ||
-                  isAfternoonSelected ||
-                  isEveningSelected ||
-                  isNightSelected,
-              onTap: () {
-                _showTimeFilterDialog();
-              },
-            ),
-          ],
-        ),
+        children: [
+          _buildFilterChip(
+            label: 'Filter',
+            icon: Icons.filter_list,
+            isSelected: false,
+            onTap: () {
+              _showFilterDialog();
+            },
+          ),
+          const SizedBox(width: 8),
+          _buildFilterChip(
+            label: 'Sort',
+            icon: Icons.sort,
+            isSelected: selectedSort != null,
+            onTap: () {
+              _showSortDialog();
+            },
+          ),
+          // const SizedBox(width: 8),
+          // _buildFilterChip(
+          //   label: 'AC',
+          //   isSelected: isACSelected,
+          //   onTap: () {
+          //     setState(() {
+          //       isACSelected = !isACSelected;
+          //     });
+          //     _applyFilters();
+          //   },
+          // ),
+          // const SizedBox(width: 8),
+          // _buildFilterChip(
+          //   label: 'Sleeper',
+          //   isSelected: isSleeperSelected,
+          //   onTap: () {
+          //     setState(() {
+          //       isSleeperSelected = !isSleeperSelected;
+          //     });
+          //     _applyFilters();
+          //   },
+          // ),
+          // const SizedBox(width: 8),
+          // _buildFilterChip(
+          //   label: 'Non AC',
+          //   isSelected: isNonACSelected,
+          //   onTap: () {
+          //     setState(() {
+          //       isNonACSelected = !isNonACSelected;
+          //     });
+          //     _applyFilters();
+          //   },
+          // ),
+          // const SizedBox(width: 8),
+          // _buildFilterChip(
+          //   label: 'Time',
+          //   icon: Icons.access_time,
+          //   isSelected:
+          //       isMorningSelected ||
+          //       isAfternoonSelected ||
+          //       isEveningSelected ||
+          //       isNightSelected,
+          //   onTap: () {
+          //     _showTimeFilterDialog();
+          //   },
+          // ),
+        ],
       ),
     );
   }
@@ -898,11 +929,13 @@ class _FilterRowViewState extends State<FilterRowView> {
     }
 
     List<String> _options() {
-      if (_selectedTab == "Bus Type") return busTypes.toList();
+      if (_selectedTab == "Bus Type") {
+        // Show standard bus type categories instead of API types
+        return ['AC', 'Non-AC', 'Sleeper', 'Seater', 'Sleeper/Seater'];
+      }
       if (_selectedTab == "Boarding") return boardingPoints.toList();
       if (_selectedTab == "Dropping") return droppingPoints.toList();
       if (_selectedTab == "Departure") {
-        // Return shift options instead of individual times (Dec 10, 2025)
         return [
           'Morning (6 AM - 12 PM)',
           'Afternoon (12 PM - 6 PM)',
@@ -1051,26 +1084,52 @@ class _FilterRowViewState extends State<FilterRowView> {
 
                   SizedBox(height: 12),
 
-                  // APPLY BUTTON
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _applyFilters();
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        minimumSize: Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                  // RESET AND APPLY BUTTONS - Added on Dec 13, 2025
+                  Row(
+                    children: [
+                      // Reset Button
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              _clearAllFilters();
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.blue),
+                            minimumSize: Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: Text(
+                            "Reset",
+                            style: TextStyle(color: Colors.blue, fontSize: 16),
+                          ),
                         ),
                       ),
-                      child: Text(
-                        "Apply",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      SizedBox(width: 12),
+                      // Apply Button
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _applyFilters();
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            minimumSize: Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: Text(
+                            "Apply",
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
