@@ -61,11 +61,30 @@ class BusBookingApp extends StatelessWidget {
     //  return MaterialApp(
     //   title: 'Hopzy',
     //   debugShowCheckedModeBanner: false,
-    //    home: Scaffold(
-    //      body: SafeArea(
-    //          child: WebViewPagesScreen(titleMain: "Hopzy", urlToLoad: "https://www.hopzy.in/", bodyTags: "",)),
-    //    ),
-    //  );
+    //   theme: AppTheme.lightTheme,
+    //   darkTheme: AppTheme.darkTheme,
+    //   onGenerateRoute: Routes.onCreateRoute,
+    //     initialRoute: Routes.splash,
+    //   themeMode: ThemeMode.system, // or ThemeMode.light / dark
+    //   builder: (context, child) {
+    //     final mediaQuery = MediaQuery.of(context);
+    //     return MediaQuery(
+    //       data: mediaQuery.copyWith(textScaleFactor: 1.0),
+    //       child: child!,
+    //     );
+    //   },
+    // );
+
+
+    //webvie Flow
+     return MaterialApp(
+      title: 'Hopzy',
+      debugShowCheckedModeBanner: false,
+       home: Scaffold(
+         body: SafeArea(
+             child: WebViewPagesScreen(titleMain: "Hopzy", urlToLoad: "https://www.hopzy.in/", bodyTags: "",)),
+       ),
+     );
 
   }
 }

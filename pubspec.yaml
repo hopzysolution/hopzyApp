@@ -65,6 +65,9 @@ dependencies:
   url_launcher: ^6.2.5
   payu_checkoutpro_flutter: ^1.3.4
   toggle_switch: ^2.3.0
+  flutter_inappwebview: ^6.0.0
+  open_filex: ^4.4.0
+
 
 dev_dependencies:
   flutter_test:
