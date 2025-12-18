@@ -39,46 +39,55 @@ class CustomBottomNavBar extends StatelessWidget {
             activeIndex: selectedIndex,
             onTap: onItemTapped,
             circleColor: AppColors.primaryBlue,
-            height: 70,
-            circleWidth: 50,
+            // 🎯 Dynamic sizing
+            height: MediaQuery.of(context).size.height * 0.09,        // ~70 on normal devices
+            circleWidth:MediaQuery.of(context).size.width * 0.14,
+            activeLevelsStyle: TextStyle(
+              color: Colors.white
+            ),
+            inactiveLevelsStyle: TextStyle(
+                color: Colors.white
+            ),
+
+
             levels: ["Home", "Booking", "Tickets", "Account"],
             // circlePadding: const EdgeInsets.only(top: 5),
             activeIcons: [
               Container(
-                width: 40,
-                height: 40,
+                width: MediaQuery.of(context).size.width * 0.15,
+                height: MediaQuery.of(context).size.width * 0.15,
                 alignment: Alignment.center,
-                child: const Icon(Icons.home, color: Colors.white, size: 22),
+                child: const Icon(Icons.home, color: Colors.white, size: 25),
               ),
               Container(
-                width: 40,
-                height: 40,
+                width: MediaQuery.of(context).size.width * 0.15,
+                height: MediaQuery.of(context).size.width * 0.15,
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.list_alt_rounded,
                   color: Colors.white,
-                  size: 22,
+                  size: 25,
                 ),
               ),
 
               Container(
-                width: 40,
-                height: 40,
+                width: MediaQuery.of(context).size.width * 0.15,
+                height: MediaQuery.of(context).size.width * 0.15,
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.airplane_ticket,
                   color: Colors.white,
-                  size: 22,
+                  size: 25,
                 ),
               ),
               Container(
-                width: 40,
-                height: 40,
+                width: MediaQuery.of(context).size.width * 0.15,
+                height: MediaQuery.of(context).size.width * 0.15,
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.account_circle_rounded,
                   color: Colors.white,
-                  size: 22,
+                  size: 25,
                 ),
               ),
             ],

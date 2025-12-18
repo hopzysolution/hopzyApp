@@ -1,16 +1,17 @@
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+// ✅ Add plugin declaration at the top
 
+repositories {
+    google()
+    gradlePluginPortal()
+    mavenCentral()
+}
 plugins {
+
     id("com.google.gms.google-services") version "4.4.0" apply false
     id("com.google.firebase.crashlytics") version "2.9.9" apply false
 }
 
-    
+
 
 
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -6,11 +7,13 @@ import 'package:ridebooking/utils/Api_client.dart';
 import 'package:ridebooking/utils/app_theme.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 
-void main() async {
+
+void main() async{
+  
   WidgetsFlutterBinding.ensureInitialized();
 
   await MediaStore.ensureInitialized();
-  MediaStore.appFolder = "Hopzy";
+   MediaStore.appFolder = "Hopzy";
   final apiClient = ApiClient();
   apiClient.init();
   // await Firebase.initializeApp(
@@ -20,9 +23,10 @@ void main() async {
   //         messagingSenderId: "604780340704",
   //         projectId: "redbus-4d7c2"));
 
-  // await FirebaseAppCheck.instance.act ivate(
+  // await FirebaseAppCheck.instance.activate(
   //   androidProvider: AndroidProvider.playIntegrity,
   // );
+
 
   runApp(const BusBookingApp());
 }
@@ -32,14 +36,16 @@ class BusBookingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     //original Flow
     return MaterialApp(
+
       title: 'Hopzy',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       onGenerateRoute: Routes.onCreateRoute,
-      initialRoute: Routes.splash,
+        initialRoute: Routes.splash,
       themeMode: ThemeMode.system, // or ThemeMode.light / dark
       builder: (context, child) {
         final mediaQuery = MediaQuery.of(context);
@@ -50,14 +56,35 @@ class BusBookingApp extends StatelessWidget {
       },
     );
 
-    //webview Flow
+
+    //webvie Flow
     //  return MaterialApp(
     //   title: 'Hopzy',
     //   debugShowCheckedModeBanner: false,
-    //    home: Scaffold(
-    //      body: SafeArea(
-    //          child: WebViewPagesScreen(titleMain: "Hopzy", urlToLoad: "https://www.hopzy.in/", bodyTags: "",)),
-    //    ),
-    //  );
+    //   theme: AppTheme.lightTheme,
+    //   darkTheme: AppTheme.darkTheme,
+    //   onGenerateRoute: Routes.onCreateRoute,
+    //     initialRoute: Routes.splash,
+    //   themeMode: ThemeMode.system, // or ThemeMode.light / dark
+    //   builder: (context, child) {
+    //     final mediaQuery = MediaQuery.of(context);
+    //     return MediaQuery(
+    //       data: mediaQuery.copyWith(textScaleFactor: 1.0),
+    //       child: child!,
+    //     );
+    //   },
+    // );
+
+
+    //webvie Flow
+     return MaterialApp(
+      title: 'Hopzy',
+      debugShowCheckedModeBanner: false,
+       home: Scaffold(
+         body: SafeArea(
+             child: WebViewPagesScreen(titleMain: "Hopzy", urlToLoad: "https://www.hopzy.in/", bodyTags: "",)),
+       ),
+     );
+
   }
 }
