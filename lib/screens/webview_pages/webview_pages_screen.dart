@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class WebViewPagesScreen extends StatelessWidget {
   String title = '', url = '', body = '';
@@ -35,6 +36,7 @@ class WebViewPagesScreenBody extends StatefulWidget {
   String title = '', url = '', body = '';
   bool isLoading = true;
 
+
   WebViewPagesScreenBody({
     super.key,
     required String titleMain,
@@ -51,6 +53,7 @@ class WebViewPagesScreenBody extends StatefulWidget {
 }
 
 class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   late final WebViewController _controller;
   late WebViewController webViewControllerr;
   bool urlAndBodyNotFound = false;
@@ -80,6 +83,104 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
   }
 
   // loading website url
+  // Future<void> webViewManager(String url) async {
+  //   _controller = WebViewController()
+  //     ..enableZoom(false)
+  //     ..setJavaScriptMode(JavaScriptMode.unrestricted)
+  //     ..setBackgroundColor(const Color(0x00000000));
+  //
+  //   // ✅ 1. Restore token BEFORE loading anything
+  //
+  //
+  //   // ✅ 2. Navigation delegate
+  //   _controller.setNavigationDelegate(
+  //     NavigationDelegate(
+  //       onPageStarted: (_) {
+  //         setState(() => widget.isLoading = true);
+  //       },
+  //
+  //       onPageFinished: (url) async {
+  //         if (!mounted) return;
+  //
+  //         setState(() => widget.isLoading = false);
+  //
+  //         try {
+  //           // ✅ If redirected to login, clear token immediately
+  //           if (url.contains('/login')) {
+  //             await _secureStorage.delete(key: 'accessToken');
+  //             debugPrint("🔓 accessToken cleared (login page)");
+  //             return;
+  //           }
+  //
+  //           // ✅ Read accessToken safely from WebView
+  //           final result = await _controller.runJavaScriptReturningResult("""
+  //     (function() {
+  //       try {
+  //         return localStorage.getItem('accessToken');
+  //       } catch (e) {
+  //         return null;
+  //       }
+  //     })();
+  //   """);
+  //
+  //           // ✅ Normalize result
+  //           String? token;
+  //           if (result is String && result.isNotEmpty && result != 'null') {
+  //             token = result.replaceAll('"', '');
+  //           }
+  //
+  //           // ✅ Validate token before saving
+  //           if (token != null && token.length > 10) {
+  //             final existingToken = await _secureStorage.read(key: 'accessToken');
+  //
+  //             // Save only if changed
+  //             if (existingToken != token) {
+  //               await _secureStorage.write(
+  //                 key: 'accessToken',
+  //                 value: token,
+  //               );
+  //               debugPrint("✅ accessToken captured & stored");
+  //             }
+  //           }
+  //         } catch (e) {
+  //           // Never crash WebView for token issues
+  //           debugPrint("⚠️ accessToken read error: $e");
+  //         }
+  //       },
+  //
+  //
+  //       onNavigationRequest: (request) async {
+  //         final reqUrl = request.url;
+  //
+  //         if (reqUrl.startsWith("upi:") ||
+  //             reqUrl.contains("paytm") ||
+  //             reqUrl.contains("phonepe") ||
+  //             reqUrl.contains("gpay") ||
+  //             reqUrl.contains("upi/pay")) {
+  //           try {
+  //             final uri = Uri.parse(reqUrl);
+  //             if (await canLaunchUrl(uri)) {
+  //               await launchUrl(uri, mode: LaunchMode.externalApplication);
+  //             }
+  //           } catch (_) {}
+  //           return NavigationDecision.prevent;
+  //         }
+  //
+  //         return NavigationDecision.navigate;
+  //       },
+  //     ),
+  //   );
+  //
+  //   // ✅ 3. Load page LAST
+  //   if (widget.body.isNotEmpty) {
+  //     await _controller.loadHtmlString(widget.body);
+  //   } else {
+  //     await _controller.loadRequest(Uri.parse(url));
+  //   }
+  //
+  //   webViewControllerr = _controller;
+  // }
+
   Future<void> webViewManager(String url) async {
     _controller = WebViewController()
       ..enableZoom(false)
@@ -103,18 +204,18 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
     for (var i = 0; i < headers.length; i++) {
       headers[i].style.display = 'none';
     }
-    
+
     var footers = document.getElementsByTagName('footer');
     for (var i = 0; i < footers.length; i++) {
       footers[i].style.display = 'none';
     }
 
     // Remove elements by class name and tag
-    
-   
+
+
    var siteHeaders = document.getElementsByClassName('sc-kqGpvY nmGRv pf-41_ pf-color-scheme-1');
     var headings = document.getElementsByTagName('div');
-    
+
     Array.from(siteHeaders).forEach(function(siteHeader) {
       Array.from(headings).forEach(function(heading) {
         if (siteHeader === heading) {
@@ -122,26 +223,69 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
         }
       });
     });
-    
-   
+
+
   }
-  
+
   var interval = setInterval(function() {
     removeElements();
   }, 10);
    setTimeout(function() {
     clearInterval(interval);
   }, 5000);
- 
+
 """);
             print("--------------starting1 ${url}");
           },
-          onPageFinished: (String url) {
+          onPageFinished: (String url) async {
+            if (!mounted) return;
+
             setState(() {
               widget.isLoading = false;
             });
-            print("--------------starting ${url}");
+
+            // 🔐 Flutter-only token capture (NO website change)
+            try {
+              // If redirected to login → clear token
+              if (url.contains('/login')) {
+                await _secureStorage.delete(key: 'accessToken');
+                debugPrint("🔓 accessToken cleared (login page)");
+                return;
+              }
+
+              final result = await _controller.runJavaScriptReturningResult("""
+      (function() {
+        try {
+          return localStorage.getItem('accessToken');
+        } catch (e) {
+          return null;
+        }
+      })();
+    """);
+
+              if (result is String && result.isNotEmpty && result != 'null') {
+                final token = result.replaceAll('"', '');
+
+                if (token.length > 10) {
+                  final existingToken =
+                  await _secureStorage.read(key: 'accessToken');
+
+                  // Save only if changed
+                  if (existingToken != token) {
+                    await _secureStorage.write(
+                      key: 'accessToken',
+                      value: token,
+                    );
+                    debugPrint("✅ accessToken captured & stored");
+                  }
+                }
+              }
+            } catch (e) {
+              // Never crash WebView
+              debugPrint("⚠️ accessToken read error: $e");
+            }
           },
+
 
           // onWebResourceError: (WebResourceError error) {
           // LoadingDialog.hide(context);
@@ -266,9 +410,9 @@ class _WebViewPagesScreenBodyState extends State<WebViewPagesScreenBody> {
            .change
             {
             }
-             </style> 
+             </style>
             </head>
-           <body class="change" 
+           <body class="change"
            style="margin: 0; padding: 0;"
            >
             ${widget.body}
