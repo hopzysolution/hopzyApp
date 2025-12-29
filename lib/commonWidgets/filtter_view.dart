@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ridebooking/models/available_trip_data.dart';
+import 'package:ridebooking/utils/app_colors.dart';
 
 class FilterRowView extends StatefulWidget {
   final List<Trips>? allTrips;
@@ -141,42 +142,66 @@ class _FilterRowViewState extends State<FilterRowView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Select Fare Range',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 20),
-          Text(
             'Price Range: ₹${selectedFareRange.start.round()} - ₹${selectedFareRange.end.round()}',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: Colors.blue,
+              color: Colors.black,
             ),
-          ),
-          SizedBox(height: 20),
-          RangeSlider(
-            values: selectedFareRange,
-            min: minFare,
-            max: maxFare,
-            divisions: maxFare > minFare ? 20 : null,
-            activeColor: Colors.blue,
-            inactiveColor: Colors.blue.withOpacity(0.3),
-            labels: RangeLabels(
-              '₹${selectedFareRange.start.round()}',
-              '₹${selectedFareRange.end.round()}',
-            ),
-            onChanged: (RangeValues values) {
-              setModalState(() {
-                selectedFareRange = values;
-              });
-            },
           ),
           SizedBox(height: 20),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('₹${minFare.round()}'),
-              Text('₹${maxFare.round()}'),
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      '₹${selectedFareRange.start.round()}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    RotatedBox(
+                      quarterTurns: 3,
+                      child: SizedBox(
+                        width: 150,
+                        child: RangeSlider(
+                          values: selectedFareRange,
+                          min: minFare,
+                          max: maxFare,
+                          divisions: maxFare > minFare ? 20 : null,
+                          activeColor: AppColors.primaryBlueDark,
+                          inactiveColor: AppColors.primaryBlueDark.withOpacity(
+                            0.3,
+                          ),
+                          labels: RangeLabels(
+                            '₹${selectedFareRange.start.round()}',
+                            '₹${selectedFareRange.end.round()}',
+                          ),
+                          onChanged: (RangeValues values) {
+                            setModalState(() {
+                              selectedFareRange = values;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      '₹${selectedFareRange.end.round()}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -425,7 +450,7 @@ class _FilterRowViewState extends State<FilterRowView> {
           _buildFilterChip(
             label: 'Sort',
             icon: Icons.sort,
-            isSelected: selectedSort != null,
+            isSelected: false,
             onTap: () {
               _showSortDialog();
             },
@@ -492,9 +517,11 @@ class _FilterRowViewState extends State<FilterRowView> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade600 : Colors.white,
+          color: isSelected ? AppColors.primaryBlueDark : Colors.white,
           border: Border.all(
-            color: isSelected ? Colors.blue.shade600 : Colors.grey.shade300,
+            color: isSelected
+                ? AppColors.primaryBlueDark
+                : Colors.grey.shade300,
             width: 1,
           ),
           borderRadius: BorderRadius.circular(20),
@@ -646,7 +673,7 @@ class _FilterRowViewState extends State<FilterRowView> {
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade600,
+                        backgroundColor: AppColors.primaryBlueDark,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -760,7 +787,7 @@ class _FilterRowViewState extends State<FilterRowView> {
           Checkbox(
             value: isSelected,
             onChanged: onChanged,
-            activeColor: Colors.blue.shade600,
+            activeColor: AppColors.primaryBlueDark,
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -904,11 +931,23 @@ class _FilterRowViewState extends State<FilterRowView> {
       if (trip.bustype != null) busTypes.add(trip.bustype!);
 
       trip.boardingpoint?.bpDetails?.forEach((bp) {
-        if (bp.stnname != null) boardingPoints.add(bp.stnname!);
+        // Add both stnname and venue if they exist
+        if (bp.stnname != null && bp.stnname!.isNotEmpty) {
+          boardingPoints.add(bp.stnname!);
+        }
+        if (bp.venue != null && bp.venue!.isNotEmpty) {
+          boardingPoints.add(bp.venue!);
+        }
       });
 
       trip.droppingpoint?.dpDetails?.forEach((dp) {
-        if (dp.stnname != null) droppingPoints.add(dp.stnname!);
+        // Add both stnname and venue if they exist
+        if (dp.stnname != null && dp.stnname!.isNotEmpty) {
+          droppingPoints.add(dp.stnname!);
+        }
+        if (dp.venue != null && dp.venue!.isNotEmpty) {
+          droppingPoints.add(dp.venue!);
+        }
       });
 
       if (trip.deptime != null) departureTimes.add(trip.deptime!);
@@ -918,6 +957,10 @@ class _FilterRowViewState extends State<FilterRowView> {
         if (fare != null) fares.add(fare);
       }
     });
+
+    // Debug: Print collected points
+    print('Boarding Points: ${boardingPoints.length} - $boardingPoints');
+    print('Dropping Points: ${droppingPoints.length} - $droppingPoints');
 
     // Calculate fare range
     if (fares.isNotEmpty) {
@@ -966,17 +1009,24 @@ class _FilterRowViewState extends State<FilterRowView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "Filter Buses",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          "Filter Buses",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
                         ),
                       ),
                       InkWell(
                         onTap: () => Navigator.pop(context),
-                        child: Icon(Icons.close, size: 28, color: Colors.blue),
+                        child: Icon(
+                          Icons.close,
+                          size: 28,
+                          color: AppColors.primaryBlueDark,
+                        ),
                       ),
                     ],
                   ),
@@ -1025,6 +1075,28 @@ class _FilterRowViewState extends State<FilterRowView> {
                             ),
                             child: _selectedTab == "Fare Range"
                                 ? _buildFareRangeContent(setModalState)
+                                : _options().isEmpty
+                                ? Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.info_outline,
+                                          size: 48,
+                                          color: Colors.grey,
+                                        ),
+                                        SizedBox(height: 16),
+                                        Text(
+                                          'No ${_selectedTab} options available',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
                                 : ListView(
                                     children: _options().map((item) {
                                       bool selected = _getSelectedItems()
@@ -1064,7 +1136,7 @@ class _FilterRowViewState extends State<FilterRowView> {
                                                 : Icons.circle_outlined,
                                             size: 24,
                                             color: selected
-                                                ? Colors.blue
+                                                ? AppColors.primaryBlueDark
                                                 : Colors.grey,
                                           ),
                                           onTap: () {
@@ -1096,7 +1168,7 @@ class _FilterRowViewState extends State<FilterRowView> {
                             });
                           },
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: Colors.blue),
+                            side: BorderSide(color: AppColors.primaryBlueDark),
                             minimumSize: Size(double.infinity, 50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
@@ -1104,7 +1176,10 @@ class _FilterRowViewState extends State<FilterRowView> {
                           ),
                           child: Text(
                             "Reset",
-                            style: TextStyle(color: Colors.blue, fontSize: 16),
+                            style: TextStyle(
+                              color: AppColors.primaryBlueDark,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),
@@ -1117,7 +1192,7 @@ class _FilterRowViewState extends State<FilterRowView> {
                             Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: AppColors.primaryBlueDark,
                             minimumSize: Size(double.infinity, 50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
@@ -1150,12 +1225,12 @@ class _FilterRowViewState extends State<FilterRowView> {
         margin: EdgeInsets.only(bottom: 12),
         padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue : Colors.grey.shade200,
+          color: isSelected ? AppColors.primaryBlueDark : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(14),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
+                    color: AppColors.primaryBlueDark.withOpacity(0.3),
                     blurRadius: 8,
                     offset: Offset(0, 3),
                   ),
@@ -1188,7 +1263,7 @@ class _FilterRowViewState extends State<FilterRowView> {
         margin: EdgeInsets.only(bottom: 12),
         padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
         decoration: BoxDecoration(
-          color: active ? Colors.blue : Colors.grey.shade200,
+          color: active ? AppColors.primaryBlueDark : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
@@ -1229,8 +1304,8 @@ class _FilterRowViewState extends State<FilterRowView> {
                       }
                     });
                   },
-                  selectedColor: Colors.blue.shade100,
-                  checkmarkColor: Colors.blue.shade600,
+                  selectedColor: AppColors.primaryBlueDark.withOpacity(0.2),
+                  checkmarkColor: AppColors.primaryBlueDark,
                 ),
               )
               .toList(),
@@ -1242,72 +1317,145 @@ class _FilterRowViewState extends State<FilterRowView> {
   void _showSortDialog() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      isScrollControlled: false,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(18),
+          height: MediaQuery.of(context).size.height * 0.5,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Sort By',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              _buildSortOption(
-                'Price (Low to High)',
-                Icons.arrow_upward,
-                'price_low',
-                setModalState,
-              ),
-              _buildSortOption(
-                'Price (High to Low)',
-                Icons.arrow_downward,
-                'price_high',
-                setModalState,
-              ),
-              _buildSortOption(
-                'Departure Time',
-                Icons.access_time,
-                'departure',
-                setModalState,
-              ),
-              _buildSortOption(
-                'Duration',
-                Icons.schedule,
-                'duration',
-                setModalState,
-              ),
-              _buildSortOption(
-                'Available Seats',
-                Icons.event_seat,
-                'seats',
-                setModalState,
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {}); // Update main state
-                    _applyFilters();
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.shade600,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              // TOP BAR
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      "Sort Buses",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
-                  child: const Text(
-                    'Apply',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  InkWell(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(
+                      Icons.close,
+                      size: 28,
+                      color: AppColors.primaryBlueDark,
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 20),
+
+              // SORT OPTIONS
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: ListView(
+                    children: [
+                      _buildSortOption(
+                        'Price (Low to High)',
+                        Icons.arrow_upward,
+                        'price_low',
+                        setModalState,
+                      ),
+                      _buildSortOption(
+                        'Price (High to Low)',
+                        Icons.arrow_downward,
+                        'price_high',
+                        setModalState,
+                      ),
+                      _buildSortOption(
+                        'Departure Time',
+                        Icons.access_time,
+                        'departure',
+                        setModalState,
+                      ),
+                      _buildSortOption(
+                        'Duration',
+                        Icons.schedule,
+                        'duration',
+                        setModalState,
+                      ),
+                      _buildSortOption(
+                        'Available Seats',
+                        Icons.event_seat,
+                        'seats',
+                        setModalState,
+                      ),
+                    ],
                   ),
                 ),
+              ),
+
+              SizedBox(height: 12),
+
+              // RESET AND APPLY BUTTONS
+              Row(
+                children: [
+                  // Reset Button
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        setModalState(() {
+                          selectedSort = null;
+                        });
+                        setState(() {
+                          selectedSort = null;
+                        });
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: AppColors.primaryBlueDark),
+                        minimumSize: Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(
+                        "Reset",
+                        style: TextStyle(
+                          color: AppColors.primaryBlueDark,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  // Apply Button
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _applyFilters();
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryBlueDark,
+                        minimumSize: Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(
+                        "Apply",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1322,25 +1470,42 @@ class _FilterRowViewState extends State<FilterRowView> {
     String value,
     StateSetter setModalState,
   ) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.grey.shade600),
-      title: Text(title),
-      trailing: Radio<String>(
-        value: value,
-        groupValue: selectedSort,
-        onChanged: (newValue) {
+    bool selected = selectedSort == value;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: Icon(
+          icon,
+          color: selected ? AppColors.primaryBlueDark : Colors.grey.shade600,
+        ),
+        title: Text(
+          title,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+        trailing: Icon(
+          selected ? Icons.check_circle : Icons.circle_outlined,
+          size: 24,
+          color: selected ? AppColors.primaryBlueDark : Colors.grey,
+        ),
+        onTap: () {
           setModalState(() {
-            selectedSort = newValue;
+            selectedSort = value;
           });
         },
-        activeColor: Colors.blue.shade600,
       ),
-      onTap: () {
-        setModalState(() {
-          selectedSort = value;
-        });
-      },
-      contentPadding: EdgeInsets.zero,
     );
   }
 }

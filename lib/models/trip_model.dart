@@ -12,6 +12,8 @@ class TripModel {
   final String busType;
   final String tripIdV2;
   final String? price;
+  final String? originalPrice;
+  final String? discountPrice;
 
   TripModel({
     required this.operatorId,
@@ -27,6 +29,8 @@ class TripModel {
     required this.busType,
     required this.tripIdV2,
     required this.price,
+    this.originalPrice,
+    this.discountPrice,
   });
 
   factory TripModel.fromJson(Map<String, dynamic> json) {
@@ -44,6 +48,8 @@ class TripModel {
       busType: json['bustype'],
       tripIdV2: json['tripid_v2'],
       price: json['price']?.toString() ?? '0',
+      originalPrice: json['original_price']?.toString(),
+      discountPrice: json['discount_price']?.toString(),
     );
   }
 
@@ -62,6 +68,8 @@ class TripModel {
       'bustype': busType,
       'tripid_v2': tripIdV2,
       'price': price,
+      'original_price': originalPrice,
+      'discount_price': discountPrice,
     };
   }
 }

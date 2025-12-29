@@ -256,45 +256,45 @@ class _DashboardScreenState extends State<DashboardScreen>
           ],
         ),
       ),
-      actions: [
-        accessTokenHopzy != ""
-            ? Container()
-            : InkWell(
-                onTap: () {
-                  Navigator.pushNamed(context, Routes.loginWithOtpScreen);
-                },
-                child: Container(
-                  margin: EdgeInsets.only(right: isTablet ? 16 : 12),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isTablet ? 16 : 12,
-                    vertical: isTablet ? 8 : 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.neutral900,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.login,
-                        color: Colors.white,
-                        size: isTablet ? 18 : 16,
-                      ),
-                      SizedBox(width: isTablet ? 8 : 6),
-                      Text(
-                        'Login',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: walletFontSize,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-      ],
+      // actions: [
+      //   accessTokenHopzy != ""
+      //       ? Container()
+      //       : InkWell(
+      //           onTap: () {
+      //             Navigator.pushNamed(context, Routes.loginWithOtpScreen);
+      //           },
+      //           child: Container(
+      //             margin: EdgeInsets.only(right: isTablet ? 16 : 12),
+      //             padding: EdgeInsets.symmetric(
+      //               horizontal: isTablet ? 16 : 12,
+      //               vertical: isTablet ? 8 : 6,
+      //             ),
+      //             decoration: BoxDecoration(
+      //               color: AppColors.neutral50,
+      //               borderRadius: BorderRadius.circular(20),
+      //             ),
+      //             child: Row(
+      //               mainAxisSize: MainAxisSize.min,
+      //               children: [
+      //                 Icon(
+      //                   Icons.login,
+      //                   color: Colors.black,
+      //                   size: isTablet ? 18 : 16,
+      //                 ),
+      //                 SizedBox(width: isTablet ? 8 : 6),
+      //                 Text(
+      //                   'Login',
+      //                   style: TextStyle(
+      //                     color: Colors.black,
+      //                     fontWeight: FontWeight.bold,
+      //                     fontSize: walletFontSize,
+      //                   ),
+      //                 ),
+      //               ],
+      //             ),
+      //           ),
+      //         ),
+      // ],
     );
   }
 

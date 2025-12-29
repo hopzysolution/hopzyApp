@@ -71,7 +71,7 @@ class CustomSearchWidget extends StatelessWidget {
                   _buildTextField(
                     context: context,
                     controller: toController,
-                    icon: Icons.directions_bus,
+                    icon: Icons.location_on,
                     hintText: 'To',
                     searchType: 'dst',
                     onStationSelected: onToSelected,
@@ -87,7 +87,7 @@ class CustomSearchWidget extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.accent,
+                      color: AppColors.primaryBlue,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -204,7 +204,9 @@ class CustomSearchWidget extends StatelessWidget {
                     );
 
                     bool isSameDay(DateTime a, DateTime b) =>
-                        a.year == b.year && a.month == b.month && a.day == b.day;
+                        a.year == b.year &&
+                        a.month == b.month &&
+                        a.day == b.day;
 
                     final double itemWidth =
                         (constraints.maxWidth - monthBoxWidth - 8) / daysCount;
@@ -213,7 +215,9 @@ class CustomSearchWidget extends StatelessWidget {
                       children: [
                         // 6 date items
                         ...List.generate(daysCount, (index) {
-                          final DateTime date = baseDate.add(Duration(days: index));
+                          final DateTime date = baseDate.add(
+                            Duration(days: index),
+                          );
                           final bool isSelected = isSameDay(date, selectedDate);
 
                           return SizedBox(
@@ -231,7 +235,9 @@ class CustomSearchWidget extends StatelessWidget {
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: isSelected ? AppColors.vibrent : Colors.transparent,
+                                      color: isSelected
+                                          ? AppColors.primaryBlue
+                                          : Colors.transparent,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -248,7 +254,9 @@ class CustomSearchWidget extends StatelessWidget {
                                   const SizedBox(height: 4),
                                   // day below (FRI, SAT…)
                                   Text(
-                                    DateFormat('EEE').format(date).toUpperCase(),
+                                    DateFormat(
+                                      'EEE',
+                                    ).format(date).toUpperCase(),
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w500,
@@ -270,7 +278,9 @@ class CustomSearchWidget extends StatelessWidget {
                               context: context,
                               initialDate: selectedDate,
                               firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(const Duration(days: 30)),
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 30),
+                              ),
                             );
                             if (picked != null) {
                               final formatter = DateFormat('yyyy-MM-dd');
@@ -280,30 +290,23 @@ class CustomSearchWidget extends StatelessWidget {
                           },
                           child: Container(
                             width: monthBoxWidth,
-                            padding:
-                            const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: Colors.grey.shade300),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 8,
                             ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  DateFormat('MMM').format(selectedDate).toUpperCase(),
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  DateFormat('yyyy').format(selectedDate),
-                                  style: const TextStyle(
-                                    fontSize: 9,
-                                  ),
-                                ),
-                              ],
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryBlue.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: AppColors.primaryBlue.withOpacity(0.3),
+                              ),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.calendar_month_rounded,
+                                size: 28,
+                                color: AppColors.primaryBlue,
+                              ),
                             ),
                           ),
                         ),
@@ -360,7 +363,7 @@ class CustomSearchWidget extends StatelessWidget {
                 //   borderRadius: BorderRadius.circular(8),
                 //   borderSide: BorderSide(color: Colors.grey.shade300),
                 // ),
-                enabledBorder:InputBorder.none,
+                enabledBorder: InputBorder.none,
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(
@@ -372,8 +375,6 @@ class CustomSearchWidget extends StatelessWidget {
               onTap: () async {
                 // Create a new instance of AllStationBloc for the dialog
                 // final stationBloc = AllStationBloc();
-
-
 
                 final selectedStation = await showDialog<City>(
                   context: context,
@@ -387,7 +388,6 @@ class CustomSearchWidget extends StatelessWidget {
                 );
 
                 // Close the bloc after dialog is dismissed
-
 
                 if (selectedStation != null) {
                   controller.text = selectedStation.cityName ?? '';

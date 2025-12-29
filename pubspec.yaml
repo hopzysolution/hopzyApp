@@ -67,6 +67,7 @@ dependencies:
   circle_nav_bar: ^2.2.0
   toggle_switch: ^2.3.0
   sms_autofill: ^2.4.1
+  firebase_app_check: ^0.2.2
 
 dev_dependencies:
   flutter_test:

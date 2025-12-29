@@ -144,10 +144,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
   }
 
   bool _canSelectSeat(String status) {
-    return status == "A"
-    ||
-        status == "F"||
-        status == "M";
+    return status == "A" || status == "F" || status == "M";
   }
 
   // Widget _buildSeat(SeatInfo? seatData, int rowIndex, int colIndex) {
@@ -262,7 +259,6 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
   //   );
   // }
 
-  
   Widget _buildLegendItem(String label, Color color, IconData icon) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 6),
@@ -352,17 +348,15 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
     int maxRows,
     int maxCols,
     String berthType,
-  )
-  {
+  ) {
     return Container(
-
       //  decoration: BoxDecoration(
       //       borderRadius: BorderRadius.circular(8),
       //       border: Border.all(
       //         width: 2,
       //         color:AppColors.neutral700), //AppColors.neutral400),
       //     ),
-      padding: const EdgeInsets.only(top: 4,left: 4),
+      padding: const EdgeInsets.only(top: 2, left: 2, right: 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -380,9 +374,8 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
           // Seat grid
           Column(
             children: List.generate(maxRows, (rowIndex) {
-
               return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: List.generate(maxCols, (colIndex) {
@@ -415,7 +408,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
     String seatNo = seat.seatNo ?? '';
     String status = seat.seatstatus ?? '';
     String? gender = seat.gender;
-    String? code=seat.seatCode;
+    String? code = seat.seatCode;
     bool isSelected = selectedSeats.any(
       (selectedSeat) => selectedSeat.seatNo == seatNo,
     );
@@ -433,7 +426,6 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
               if (isSelected) {
                 // Remove the specific seat that matches the seatNo
                 selectedSeats.removeWhere(
-
                   (selectedSeat) => selectedSeat.seatNo == seatNo,
                 );
               } else {
@@ -443,8 +435,7 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
                     seatNo: seat.seatNo!,
                     fare: seat.fare ?? 0,
                     available: status,
-                    seatCode:code,
-
+                    seatCode: code,
                   ),
                 );
               }
@@ -463,8 +454,8 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
           //   minWidth: 95,
           //   maxWidth: 250,
           // ),
-          height: seat.seattype=="sleeper"? 45: 45,
-          width: seat.seattype=="sleeper"? 140: 95,
+          height: seat.seattype == "sleeper" ? 40 : 40,
+          width: seat.seattype == "sleeper" ? 120 : 80,
           decoration: BoxDecoration(
             color: isSelected ? AppColors.accent : getSeatColor(status),
             borderRadius: BorderRadius.circular(6),
@@ -575,197 +566,166 @@ class _BusSeatSelectionScreenState extends State<BusSeatSelectionScreen> {
   seaLayoutWidgetr() {
     return Center(
       child: ConstrainedBox(
-
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 1,
           minHeight: MediaQuery.of(context).size.height * 0.8,
         ),
         child: RotatedBox(
           quarterTurns: 1,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Upper Berth
-                upperBirthView(),
+          child: Column(
+            children: [
+              // Upper Berth - First Half
+              Expanded(
+                flex: 1,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(8),
+                  child: upperBirthView(),
+                ),
+              ),
 
-                const SizedBox(height: 10),
+              const SizedBox(height: 8),
 
-                // Lower Berth
-
-                lowerBirthView()
-                // Container(
-                //   width: double.infinity,
-                //   padding: const EdgeInsets.all(12),
-                //   decoration: BoxDecoration(
-                //     color: AppColors.neutral400.withOpacity(0.2),
-                //     borderRadius: BorderRadius.circular(8),
-                //     border: Border.all(color: AppColors.neutral400),
-                //   ),
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.start,
-                //     children: [
-                //      Container(height: MediaQuery.of(context).size.width*0.5, child: getWheelView()),
-                //       const SizedBox(height: 5),
-                //       Expanded(
-                //         child: _buildBerthLayout(
-                //           lowerSeats,
-                //           maxRows!,
-                //           maxCols!,
-                //           'lower',
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-              ],
-            ),
+              // Lower Berth - Second Half
+              Expanded(
+                flex: 1,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(8),
+                  child: lowerBirthView(),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
- Widget getWheelView() {
-  return RotatedBox(
-    quarterTurns: -1,
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
+  Widget getWheelView() {
+    return RotatedBox(
+      quarterTurns: -1,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Icon(
+                PhosphorIcons.steeringWheel(),
+                size: 30,
+                color: AppColors.neutral900,
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Driver",
+            style: TextStyle(fontSize: 12, color: AppColors.neutral900),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget upperBirthView() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+
+      children: [
+        // The label outside (left)
+        RotatedBox(
+          quarterTurns: -1, // optional: if you want vertical text
+          child: Text(
+            "Upper Berth",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.neutral900,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+
+        // Expanded container for seat layout
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.neutral400.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.neutral400),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(width: 60), // keep gap if needed
+                Expanded(
+                  child: _buildBerthLayout(
+                    upperSeats,
+                    maxRows!,
+                    maxCols!,
+                    'upper',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget lowerBirthView() {
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Icon(
-          PhosphorIcons.steeringWheel(),
-          size: 30,
-          color: AppColors.neutral900,
-        ),
-        
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          "Driver",
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.neutral900,
+        // The label outside (left)
+        RotatedBox(
+          quarterTurns: -1, // optional: if you want vertical text
+          child: Text(
+            "Lower Berth",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.neutral900,
+            ),
           ),
         ),
-        
+        const SizedBox(width: 8),
+
+        // Expanded container for seat layout
+        Expanded(
+          child: Container(
+            // padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.neutral400.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(width: 1, color: AppColors.neutral400),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.only(top: 4, left: 4),
+                  height: MediaQuery.of(context).size.width * 0.20,
+                  child: getWheelView(),
+                ), // keep gap if needed
+                const SizedBox(width: 2),
+                Expanded(
+                  flex: 1,
+                  child: _buildBerthLayout(
+                    lowerSeats,
+                    maxRows!,
+                    maxCols!,
+                    'lower',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
-    ),
-  );
-}
-
-
-Widget upperBirthView() {
-  return Row(
-    crossAxisAlignment: CrossAxisAlignment.center,
-
-    children: [
-      // The label outside (left)
-      RotatedBox(
-        quarterTurns: -1, // optional: if you want vertical text
-        child: Text(
-          "Upper Berth",
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.neutral900,
-          ),
-        ),
-      ),
-      const SizedBox(width: 8),
-
-      // Expanded container for seat layout
-      Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.neutral400.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.neutral400),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(width: 60), // keep gap if needed
-              Expanded(
-                child: _buildBerthLayout(
-                  upperSeats,
-                  maxRows!,
-                  maxCols!,
-                  'upper',
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
-
-Widget lowerBirthView() {
-  return Row(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      // The label outside (left)
-      RotatedBox(
-        quarterTurns: -1, // optional: if you want vertical text
-        child: Text(
-          "Lower Berth",
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.neutral900,
-          ),
-        ),
-      ),
-      const SizedBox(width: 8),
-
-      // Expanded container for seat layout
-      Expanded(
-        child: Container(
-          // padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.neutral400.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              width: 1,
-              color:AppColors.neutral400),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
-          padding: const EdgeInsets.only(top:8,left: 6),
-                height: MediaQuery.of(context).size.width*0.53, child: getWheelView()), // keep gap if needed
-              const SizedBox(width: 5),
-              Expanded(
-                flex: 1,
-                child: _buildBerthLayout(
-                  lowerSeats,
-                  maxRows!,
-                  maxCols!,
-                  'lower',
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
-
-
-
+    );
+  }
 }
 
 

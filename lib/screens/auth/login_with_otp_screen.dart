@@ -63,7 +63,6 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
   }
 
   void _initializeAnimations() {
-
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
@@ -174,7 +173,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
-      
+
       body: SafeArea(
         child: _buildResponsiveBody(isTablet, screenHeight, context),
       ),
@@ -204,8 +203,11 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
       child: Stack(
         children: [
           // Animated background elements
-          FloatingCirclesBackground(floatingAnimation: _floatingAnimation,context: context,),
-          
+          FloatingCirclesBackground(
+            floatingAnimation: _floatingAnimation,
+            context: context,
+          ),
+
           // Main content
           BlocProvider(
             create: (context) => LoginWithOtpBloc(),
@@ -316,8 +318,8 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
           return Transform.scale(
             scale: _pulseAnimation.value,
             child: Container(
-              width: containerSize*1.4,
-              height: containerSize*1.4,
+              width: containerSize * 1.4,
+              height: containerSize * 1.4,
               padding: EdgeInsets.all(isTablet ? 32 : 24),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -388,7 +390,9 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
     return OtpVerification(
       mobileNumber: _mobileController.text,
       onCompleted: (code) {
-        context.read<LoginWithOtpBloc>().add(OnOtpVerification(otp: code,email:_mobileController.text ));
+        context.read<LoginWithOtpBloc>().add(
+          OnOtpVerification(otp: code, email: _mobileController.text),
+        );
       },
     );
   }
@@ -416,11 +420,9 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
         isKeyboardVisible ? -keyboardHeight * 0.2 : 0,
         0,
       ),
-      child: 
-      SingleChildScrollView(
+      child: SingleChildScrollView(
         physics: const ClampingScrollPhysics(),
-        child:
-         SizedBox(
+        child: SizedBox(
           height: screenHeight,
           child: Column(
             children: [
@@ -429,20 +431,21 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                 children: [
                   Spacer(),
                   InkWell(
-                    onTap: (){
+                    onTap: () {
                       Navigator.pushNamed(context, Routes.dashboard);
                     },
                     child: Container(
                       padding: EdgeInsets.all(20),
-                      child: Text("Skip",
-                      style: TextStyle(
-                        // decoration: TextDecorationStyle,
-                        color: AppColors.neutral100,
-                        fontWeight: FontWeight.bold
-                      ),
+                      child: Text(
+                        "Skip",
+                        style: TextStyle(
+                          // decoration: TextDecorationStyle,
+                          color: AppColors.neutral100,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
 
@@ -465,20 +468,22 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                             child: ScaleTransition(
                               scale: _logoScale,
                               child: AnimatedLogo(
-                                size: isTablet ? 190 : 150, 
-                                padding: EdgeInsets.all(2)
+                                size: isTablet ? 190 : 150,
+                                padding: EdgeInsets.all(2),
                               ),
                             ),
                           );
                         },
                       ),
-                      SizedBox(
-                        height: isTablet ? 32 : (isSmallScreen ? 5 : 8
-                        ),
-                      ),
+                      SizedBox(height: isTablet ? 32 : (isSmallScreen ? 5 : 8)),
                       if (!isKeyboardVisible || !isSmallScreen)
-                        WelcomeSection( opacityAnimation:  _contentOpacity,slideAnimation: _contentSlide,isTablet:  isTablet,isSmallScreen:  isSmallScreen,context: context),
-
+                        WelcomeSection(
+                          opacityAnimation: _contentOpacity,
+                          slideAnimation: _contentSlide,
+                          isTablet: isTablet,
+                          isSmallScreen: isSmallScreen,
+                          context: context,
+                        ),
                     ],
                   ),
                 ),
@@ -512,7 +517,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
     final buttonHeight = isTablet ? 58.0 : (isSmallScreen ? 48.0 : 52.0);
     final fontSize = isTablet ? 16.0 : (isSmallScreen ? 14.0 : 15.0);
     final iconSize = isTablet ? 22.0 : (isSmallScreen ? 18.0 : 20.0);
-    
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
       decoration: BoxDecoration(
@@ -548,20 +553,25 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                     SizedBox(height: isTablet ? 32 : (isSmallScreen ? 20 : 24)),
                     _buildForm(isTablet, isSmallScreen, context),
                     SizedBox(height: isTablet ? 32 : (isSmallScreen ? 20 : 24)),
-                  CustomActionButton(
-  onPressed:  () => _handleSendOtp(context),//_isFormValid && !_isLoading ? : null,
-  text: 'Send Code to Login',
-  height: buttonHeight,
-  backgroundColor: AppColors.primaryBlue ,// _isFormValid && !_isLoading ?: Colors.grey.shade300,
-  foregroundColor: _isFormValid && !_isLoading ? Colors.white : Colors.grey.shade500,
-  borderColor: Colors.transparent,
-  fontSize: fontSize,
-  icon: Icons.send_rounded,
-  iconSize: iconSize,
-  isLoading: _isLoading,
-  elevation: _isFormValid && !_isLoading ? 4 : 0,
-  borderRadius: 16,
-),
+                    CustomActionButton(
+                      onPressed: () => _handleSendOtp(
+                        context,
+                      ), //_isFormValid && !_isLoading ? : null,
+                      text: 'Send Otp to Login',
+                      height: buttonHeight,
+                      backgroundColor: AppColors
+                          .primaryBlue, // _isFormValid && !_isLoading ?: Colors.grey.shade300,
+                      foregroundColor: _isFormValid && !_isLoading
+                          ? Colors.white
+                          : Colors.grey.shade500,
+                      borderColor: Colors.transparent,
+                      fontSize: fontSize,
+                      icon: Icons.send_rounded,
+                      iconSize: iconSize,
+                      isLoading: _isLoading,
+                      elevation: _isFormValid && !_isLoading ? 4 : 0,
+                      borderRadius: 16,
+                    ),
                     if (!isKeyboardVisible) ...[
                       SizedBox(
                         height: isTablet ? 20 : (isSmallScreen ? 12 : 16),
@@ -571,9 +581,6 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
                         height: isTablet ? 16 : (isSmallScreen ? 8 : 12),
                       ),
                       _buildFooterText(isTablet, isSmallScreen, context),
-
-
-
                     ],
                   ],
                 ),
@@ -584,8 +591,6 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
       ),
     );
   }
-
- 
 
   Widget _buildFormHeader(
     bool isTablet,
@@ -614,7 +619,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
             ),
             const SizedBox(width: 12),
             Text(
-              'Mobile Verification',
+              'Otp Login',
               style: TextStyle(
                 fontSize: titleFontSize,
                 fontWeight: FontWeight.w800,
@@ -641,18 +646,21 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
   Widget _buildForm(bool isTablet, bool isSmallScreen, BuildContext context) {
     return Form(
       key: _formKey,
-  autovalidateMode: AutovalidateMode.onUserInteraction,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         children: [
-          
-          MobileNumberField(controller:_mobileController ,focusNode:_focusNode ,isFormValid:_isFormValid ,isTablet:isTablet,isSmallScreen: isSmallScreen,context:context)],
+          MobileNumberField(
+            controller: _mobileController,
+            focusNode: _focusNode,
+            isFormValid: _isFormValid,
+            isTablet: isTablet,
+            isSmallScreen: isSmallScreen,
+            context: context,
+          ),
+        ],
       ),
     );
   }
-
-  
-
-  
 
   Widget _buildSignUpLink(bool isTablet, bool isSmallScreen) {
     final fontSize = isTablet ? 15.0 : (isSmallScreen ? 12.0 : 13.0);
@@ -715,10 +723,10 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
 
   void _handleSendOtp(BuildContext context) {
     // Navigator.pushNamed(context, Routes.dashboard);
-     print("send code to login");
-     context.read<LoginWithOtpBloc>().add(
-        OnLoginButtonPressed(mobileNumber: _mobileController.text),
-      );
+    print("send Otp to login");
+    context.read<LoginWithOtpBloc>().add(
+      OnLoginButtonPressed(mobileNumber: _mobileController.text),
+    );
     // if (_formKey.currentState?.validate() ?? false) {
     //   FocusScope.of(context).unfocus();
     //   HapticFeedback.lightImpact();
@@ -743,7 +751,7 @@ class _LoginWithOtpScreenState extends State<LoginWithOtpScreen>
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-             SignupWithOtpScreen(),
+            SignupWithOtpScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);
           const end = Offset.zero;

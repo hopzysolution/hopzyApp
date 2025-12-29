@@ -507,43 +507,49 @@ class TripListTile extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
-                    vertical: 4,
+                    vertical: 8,
                   ),
-                  child: Row(
-                    children: [
-                      Column(
-                        children: [
-                          Text(
-                            "TOTAL",
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                  child:
+                      // Check if discount is available
+                      trip.discountPrice != null &&
+                          trip.discountPrice!.isNotEmpty
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Original price with strikethrough
+                            if (trip.originalPrice != null &&
+                                trip.originalPrice!.isNotEmpty)
+                              Text(
+                                "₹${trip.originalPrice}",
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white70,
+                                  decoration: TextDecoration.lineThrough,
+                                  decorationColor: Colors.white70,
+                                  decorationThickness: 2,
+                                ),
+                              ),
+                            // Discounted price
+                            Text(
+                              "₹${trip.discountPrice}",
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                color: Colors.white,
+                              ),
                             ),
+                          ],
+                        )
+                      : Text(
+                          " ₹ ${trip.price}",
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            color: Colors.white,
                           ),
-                          Text(
-                            "FARE",
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(width: 8),
-
-                      Text(
-                        " ₹ ${trip.price}",
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.white,
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
           ],

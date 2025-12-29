@@ -260,6 +260,10 @@ class _AvailableTripsContentState extends State<_AvailableTripsContent> {
                                 price:
                                     displayedTrips![index].fare.toString() ??
                                     "0",
+                                originalPrice:
+                                    displayedTrips![index].originalPrice,
+                                discountPrice:
+                                    displayedTrips![index].discountPrice,
                               ),
                             );
                           },
