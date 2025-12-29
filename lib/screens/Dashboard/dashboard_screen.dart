@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:ridebooking/commonWidgets/custom_bottom_nav_bar.dart';
 import 'package:ridebooking/screens/Dashboard/account.dart';
 import 'package:ridebooking/screens/Dashboard/home_screen.dart';
+import 'package:ridebooking/screens/Dashboard/master_list.dart';
 import 'package:ridebooking/screens/Dashboard/tickets.dart';
 import 'package:ridebooking/screens/booking_screen.dart';
 import 'package:ridebooking/utils/app_colors.dart';
@@ -31,15 +32,11 @@ class _DashboardScreenState extends State<DashboardScreen>
   late Animation<double> _fabRotationAnimation;
 
   final List<Widget> _pages = [
-    //  HomeScreen(),
-    //  Tickets(),
+     HomeScreen(),
+     Tickets(),
+     MasterList(),
+     Account(),
 
-    //  MasterList(),
-    //  Account()
-    HomeScreen(), // Index 0 - Home
-    BookingListScreen(), // Index 1 - Bookings
-    Tickets(), // Index 2 - Tickets
-    Account(),
   ];
 
   @override
@@ -192,7 +189,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       appBar: _buildAppBar(isTablet),
       drawer: _buildDrawer(isTablet),
       body: _isLoading ? _buildLoadingState(isTablet) : _buildBody(),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar:  CustomBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
         isTablet: isTablet,

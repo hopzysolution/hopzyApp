@@ -34,6 +34,7 @@ import '../../models/profile_data_model.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/route_generate.dart';
 import '../../utils/session.dart';
+import '../../widgets/edit_profile.dart';
 import 'wallet_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/transactionBloc/transaction_bloc.dart';
@@ -412,30 +413,25 @@ class _AccountState extends State<Account> {
                         const SizedBox(height: 8),
 
                         // ✅ Menu Section
+                        // ✅ Menu Section
                         _menuTile(
                           Icons.account_balance_wallet,
                           "Hopzy Account",
                           "Manage your account details",
                           onTap: () {
-                            // showDialog(
-                            //   context: context,
-                            //   builder: (dialogContext) => BlocProvider.value(
-                            //     value: context.read<AccountBloc>(),
-                            //     child: EditProfileDialog(
-                            //       userId:
-                            //           profile.data?.user?.sId ??
-                            //           '', // Replace with your actual userId field
-                            //       currentFirstName:
-                            //           profile.data?.user?.firstName ?? '',
-                            //       currentLastName:
-                            //           profile.data?.user?.lastName ?? '',
-                            //       currentEmail: profile.data?.user?.email ?? '',
-                            //       currentState:
-                            //           profile.data?.user?.state ??
-                            //           '', // Add state field to your model if not present
-                            //     ),
-                            //   ),
-                            // );
+                            showDialog(
+                              context: context,
+                              builder: (dialogContext) => BlocProvider.value(
+                                value: context.read<AccountBloc>(),
+                                child: EditProfileDialog(
+                                  userId: profile.data?.user?.sId ?? '', // Replace with your actual userId field
+                                  currentFirstName: profile.data?.user?.firstName ?? '',
+                                  currentLastName: profile.data?.user?.lastName ?? '',
+                                  currentEmail: profile.data?.user?.email ?? '',
+                                  currentState: profile.data?.user?.state ??'', // Add state field to your model if not present
+                                ),
+                              ),
+                            );
                           },
                         ),
                         _divider(),
