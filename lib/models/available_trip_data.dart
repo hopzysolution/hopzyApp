@@ -66,6 +66,8 @@ class Trips {
   String? totalseats;
   String? availseats;
   String? fare;
+  String? originalPrice;
+  String? discountPrice;
   ServiceTax? servicetax;
   String? seattype;
   String? deptime;
@@ -80,37 +82,40 @@ class Trips {
   Cancellationpolicy? cancellationpolicy;
   String? traveltime;
 
-  Trips(
-      {this.provider,
-      this.operatorid,
-      this.operatorname,
-      this.srcId,
-      this.dstId,
-      this.src,
-      this.dst,
-      this.routeid,
-      this.tripDate,
-      this.travelTime,
-      this.tripid,
-      this.subtripid,
-      this.scheduleCode,
-      this.bustype,
-      this.totalseats,
-      this.availseats,
-      this.fare,
-      this.servicetax,
-      this.seattype,
-      this.deptime,
-      this.arrtime,
-      this.vehiclenumber,
-      this.amenities,
-      this.schnote,
-      this.blockingtype,
-      this.boardingpoint,
-      this.droppingpoint,
-      this.cancellationrefrncetime,
-      this.cancellationpolicy,
-      this.traveltime});
+  Trips({
+    this.provider,
+    this.operatorid,
+    this.operatorname,
+    this.srcId,
+    this.dstId,
+    this.src,
+    this.dst,
+    this.routeid,
+    this.tripDate,
+    this.travelTime,
+    this.tripid,
+    this.subtripid,
+    this.scheduleCode,
+    this.bustype,
+    this.totalseats,
+    this.availseats,
+    this.fare,
+    this.originalPrice,
+    this.discountPrice,
+    this.servicetax,
+    this.seattype,
+    this.deptime,
+    this.arrtime,
+    this.vehiclenumber,
+    this.amenities,
+    this.schnote,
+    this.blockingtype,
+    this.boardingpoint,
+    this.droppingpoint,
+    this.cancellationrefrncetime,
+    this.cancellationpolicy,
+    this.traveltime,
+  });
 
   Trips.fromJson(Map<String, dynamic> json) {
     provider = json['provider'];
@@ -130,8 +135,10 @@ class Trips {
     totalseats = json['totalseats'].toString();
     availseats = json['availseats'].toString();
     fare = json['fare'].toString();
-    
-        final st = json['servicetax'];
+    originalPrice = json['original_price']?.toString();
+    discountPrice = json['discount_price']?.toString();
+
+    final st = json['servicetax'];
     if (st != null) {
       if (st is int) {
         servicetax = ServiceTax(value: st.toDouble());
@@ -139,8 +146,6 @@ class Trips {
         servicetax = ServiceTax.fromJson(st);
       }
     }
- 
-    
 
     seattype = json['seattype'];
     deptime = json['deptime'];
@@ -181,7 +186,9 @@ class Trips {
     data['totalseats'] = this.totalseats;
     data['availseats'] = this.availseats;
     data['fare'] = this.fare;
-     if (servicetax != null) {
+    data['original_price'] = this.originalPrice;
+    data['discount_price'] = this.discountPrice;
+    if (servicetax != null) {
       data['servicetax'] = servicetax!.toJson();
     }
     data['seattype'] = this.seattype;
@@ -237,13 +244,14 @@ class BpDetails {
   String? contactno;
   String? boardtime;
 
-  BpDetails(
-      {this.id,
-      this.venue,
-      this.stnname,
-      this.address,
-      this.contactno,
-      this.boardtime});
+  BpDetails({
+    this.id,
+    this.venue,
+    this.stnname,
+    this.address,
+    this.contactno,
+    this.boardtime,
+  });
 
   BpDetails.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -297,13 +305,14 @@ class DpDetails {
   String? contactno;
   String? droptime;
 
-  DpDetails(
-      {this.id,
-      this.venue,
-      this.stnname,
-      this.address,
-      this.contactno,
-      this.droptime});
+  DpDetails({
+    this.id,
+    this.venue,
+    this.stnname,
+    this.address,
+    this.contactno,
+    this.droptime,
+  });
 
   DpDetails.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -355,11 +364,12 @@ class Terms {
   String? refundpercentage;
   String? cancellationpercentage;
 
-  Terms(
-      {this.hoursbefore,
-      this.description,
-      this.refundpercentage,
-      this.cancellationpercentage});
+  Terms({
+    this.hoursbefore,
+    this.description,
+    this.refundpercentage,
+    this.cancellationpercentage,
+  });
 
   Terms.fromJson(Map<String, dynamic> json) {
     hoursbefore = json['hoursbefore'];

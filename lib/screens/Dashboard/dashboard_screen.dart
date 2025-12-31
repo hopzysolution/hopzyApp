@@ -9,6 +9,7 @@ import 'package:ridebooking/screens/Dashboard/account.dart';
 import 'package:ridebooking/screens/Dashboard/home_screen.dart';
 import 'package:ridebooking/screens/Dashboard/master_list.dart';
 import 'package:ridebooking/screens/Dashboard/tickets.dart';
+import 'package:ridebooking/screens/booking_screen.dart';
 import 'package:ridebooking/utils/app_colors.dart';
 import 'package:ridebooking/utils/route_generate.dart';
 import 'package:ridebooking/utils/session.dart';
@@ -20,21 +21,22 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> with TickerProviderStateMixin {
+class _DashboardScreenState extends State<DashboardScreen>
+    with TickerProviderStateMixin {
   int _selectedIndex = 0;
   String fullName = "";
   bool _isLoading = true;
-  
+
   late AnimationController _fabAnimationController;
   late Animation<double> _fabScaleAnimation;
   late Animation<double> _fabRotationAnimation;
 
   final List<Widget> _pages = [
-   HomeScreen(),
-   Tickets(),
-   
-   MasterList(),
-   Account()
+     HomeScreen(),
+     Tickets(),
+     MasterList(),
+     Account(),
+
   ];
 
   @override
@@ -45,20 +47,20 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
     getHopzyToken();
     storagePermission();
   }
-  
-    Directory? downloadsDir;
 
-  storagePermission()async{
-if (Platform.isAndroid) {
-  downloadsDir = await getExternalStorageDirectory(); 
-} else {
-  downloadsDir = await getApplicationDocumentsDirectory();
-}
+  Directory? downloadsDir;
+
+  storagePermission() async {
+    if (Platform.isAndroid) {
+      downloadsDir = await getExternalStorageDirectory();
+    } else {
+      downloadsDir = await getApplicationDocumentsDirectory();
+    }
   }
 
-  String accessTokenHopzy="";
+  String accessTokenHopzy = "";
 
-  getHopzyToken()async{
+  getHopzyToken() async {
     accessTokenHopzy = await Session().getHopzyAccessToken();
   }
 
@@ -68,27 +70,19 @@ if (Platform.isAndroid) {
       vsync: this,
     );
 
-    _fabScaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _fabAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    _fabScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _fabAnimationController, curve: Curves.easeInOut),
+    );
 
-    _fabRotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 0.1,
-    ).animate(CurvedAnimation(
-      parent: _fabAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    _fabRotationAnimation = Tween<double>(begin: 0.0, end: 0.1).animate(
+      CurvedAnimation(parent: _fabAnimationController, curve: Curves.easeInOut),
+    );
   }
 
   Future<void> _loadUserData() async {
     try {
       final name = await Session().getFullName();
-      
+
       if (mounted) {
         setState(() {
           fullName = name.isNotEmpty ? name : 'Welcome User';
@@ -117,7 +111,7 @@ if (Platform.isAndroid) {
       setState(() {
         _selectedIndex = index;
       });
-      
+
       if (index == 3) {
         _fabAnimationController.forward().then((_) {
           _fabAnimationController.reverse();
@@ -126,24 +120,26 @@ if (Platform.isAndroid) {
     }
   }
 
-   Future<void> _logout(BuildContext context) async {
-
-
+  Future<void> _logout(BuildContext context) async {
     // Remove saved user data / token
     await Session().clearAllData();
 
     // Navigate back to login screen and clear history
-    Navigator.pushNamedAndRemoveUntil(context, Routes.loginWithOtpScreen, (route) => false);
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      Routes.loginWithOtpScreen,
+      (route) => false,
+    );
   }
 
   void _onDrawerItemTap(String title) {
     if (title == "MyBookings") {
       Navigator.pushNamed(context, Routes.bookingsScreen);
-    }  else{
-    Navigator.pop(context);
-    HapticFeedback.selectionClick();
-    
-    _showSnackBar('Tapped $title', isError: false);
+    } else {
+      Navigator.pop(context);
+      HapticFeedback.selectionClick();
+
+      _showSnackBar('Tapped $title', isError: false);
     }
   }
 
@@ -167,9 +163,13 @@ if (Platform.isAndroid) {
               ),
             ],
           ),
-          backgroundColor: isError ? Colors.red.shade600 : Colors.green.shade600,
+          backgroundColor: isError
+              ? Colors.red.shade600
+              : Colors.green.shade600,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           margin: const EdgeInsets.all(16),
           duration: const Duration(seconds: 3),
         ),
@@ -177,9 +177,7 @@ if (Platform.isAndroid) {
     }
   }
 
-
-Map<String, dynamic> ticketData = {};
-
+  Map<String, dynamic> ticketData = {};
 
   @override
   Widget build(BuildContext context) {
@@ -190,12 +188,12 @@ Map<String, dynamic> ticketData = {};
       backgroundColor: Colors.white,
       appBar: _buildAppBar(isTablet),
       drawer: _buildDrawer(isTablet),
-      body: _isLoading ? _buildLoadingState(isTablet) : _buildBody(), 
-      bottomNavigationBar: CustomBottomNavBar(
-      selectedIndex: _selectedIndex,
-      onItemTapped: _onItemTapped,
-      isTablet: isTablet,
-    ),
+      body: _isLoading ? _buildLoadingState(isTablet) : _buildBody(),
+      bottomNavigationBar:  CustomBottomNavBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+        isTablet: isTablet,
+      ),
     );
   }
 
@@ -243,7 +241,6 @@ Map<String, dynamic> ticketData = {};
             //     )
             //
             // ),
-
             Text(
               'WHERE WOULD YOU LIKE TO GO?',
               style: TextStyle(
@@ -256,45 +253,45 @@ Map<String, dynamic> ticketData = {};
           ],
         ),
       ),
-      actions: [
-        accessTokenHopzy!=""?Container():
-        InkWell(
-          onTap: (){
-            Navigator.pushNamed(context, Routes.loginWithOtpScreen);
-          },
-          child: Container(
-            margin: EdgeInsets.only(right: isTablet ? 16 : 12),
-            padding: EdgeInsets.symmetric(
-              horizontal: isTablet ? 16 : 12,
-              vertical: isTablet ? 8 : 6,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.neutral900,
-              borderRadius: BorderRadius.circular(20),
-             
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.login,
-                  color: Colors.white,
-                  size: isTablet ? 18 : 16,
-                ),
-                SizedBox(width: isTablet ? 8 : 6),
-                Text(
-                  'Login',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: walletFontSize,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+      // actions: [
+      //   accessTokenHopzy != ""
+      //       ? Container()
+      //       : InkWell(
+      //           onTap: () {
+      //             Navigator.pushNamed(context, Routes.loginWithOtpScreen);
+      //           },
+      //           child: Container(
+      //             margin: EdgeInsets.only(right: isTablet ? 16 : 12),
+      //             padding: EdgeInsets.symmetric(
+      //               horizontal: isTablet ? 16 : 12,
+      //               vertical: isTablet ? 8 : 6,
+      //             ),
+      //             decoration: BoxDecoration(
+      //               color: AppColors.neutral50,
+      //               borderRadius: BorderRadius.circular(20),
+      //             ),
+      //             child: Row(
+      //               mainAxisSize: MainAxisSize.min,
+      //               children: [
+      //                 Icon(
+      //                   Icons.login,
+      //                   color: Colors.black,
+      //                   size: isTablet ? 18 : 16,
+      //                 ),
+      //                 SizedBox(width: isTablet ? 8 : 6),
+      //                 Text(
+      //                   'Login',
+      //                   style: TextStyle(
+      //                     color: Colors.black,
+      //                     fontWeight: FontWeight.bold,
+      //                     fontSize: walletFontSize,
+      //                   ),
+      //                 ),
+      //               ],
+      //             ),
+      //           ),
+      //         ),
+      // ],
     );
   }
 
@@ -321,7 +318,9 @@ Map<String, dynamic> ticketData = {};
               height: isTablet ? 32 : 24,
               child: const CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppColors.primaryBlue,
+                ),
               ),
             ),
             SizedBox(height: isTablet ? 20 : 16),
@@ -340,10 +339,7 @@ Map<String, dynamic> ticketData = {};
   }
 
   Widget _buildBody() {
-    return IndexedStack(
-      index: _selectedIndex,
-      children: _pages,
-    );
+    return IndexedStack(index: _selectedIndex, children: _pages);
   }
 
   Widget _buildDrawer(bool isTablet) {
@@ -359,10 +355,7 @@ Map<String, dynamic> ticketData = {};
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Colors.grey.shade50,
-            ],
+            colors: [Colors.white, Colors.grey.shade50],
           ),
         ),
         child: ListView(
@@ -378,7 +371,7 @@ Map<String, dynamic> ticketData = {};
                   colors: [
                     AppColors.primaryBlueDark,
                     AppColors.primaryBlue,
-                   AppColors.secondaryTeal,
+                    AppColors.secondaryTeal,
                   ],
                 ),
                 boxShadow: [
@@ -411,7 +404,9 @@ Map<String, dynamic> ticketData = {};
                         backgroundColor: Colors.white,
                         child: CircleAvatar(
                           radius: avatarRadius - 3,
-                          backgroundImage: const AssetImage("assets/images/HopzybluePin.png"),
+                          backgroundImage: const AssetImage(
+                            "assets/images/HopzybluePin.png",
+                          ),
                         ),
                       ),
                     ),
@@ -468,6 +463,7 @@ Map<String, dynamic> ticketData = {};
               onTap: () => _onDrawerItemTap("Passengers"),
               isTablet: isTablet,
             ),
+
             // _buildModernListTile(
             //   icon: Icons.loyalty_outlined,
             //   title: 'IRCTC details',
@@ -482,8 +478,6 @@ Map<String, dynamic> ticketData = {};
             //   onTap: () => _onDrawerItemTap("MyQuestions"),
             //   isTablet: isTablet,
             // ),
-           
-
             SizedBox(height: isTablet ? 20 : 16),
             Container(
               margin: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16),
@@ -601,10 +595,7 @@ Map<String, dynamic> ticketData = {};
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               color: Colors.white.withOpacity(0.7),
-              border: Border.all(
-                color: Colors.grey.shade200,
-                width: 0.5,
-              ),
+              border: Border.all(color: Colors.grey.shade200, width: 0.5),
             ),
             child: Row(
               children: [
@@ -643,5 +634,4 @@ Map<String, dynamic> ticketData = {};
       ),
     );
   }
-
 }

@@ -60,8 +60,9 @@ class User {
   String? lastName;
   String? email;
   String? phone;
+  String? state;
 
-  User({this.sId, this.firstName, this.lastName, this.email, this.phone});
+  User({this.sId, this.firstName, this.lastName, this.email, this.phone,this.state});
 
   User.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -69,6 +70,7 @@ class User {
     lastName = json['lastName'];
     email = json['email'];
     phone = json['phone'];
+    state= json['state'];
   }
 
   Map<String, dynamic> toJson() {
@@ -78,6 +80,7 @@ class User {
     map['lastName'] = lastName;
     map['email'] = email;
     map['phone'] = phone;
+    map['state'] = state;
     return map;
   }
 }

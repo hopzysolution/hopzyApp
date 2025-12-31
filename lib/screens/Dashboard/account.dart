@@ -34,6 +34,11 @@ import '../../models/profile_data_model.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/route_generate.dart';
 import '../../utils/session.dart';
+import '../../widgets/edit_profile.dart';
+import 'wallet_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../bloc/transactionBloc/transaction_bloc.dart';
+import '../../bloc/transactionBloc/transaction_event.dart';
 // Import your booking_bloc and ProfileDataModel files here
 // import 'path/to/booking_bloc.dart';
 // import 'path/to/profile_data_model.dart';
@@ -173,7 +178,12 @@ class _AccountState extends State<Account> {
                   profile.data?.user?.phone ?? profile.data?.user?.phone ?? "";
 
               final initials = name.isNotEmpty
-                  ? name.split(" ").map((e) => e[0]).join().toUpperCase()
+                  ? name
+                        .split(" ")
+                        .where((e) => e.isNotEmpty)
+                        .map((e) => e.isNotEmpty ? e[0] : '')
+                        .join()
+                        .toUpperCase()
                   : "?";
 
               return Scaffold(
@@ -219,17 +229,19 @@ class _AccountState extends State<Account> {
                                     const SizedBox(height: 4),
                                     Text(
                                       contact,
-                                      style:  Theme.of(context)
+                                      style: Theme.of(context)
                                           .textTheme
                                           .titleSmall
                                           ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       phone, // your phone variable
-                                      style: Theme.of(context).textTheme.titleSmall,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleSmall,
                                     ),
 
                                     // OutlinedButton(
@@ -254,64 +266,102 @@ class _AccountState extends State<Account> {
 
                         // ✅ Wallet
                         if (wallet != null)
-                          Container(
-                            margin: const EdgeInsets.all(16),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.green.shade400,
-                                  Colors.green.shade600,
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.green.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BlocProvider(
+                                    create: (_) => TransactionBloc(),
+                                    child: Builder(
+                                      builder: (context) {
+                                        // Initialize the bloc when the widget is built
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                              context
+                                                  .read<TransactionBloc>()
+                                                  .add(
+                                                    FetchTransactionsEvent(),
+                                                  );
+                                            });
+                                        return WalletScreen(
+                                          walletBalance: wallet,
+                                        );
+                                      },
+                                    ),
+                                  ),
                                 ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      "Wallet Balance",
-                                      style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      "₹${wallet.toStringAsFixed(2)}",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                              );
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.green.shade400,
+                                    Colors.green.shade600,
                                   ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    shape: BoxShape.circle,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.green.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
                                   ),
-                                  child: const Icon(
-                                    Icons.account_balance_wallet,
-                                    color: Colors.white,
-                                    size: 32,
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Wallet Balance",
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "₹${wallet.toStringAsFixed(2)}",
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "Tap to view details",
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.8),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.account_balance_wallet,
+                                      color: Colors.white,
+                                      size: 32,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
 
@@ -363,15 +413,31 @@ class _AccountState extends State<Account> {
                         const SizedBox(height: 8),
 
                         // ✅ Menu Section
+                        // ✅ Menu Section
                         _menuTile(
                           Icons.account_balance_wallet,
                           "Hopzy Account",
                           "Manage your account details",
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (dialogContext) => BlocProvider.value(
+                                value: context.read<AccountBloc>(),
+                                child: EditProfileDialog(
+                                  userId: profile.data?.user?.sId ?? '', // Replace with your actual userId field
+                                  currentFirstName: profile.data?.user?.firstName ?? '',
+                                  currentLastName: profile.data?.user?.lastName ?? '',
+                                  currentEmail: profile.data?.user?.email ?? '',
+                                  currentState: profile.data?.user?.state ??'', // Add state field to your model if not present
+                                ),
+                              ),
+                            );
+                          },
                         ),
                         _divider(),
                         _menuTile(
                           Icons.star_outline,
-                          "Rate Us",
+                          "Help Us",
                           "Share your feedback",
                         ),
                         _divider(),

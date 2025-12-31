@@ -257,7 +257,6 @@
 //   }
 // }
 
-
 ///New Design
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -294,7 +293,6 @@ class _HomeScreenState extends State<HomeScreen> {
   City? selectedFromStation;
   City? selectedToStation;
 
-
   List<AllAvailabletrips> getFromOptions(List<AllAvailabletrips> trips) {
     final Map<String, AllAvailabletrips> unique = {};
     for (var trip in trips) {
@@ -316,8 +314,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final Map<String, AllAvailabletrips> uniqueDstMap = {};
 
     final filtered = trips.where(
-          (trip) =>
-      trip.routeid == fromOption.routeid && trip.srcid == fromOption.srcid,
+      (trip) =>
+          trip.routeid == fromOption.routeid && trip.srcid == fromOption.srcid,
     );
     for (var trip in filtered) {
       if (trip.dstid != null && !uniqueDstMap.containsKey(trip.dstid)) {
@@ -372,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 'allTrips': state.allTrips,
                 'from': selectedFromStation!,
                 'to': selectedToStation!,
-                'opid': "VGT"
+                'opid': "VGT",
               },
             );
           }
@@ -400,13 +398,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
+
                       //overlay without search box
-
                       Positioned(
-
                         left: 16,
                         right: 16,
-                        child:  // Search Widget
+                        child: // Search Widget
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: CustomSearchWidget(
@@ -434,7 +431,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   SnackBar(
                                     content: const Text(
                                       'Please select both stations.',
-                                      style: TextStyle(fontWeight: FontWeight.w500),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                     backgroundColor: Colors.red.shade400,
                                     behavior: SnackBarBehavior.floating,
@@ -447,8 +446,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 return;
                               }
 
-                              String dateSelected =
-                              DateFormat('yyyy-MM-dd').format(selectedDate);
+                              String dateSelected = DateFormat(
+                                'yyyy-MM-dd',
+                              ).format(selectedDate);
 
                               context.read<HomeScreenBloc>().add(
                                 SearchAvailableTripsEvent(
@@ -470,6 +470,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
+
                       // Overlay Search Box with search trip
                       // Positioned(
                       //
@@ -590,7 +591,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       // ),
 
                       // Trip Planner Section
-
                     ],
                   ),
                   const SizedBox(height: 30),
@@ -639,7 +639,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Container(
                                     padding: EdgeInsets.all(isTablet ? 12 : 10),
                                     decoration: BoxDecoration(
-                                      
                                       gradient: LinearGradient(
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
@@ -666,7 +665,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   SizedBox(width: isTablet ? 16 : 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           "Plan Your Journey",
@@ -704,7 +704,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             );

@@ -16,11 +16,17 @@ import 'package:ridebooking/globels.dart' as globals;
 import 'package:ridebooking/utils/app_sizes.dart';
 
 class AvailableTripsScreen extends StatefulWidget {
-  List<Trips>? allTrips;
+  final List<Trips>? allTrips;
   City? from;
   City? to;
   String? opId;
-  AvailableTripsScreen({super.key,required this.allTrips,this.from,this.to,this.opId});
+  AvailableTripsScreen({
+    super.key,
+    required this.allTrips,
+    this.from,
+    this.to,
+    this.opId,
+  });
 
   @override
   State<AvailableTripsScreen> createState() => _AvailableTripsScreenState();
@@ -35,7 +41,7 @@ class _AvailableTripsScreenState extends State<AvailableTripsScreen> {
         allTrips: widget.allTrips,
         from: widget.from,
         to: widget.to,
-        opId:widget.opId
+        opId: widget.opId,
       ),
     );
   }
@@ -51,7 +57,7 @@ class _AvailableTripsContent extends StatefulWidget {
     required this.allTrips,
     this.from,
     this.to,
-    this.opId
+    this.opId,
   });
 
   @override
@@ -102,9 +108,9 @@ class _AvailableTripsContentState extends State<_AvailableTripsContent> {
     return BlocListener<HomeScreenBloc, HomeScreenState>(
       listener: (context, state) {
         if (state is HomeScreenFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error))
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.error)));
         }
       },
       child: BlocBuilder<HomeScreenBloc, HomeScreenState>(
@@ -115,20 +121,15 @@ class _AvailableTripsContentState extends State<_AvailableTripsContent> {
             );
           }
           if (state is HomeScreenFailure) {
-            return Scaffold(
-              body: Center(
-                child: Text(state.error)
-                )
-                );
+            return Scaffold(body: Center(child: Text(state.error)));
           }
 
           return Scaffold(
-
             appBar: AppBar(
-              leading:  IconButton(
+              leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios),
-            onPressed: () => Navigator.pop(context),
-          ),
+                onPressed: () => Navigator.pop(context),
+              ),
               title: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -163,13 +164,10 @@ class _AvailableTripsContentState extends State<_AvailableTripsContent> {
             ),
             body: Column(
               children: [
-
                 FilterRowView(
                   allTrips: widget.allTrips,
                   onFilterChanged: _onFilterChanged,
                 ),
-
-
                 Expanded(
                   child: (displayedTrips == null || displayedTrips!.isEmpty)
                       ? Center(
@@ -206,41 +204,75 @@ class _AvailableTripsContentState extends State<_AvailableTripsContent> {
                           itemBuilder: (context, index) {
                             return TripListTile(
                               onTap: () {
-                                print("routeId Check ----->>>>>>>${displayedTrips![index].toJson()}");
+                                print(
+                                  "routeId Check ----->>>>>>>${displayedTrips![index].toJson()}",
+                                );
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => SeatSelectionScreen(
                                       trip: displayedTrips![index],
-                                    )
-                                  )
+                                    ),
+                                  ),
                                 );
                               },
                               trip: TripModel(
-                                tripIdV2: displayedTrips![index].subtripid ?? 'Unknown Trip ID',
-                                tripId: displayedTrips![index].tripid ?? 'Unknown Trip ID',
-                                routeId: displayedTrips![index].routeid ?? 'Unknown Route ID',
-                                operatorId: displayedTrips![index].operatorid ?? 'Unknown Operator ID',
-                                operatorName: displayedTrips![index].operatorname ?? 'Unknown Operator',
-                                srcName: displayedTrips![index].src ?? 'Unknown Source',
-                                dstName: displayedTrips![index].dst ?? 'Unknown Destination',
-                                departureTime: DateTime.parse(displayedTrips![index].deptime ?? DateTime.now().toString()),
-                                arrivalTime: DateTime.parse(displayedTrips![index].arrtime ?? DateTime.now().toString()),
-                                busType: displayedTrips![index].bustype ?? 'Unknown Bus Type',
-                                availableSeats: displayedTrips![index].availseats.toString() ?? "0",
-                                totalSeats: displayedTrips![index].totalseats?.toString() ?? "",
-                                price: displayedTrips![index].fare.toString() ?? "0",
+                                tripIdV2:
+                                    displayedTrips![index].subtripid ??
+                                    'Unknown Trip ID',
+                                tripId:
+                                    displayedTrips![index].tripid ??
+                                    'Unknown Trip ID',
+                                routeId:
+                                    displayedTrips![index].routeid ??
+                                    'Unknown Route ID',
+                                operatorId:
+                                    displayedTrips![index].operatorid ??
+                                    'Unknown Operator ID',
+                                operatorName:
+                                    displayedTrips![index].operatorname ??
+                                    'Unknown Operator',
+                                srcName:
+                                    displayedTrips![index].src ??
+                                    'Unknown Source',
+                                dstName:
+                                    displayedTrips![index].dst ??
+                                    'Unknown Destination',
+                                departureTime: DateTime.parse(
+                                  displayedTrips![index].deptime ??
+                                      DateTime.now().toString(),
+                                ),
+                                arrivalTime: DateTime.parse(
+                                  displayedTrips![index].arrtime ??
+                                      DateTime.now().toString(),
+                                ),
+                                busType:
+                                    displayedTrips![index].bustype ??
+                                    'Unknown Bus Type',
+                                availableSeats:
+                                    displayedTrips![index].availseats
+                                        .toString() ??
+                                    "0",
+                                totalSeats:
+                                    displayedTrips![index].totalseats
+                                        ?.toString() ??
+                                    "",
+                                price:
+                                    displayedTrips![index].fare.toString() ??
+                                    "0",
+                                originalPrice:
+                                    displayedTrips![index].originalPrice,
+                                discountPrice:
+                                    displayedTrips![index].discountPrice,
                               ),
                             );
-                          }
+                          },
                         ),
                 ),
-             
-             
               ],
-            )
+            ),
           );
-        }
+        },
       ),
     );
   }
